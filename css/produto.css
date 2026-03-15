@@ -1,0 +1,214 @@
+/* ============================================
+   UUBA Tech — Product Page Styles
+   ============================================ */
+
+/* --- Product Hero --- */
+.product-hero {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  background: var(--color-light);
+  padding: 140px 0 100px;
+}
+
+.product-hero-dark {
+  background: var(--color-dark);
+  color: var(--color-light);
+}
+
+.product-hero-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.back-link {
+  display: inline-block;
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  margin-bottom: 2rem;
+  transition: color 0.3s;
+}
+
+.back-link:hover {
+  color: var(--color-dark);
+}
+
+.product-hero-dark .back-link:hover {
+  color: var(--color-light);
+}
+
+.product-hero-content .label {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.product-hero-content h1 {
+  font-size: clamp(4rem, 10vw, 8rem);
+  margin-bottom: 1.5rem;
+  line-height: 0.85;
+}
+
+.product-hero-content .subtitle {
+  max-width: 500px;
+  margin-bottom: 2.5rem;
+}
+
+.product-hero-dark .subtitle {
+  opacity: 0.75;
+}
+
+.product-hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.product-hero-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.product-icon-large {
+  width: 200px;
+  height: 200px;
+  border: 2px solid var(--color-light-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.product-icon-large:hover {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.product-icon-large svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- Product Section --- */
+.product-section {
+  padding: var(--section-padding);
+  background: var(--color-light);
+}
+
+/* --- Steps --- */
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 2.5rem;
+}
+
+.step {
+  position: relative;
+  padding: 2rem 0;
+}
+
+.step-number {
+  font-family: var(--font-display);
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--color-red);
+  line-height: 1;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.step h4 {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.step p {
+  font-size: 0.95rem;
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+/* --- Features Detail --- */
+.product-features-section {
+  padding: var(--section-padding);
+  background: #fff;
+}
+
+.features-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.feature-detail {
+  padding: 2rem;
+  border: 1px solid var(--color-light-border);
+  border-radius: 2px;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.feature-detail:hover {
+  border-color: var(--color-red);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+}
+
+.feature-detail h3 {
+  font-size: 1.6rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.feature-detail p {
+  font-size: 0.9rem;
+  color: var(--color-gray);
+  line-height: 1.6;
+}
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .product-hero-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-hero-visual {
+    order: -1;
+  }
+
+  .product-icon-large {
+    width: 140px;
+    height: 140px;
+    padding: 2rem;
+  }
+
+  .product-hero-content h1 {
+    font-size: clamp(3rem, 8vw, 5rem);
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-hero-actions {
+    flex-direction: column;
+  }
+}
