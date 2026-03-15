@@ -29,11 +29,14 @@
           </g>
         </svg>
       </a>
+      <button class="nav-toggle" aria-label="Menu" onclick="this.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </button>
       <ul class="nav-links">
-        <li><a href="#produtos">Produtos</a></li>
-        <li><a href="#plataforma">UÚBA Financeiro</a></li>
-        <li><a href="#diferenciais">Diferenciais</a></li>
-        <li><a href="#contato" class="nav-cta">Fale Conosco</a></li>
+        <li><a href="#produtos" onclick="document.querySelector('.nav-links').classList.remove('open');document.querySelector('.nav-toggle').classList.remove('active')">Produtos</a></li>
+        <li><a href="#plataforma" onclick="document.querySelector('.nav-links').classList.remove('open');document.querySelector('.nav-toggle').classList.remove('active')">UÚBA Financeiro</a></li>
+        <li><a href="#diferenciais" onclick="document.querySelector('.nav-links').classList.remove('open');document.querySelector('.nav-toggle').classList.remove('active')">Diferenciais</a></li>
+        <li><a href="#contato" class="nav-cta" onclick="document.querySelector('.nav-links').classList.remove('open');document.querySelector('.nav-toggle').classList.remove('active')">Fale Conosco</a></li>
       </ul>
     </div>
   </nav>

@@ -179,9 +179,26 @@
 }
 
 /* --- Responsive --- */
+
+@media (max-width: 1024px) {
+  .product-hero {
+    min-height: auto;
+    padding: 120px 0 80px;
+  }
+
+  .features-detail-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
+  .product-hero {
+    padding: 100px 0 60px;
+  }
+
   .product-hero-grid {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .product-hero-visual {
@@ -189,26 +206,104 @@
   }
 
   .product-icon-large {
-    width: 140px;
-    height: 140px;
-    padding: 2rem;
+    width: 120px;
+    height: 120px;
+    padding: 1.75rem;
   }
 
   .product-hero-content h1 {
-    font-size: clamp(3rem, 8vw, 5rem);
+    font-size: clamp(3rem, 9vw, 5rem);
   }
 
-  .steps-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .steps-grid {
-    grid-template-columns: 1fr;
+  .product-hero-content .subtitle {
+    max-width: 100%;
+    font-size: 0.95rem;
   }
 
   .product-hero-actions {
     flex-direction: column;
+  }
+
+  .product-hero-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .step {
+    padding: 1.5rem 0;
+  }
+
+  .step-number {
+    font-size: 3rem;
+  }
+
+  .step h4 {
+    font-size: 1.4rem;
+  }
+
+  .step p {
+    font-size: 0.85rem;
+  }
+
+  .features-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .feature-detail {
+    padding: 1.5rem;
+  }
+
+  .feature-detail h3 {
+    font-size: 1.3rem;
+  }
+
+  .feature-detail p {
+    font-size: 0.85rem;
+  }
+
+  .back-link {
+    margin-bottom: 1.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-hero {
+    padding: 80px 0 40px;
+  }
+
+  .product-hero-content h1 {
+    font-size: clamp(2.5rem, 12vw, 4rem);
+  }
+
+  .product-icon-large {
+    width: 100px;
+    height: 100px;
+    padding: 1.5rem;
+  }
+
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .step-number {
+    font-size: 2.5rem;
+  }
+}
+
+@media (hover: none) {
+  .product-icon-large:hover {
+    transform: none;
+  }
+
+  .feature-detail:hover {
+    transform: none;
+    box-shadow: none;
   }
 }
