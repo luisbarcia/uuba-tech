@@ -15,17 +15,28 @@ router = APIRouter(
 )
 
 
-@router.post("", response_model=ClienteResponse, status_code=201)
+@router.post(
+    "",
+    response_model=ClienteResponse,
+    status_code=201,
+    summary="Cadastrar cliente",
+    description="Registra um novo cliente na carteira. O campo `documento` (CPF ou CNPJ) deve ser único.",
+)
 async def create_cliente(data: ClienteCreate, db: AsyncSession = Depends(get_db)):
     return await cliente_service.create_cliente(db, data)
 
 
-@router.get("", response_model=ListResponse)
+@router.get(
+    "",
+    response_model=ListResponse,
+    summary="Listar clientes",
+    description="Retorna a lista de clientes com suporte a filtro por telefone. Use `telefone` para buscar pelo número WhatsApp.",
+)
 async def list_clientes(
-    telefone: str | None = Query(None),
-    order_by: str | None = Query(None),
-    limit: int = Query(50, le=100),
-    offset: int = Query(0, ge=0),
+    telefone: str | None = Query(None, description="Filtrar por número WhatsApp (ex: 5511999001234)"),
+    order_by: str | None = Query(None, description="Ordenação (ex: total_vencido)"),
+    limit: int = Query(50, le=100, description="Itens por página (max 100)"),
+    offset: int = Query(0, ge=0, description="Pular N itens"),
     db: AsyncSession = Depends(get_db),
 ):
     clientes, total = await cliente_service.list_clientes(
@@ -39,7 +50,12 @@ async def list_clientes(
     )
 
 
-@router.get("/{cliente_id}", response_model=ClienteResponse)
+@router.get(
+    "/{cliente_id}",
+    response_model=ClienteResponse,
+    summary="Buscar cliente",
+    description="Retorna os dados de um cliente específico pelo ID.",
+)
 async def get_cliente(cliente_id: str, db: AsyncSession = Depends(get_db)):
     cliente = await cliente_service.get_cliente(db, cliente_id)
     if not cliente:
@@ -50,7 +66,12 @@ async def get_cliente(cliente_id: str, db: AsyncSession = Depends(get_db)):
     return cliente
 
 
-@router.patch("/{cliente_id}", response_model=ClienteResponse)
+@router.patch(
+    "/{cliente_id}",
+    response_model=ClienteResponse,
+    summary="Atualizar cliente",
+    description="Atualiza parcialmente os dados de um cliente. Envie apenas os campos que deseja alterar.",
+)
 async def update_cliente(
     cliente_id: str, data: ClienteUpdate, db: AsyncSession = Depends(get_db)
 ):
@@ -63,7 +84,12 @@ async def update_cliente(
     return cliente
 
 
-@router.get("/{cliente_id}/metricas", response_model=ClienteMetricas)
+@router.get(
+    "/{cliente_id}/metricas",
+    response_model=ClienteMetricas,
+    summary="Métricas de pagamento",
+    description="Retorna indicadores financeiros do cliente: DSO (dias médios para pagamento), total em aberto, total vencido, e contagem de faturas.",
+)
 async def get_metricas(cliente_id: str, db: AsyncSession = Depends(get_db)):
     cliente = await cliente_service.get_cliente(db, cliente_id)
     if not cliente:

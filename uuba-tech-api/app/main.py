@@ -189,15 +189,15 @@ app = FastAPI(
     openapi_tags=[
         {
             "name": "clientes",
-            "description": "Cadastro e métricas de clientes (devedores). Cada cliente tem um documento (CPF/CNPJ) único e pode ter múltiplas faturas.",
+            "description": "Gerencie os clientes da sua carteira de recebíveis. Cada cliente é identificado por CPF ou CNPJ (único) e pode ter um número de WhatsApp associado para comunicação automática. Use o endpoint de métricas para acompanhar o comportamento de pagamento (DSO, aging, histórico).",
         },
         {
             "name": "faturas",
-            "description": "CRUD de faturas a receber. Valores em centavos (R$ 150,00 = `15000`). Status: `pendente`, `pago`, `vencido`, `cancelado`.",
+            "description": "Registre e acompanhe faturas a receber. Valores são sempre em centavos (`250000` = R$ 2.500,00). Uma fatura passa pelos status `pendente` → `vencido` → `pago` ou `cancelado`. Use filtros por status e cliente para consultar a carteira.",
         },
         {
             "name": "cobrancas",
-            "description": "Registro de cobranças enviadas aos clientes. Cada cobrança está vinculada a uma fatura. Suporte a pausar/retomar régua.",
+            "description": "Acompanhe as ações de cobrança realizadas sobre cada fatura. Cada cobrança registra o canal (WhatsApp, email), o tom da mensagem (amigável, neutro, firme, urgente), e pode ser pausada ou retomada. Use o histórico por fatura para ver toda a timeline de comunicação com o cliente.",
         },
     ],
     docs_url=None,

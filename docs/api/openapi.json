@@ -5,7 +5,7 @@
     "description": "\n# Uúba Tech API\n\nAPI de cobrança inteligente para PMEs brasileiras.\n\n## Getting Started\n\n### Autenticação\n\nTodas as requisições exigem uma API Key no header:\n\n```\nX-API-Key: sua_chave_aqui\n```\n\n### Base URL\n\n```\nhttps://api.uuba.tech\n```\n\n### Primeira requisição\n\nCrie um cliente:\n\n```bash\ncurl -X POST https://api.uuba.tech/api/v1/clientes \\\n  -H \"X-API-Key: sua_chave_aqui\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"nome\": \"Padaria Bom Pão\",\n    \"documento\": \"12345678000190\",\n    \"telefone\": \"5511999001234\"\n  }'\n```\n\nResposta:\n\n```json\n{\n  \"id\": \"cli_abc123def456\",\n  \"object\": \"cliente\",\n  \"nome\": \"Padaria Bom Pão\",\n  \"documento\": \"12345678000190\",\n  \"telefone\": \"5511999001234\",\n  \"created_at\": \"2026-03-15T10:00:00-03:00\",\n  \"updated_at\": \"2026-03-15T10:00:00-03:00\"\n}\n```\n\n### Criar uma fatura\n\n```bash\ncurl -X POST https://api.uuba.tech/api/v1/faturas \\\n  -H \"X-API-Key: sua_chave_aqui\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"cliente_id\": \"cli_abc123def456\",\n    \"valor\": 250000,\n    \"vencimento\": \"2026-04-01T00:00:00-03:00\",\n    \"descricao\": \"NF 1234 - Serviços março\"\n  }'\n```\n\n> **Nota:** Valores monetários são sempre em **centavos**. R$ 2.500,00 = `250000`.\n\n### Consultar métricas do cliente\n\n```bash\ncurl https://api.uuba.tech/api/v1/clientes/cli_abc123def456/metricas \\\n  -H \"X-API-Key: sua_chave_aqui\"\n```\n\nResposta:\n\n```json\n{\n  \"dso_dias\": 28.5,\n  \"total_em_aberto\": 430000,\n  \"total_vencido\": 120000,\n  \"faturas_em_aberto\": 3,\n  \"faturas_vencidas\": 1\n}\n```\n\n## Convenções\n\n| Convenção | Detalhe |\n|-----------|---------|\n| **IDs** | Prefixo descritivo + nanoid: `cli_`, `fat_`, `cob_` |\n| **Valores** | Inteiro em centavos. `15000` = R$ 150,00 |\n| **Datas** | ISO 8601 com timezone: `2026-03-15T10:00:00-03:00` |\n| **Status** | Strings descritivas: `pendente`, `pago`, `vencido`, `cancelado` |\n| **Campos** | snake_case em todo lugar |\n\n## Erros\n\nA API usa [RFC 9457 (Problem Details)](https://www.rfc-editor.org/rfc/rfc9457) para todas as respostas de erro:\n\n```json\n{\n  \"type\": \"https://api.uubatech.com/errors/fatura-nao-encontrada\",\n  \"title\": \"Fatura não encontrada\",\n  \"status\": 404,\n  \"detail\": \"Fatura fat_abc123 não existe.\",\n  \"instance\": \"/api/v1/faturas/fat_abc123\",\n  \"request_id\": \"req_7f3a2b1c4d5e\",\n  \"errors\": []\n}\n```\n\n| Status | Significado |\n|--------|-------------|\n| `401` | API Key ausente ou inválida |\n| `404` | Recurso não encontrado |\n| `409` | Conflito de integridade (FK ou UNIQUE violation) |\n| `422` | Erro de validação nos dados enviados |\n| `500` | Erro interno do servidor |\n\n## Paginação\n\nEndpoints de listagem retornam envelope paginado:\n\n```json\n{\n  \"object\": \"list\",\n  \"data\": [...],\n  \"pagination\": {\n    \"total\": 42,\n    \"page_size\": 50,\n    \"has_more\": false,\n    \"offset\": 0\n  }\n}\n```\n\nParâmetros: `?limit=50&offset=0`\n\n## Rate Limiting\n\nPor enquanto sem limite. Quando implementado, os headers padrão serão:\n\n```\nX-RateLimit-Limit: 1000\nX-RateLimit-Remaining: 999\nX-RateLimit-Reset: 1709994000\n```\n",
     "contact": {
       "name": "Uúba Tech",
-      "url": "https://uuba.tech"
+      "url": "https://uuba.tech/"
     },
     "version": "0.1.0"
   },
@@ -15,7 +15,8 @@
         "tags": [
           "clientes"
         ],
-        "summary": "Create Cliente",
+        "summary": "Cadastrar cliente",
+        "description": "Registra um novo cliente na carteira. O campo `documento` (CPF ou CNPJ) deve ser único.",
         "operationId": "create_cliente_api_v1_clientes_post",
         "security": [
           {
@@ -59,7 +60,8 @@
         "tags": [
           "clientes"
         ],
-        "summary": "List Clientes",
+        "summary": "Listar clientes",
+        "description": "Retorna a lista de clientes com suporte a filtro por telefone. Use `telefone` para buscar pelo número WhatsApp.",
         "operationId": "list_clientes_api_v1_clientes_get",
         "security": [
           {
@@ -80,8 +82,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filtrar por número WhatsApp (ex: 5511999001234)",
               "title": "Telefone"
-            }
+            },
+            "description": "Filtrar por número WhatsApp (ex: 5511999001234)"
           },
           {
             "name": "order_by",
@@ -96,8 +100,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Ordenação (ex: total_vencido)",
               "title": "Order By"
-            }
+            },
+            "description": "Ordenação (ex: total_vencido)"
           },
           {
             "name": "limit",
@@ -106,9 +112,11 @@
             "schema": {
               "type": "integer",
               "maximum": 100,
+              "description": "Itens por página (max 100)",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Itens por página (max 100)"
           },
           {
             "name": "offset",
@@ -117,9 +125,11 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
+              "description": "Pular N itens",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Pular N itens"
           }
         ],
         "responses": {
@@ -151,7 +161,8 @@
         "tags": [
           "clientes"
         ],
-        "summary": "Get Cliente",
+        "summary": "Buscar cliente",
+        "description": "Retorna os dados de um cliente específico pelo ID.",
         "operationId": "get_cliente_api_v1_clientes__cliente_id__get",
         "security": [
           {
@@ -196,7 +207,8 @@
         "tags": [
           "clientes"
         ],
-        "summary": "Update Cliente",
+        "summary": "Atualizar cliente",
+        "description": "Atualiza parcialmente os dados de um cliente. Envie apenas os campos que deseja alterar.",
         "operationId": "update_cliente_api_v1_clientes__cliente_id__patch",
         "security": [
           {
@@ -253,7 +265,8 @@
         "tags": [
           "clientes"
         ],
-        "summary": "Get Metricas",
+        "summary": "Métricas de pagamento",
+        "description": "Retorna indicadores financeiros do cliente: DSO (dias médios para pagamento), total em aberto, total vencido, e contagem de faturas.",
         "operationId": "get_metricas_api_v1_clientes__cliente_id__metricas_get",
         "security": [
           {
@@ -300,7 +313,8 @@
         "tags": [
           "faturas"
         ],
-        "summary": "Create Fatura",
+        "summary": "Registrar fatura",
+        "description": "Cria uma nova fatura a receber vinculada a um cliente. O valor deve ser em centavos (R$ 2.500,00 = `250000`).",
         "operationId": "create_fatura_api_v1_faturas_post",
         "security": [
           {
@@ -344,7 +358,8 @@
         "tags": [
           "faturas"
         ],
-        "summary": "List Faturas",
+        "summary": "Listar faturas",
+        "description": "Retorna faturas com filtros opcionais por status e cliente. Use `status=pendente,vencido` para faturas em aberto.",
         "operationId": "list_faturas_api_v1_faturas_get",
         "security": [
           {
@@ -365,8 +380,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)",
               "title": "Status"
-            }
+            },
+            "description": "Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)"
           },
           {
             "name": "cliente_id",
@@ -381,8 +398,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filtrar por cliente",
               "title": "Cliente Id"
-            }
+            },
+            "description": "Filtrar por cliente"
           },
           {
             "name": "limit",
@@ -391,9 +410,11 @@
             "schema": {
               "type": "integer",
               "maximum": 100,
+              "description": "Itens por página (max 100)",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Itens por página (max 100)"
           },
           {
             "name": "offset",
@@ -402,9 +423,11 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
+              "description": "Pular N itens",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Pular N itens"
           }
         ],
         "responses": {
@@ -436,7 +459,8 @@
         "tags": [
           "faturas"
         ],
-        "summary": "Get Fatura",
+        "summary": "Buscar fatura",
+        "description": "Retorna os dados completos de uma fatura pelo ID.",
         "operationId": "get_fatura_api_v1_faturas__fatura_id__get",
         "security": [
           {
@@ -481,7 +505,8 @@
         "tags": [
           "faturas"
         ],
-        "summary": "Update Fatura",
+        "summary": "Atualizar fatura",
+        "description": "Atualiza status, promessa de pagamento, ou link de pagamento. Ao marcar como `pago`, o campo `pago_em` é preenchido automaticamente.",
         "operationId": "update_fatura_api_v1_faturas__fatura_id__patch",
         "security": [
           {
@@ -538,7 +563,8 @@
         "tags": [
           "cobrancas"
         ],
-        "summary": "Create Cobranca",
+        "summary": "Registrar cobrança",
+        "description": "Registra uma ação de cobrança vinculada a uma fatura. Especifique o tipo (lembrete, cobrança, follow_up, escalação) e opcionalmente o tom e mensagem.",
         "operationId": "create_cobranca_api_v1_cobrancas_post",
         "security": [
           {
@@ -582,7 +608,8 @@
         "tags": [
           "cobrancas"
         ],
-        "summary": "List Cobrancas",
+        "summary": "Listar cobranças",
+        "description": "Retorna cobranças com filtros por período, cliente, ou fatura. Use `periodo=7d` para cobranças dos últimos 7 dias.",
         "operationId": "list_cobrancas_api_v1_cobrancas_get",
         "security": [
           {
@@ -603,8 +630,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Período em dias (ex: 7d, 30d)",
               "title": "Periodo"
-            }
+            },
+            "description": "Período em dias (ex: 7d, 30d)"
           },
           {
             "name": "cliente_id",
@@ -619,8 +648,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filtrar por cliente",
               "title": "Cliente Id"
-            }
+            },
+            "description": "Filtrar por cliente"
           },
           {
             "name": "fatura_id",
@@ -635,8 +666,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filtrar por fatura",
               "title": "Fatura Id"
-            }
+            },
+            "description": "Filtrar por fatura"
           },
           {
             "name": "limit",
@@ -645,9 +678,11 @@
             "schema": {
               "type": "integer",
               "maximum": 100,
+              "description": "Itens por página (max 100)",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Itens por página (max 100)"
           },
           {
             "name": "offset",
@@ -656,9 +691,11 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
+              "description": "Pular N itens",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Pular N itens"
           }
         ],
         "responses": {
@@ -690,7 +727,8 @@
         "tags": [
           "cobrancas"
         ],
-        "summary": "Get Historico",
+        "summary": "Histórico de cobranças",
+        "description": "Retorna toda a timeline de cobranças enviadas para uma fatura específica, ordenadas da mais recente para a mais antiga.",
         "operationId": "get_historico_api_v1_cobrancas__fatura_id__historico_get",
         "security": [
           {
@@ -737,7 +775,8 @@
         "tags": [
           "cobrancas"
         ],
-        "summary": "Pausar",
+        "summary": "Pausar cobrança",
+        "description": "Pausa a régua de cobrança para esta fatura. Nenhuma mensagem será enviada enquanto estiver pausada.",
         "operationId": "pausar_api_v1_cobrancas__cobranca_id__pausar_patch",
         "security": [
           {
@@ -784,7 +823,8 @@
         "tags": [
           "cobrancas"
         ],
-        "summary": "Retomar",
+        "summary": "Retomar cobrança",
+        "description": "Retoma uma cobrança que estava pausada. A régua volta a funcionar normalmente.",
         "operationId": "retomar_api_v1_cobrancas__cobranca_id__retomar_patch",
         "security": [
           {
@@ -1511,15 +1551,15 @@
   "tags": [
     {
       "name": "clientes",
-      "description": "Cadastro e métricas de clientes (devedores). Cada cliente tem um documento (CPF/CNPJ) único e pode ter múltiplas faturas."
+      "description": "Gerencie os clientes da sua carteira de recebíveis. Cada cliente é identificado por CPF ou CNPJ (único) e pode ter um número de WhatsApp associado para comunicação automática. Use o endpoint de métricas para acompanhar o comportamento de pagamento (DSO, aging, histórico)."
     },
     {
       "name": "faturas",
-      "description": "CRUD de faturas a receber. Valores em centavos (R$ 150,00 = `15000`). Status: `pendente`, `pago`, `vencido`, `cancelado`."
+      "description": "Registre e acompanhe faturas a receber. Valores são sempre em centavos (`250000` = R$ 2.500,00). Uma fatura passa pelos status `pendente` → `vencido` → `pago` ou `cancelado`. Use filtros por status e cliente para consultar a carteira."
     },
     {
       "name": "cobrancas",
-      "description": "Registro de cobranças enviadas aos clientes. Cada cobrança está vinculada a uma fatura. Suporte a pausar/retomar régua."
+      "description": "Acompanhe as ações de cobrança realizadas sobre cada fatura. Cada cobrança registra o canal (WhatsApp, email), o tom da mensagem (amigável, neutro, firme, urgente), e pode ser pausada ou retomada. Use o histórico por fatura para ver toda a timeline de comunicação com o cliente."
     }
   ]
 }
