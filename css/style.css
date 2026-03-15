@@ -399,6 +399,59 @@ section {
   border-color: var(--color-light);
 }
 
+/* --- How We Work Section --- */
+.how-we-work {
+  padding: var(--section-padding);
+  background: var(--color-navy);
+  color: var(--color-light);
+}
+
+.hww-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem;
+}
+
+.hww-step {
+  padding: 2.5rem 2rem;
+  border: 1px solid rgba(244, 244, 244, 0.08);
+  border-radius: 2px;
+  position: relative;
+}
+
+.hww-number {
+  font-family: var(--font-display);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  line-height: 1;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+}
+
+.hww-step h3 {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.hww-step p {
+  font-size: 0.95rem;
+  opacity: 0.75;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .hww-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .hww-step {
+    padding: 2rem 1.5rem;
+  }
+}
+
 /* --- Products Section --- */
 .products {
   padding: var(--section-padding);
