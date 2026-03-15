@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard — UÚBA Tech</title>
+  <title>UÚBA Collect — UÚBA Tech</title>
   <link rel="stylesheet" href="../css/style.css">
   <link rel="stylesheet" href="../css/produto.css">
   <link rel="icon" type="image/svg+xml" href="../img/logo.svg">
 </head>
 <body>
 
+  <!-- Navigation -->
   <nav class="nav scrolled">
     <div class="container">
       <a href="../index.html" class="nav-logo">
@@ -28,35 +29,35 @@
       </a>
       <ul class="nav-links">
         <li><a href="../index.html#produtos">Produtos</a></li>
-        <li><a href="../index.html#plataforma">Plataforma</a></li>
+        <li><a href="../index.html#plataforma">UÚBA Financeiro</a></li>
         <li><a href="../index.html#contato" class="nav-cta">Fale Conosco</a></li>
       </ul>
     </div>
   </nav>
 
-  <section class="product-hero" style="--accent: var(--color-navy);">
+  <!-- Product Hero -->
+  <section class="product-hero" style="--accent: var(--color-red);">
     <div class="container">
       <div class="product-hero-grid">
         <div class="product-hero-content">
           <a href="../index.html#produtos" class="back-link reveal">← Todos os produtos</a>
-          <span class="label reveal reveal-delay-1" style="color: var(--color-navy);">Visão 360° do Negócio</span>
-          <h1 class="reveal reveal-delay-2">Dashboard</h1>
+          <span class="label reveal reveal-delay-1" style="color: var(--color-red);">Gestão de Recebíveis</span>
+          <h1 class="reveal reveal-delay-2">UÚBA<br>Collect</h1>
           <p class="subtitle reveal reveal-delay-3">
-            Todos os indicadores do seu negócio em um painel unificado. Dados em tempo real, visualizações intuitivas e insights acionáveis.
+            Reduza inadimplência e aumente a recuperação de crédito com réguas de cobrança inteligentes, integradas aos canais que seus clientes já usam.
           </p>
           <div class="product-hero-actions reveal reveal-delay-4">
-            <a href="../index.html#contato" class="btn" style="background:var(--color-navy);border-color:var(--color-navy);">Solicitar Demo</a>
+            <a href="../index.html#contato" class="btn">Solicitar Demo</a>
             <a href="#como-funciona" class="btn btn-outline">Como funciona</a>
           </div>
         </div>
         <div class="product-hero-visual reveal-right">
-          <div class="product-icon-large" style="border-color: var(--color-navy);">
+          <div class="product-icon-large">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="4" y="4" width="18" height="18" rx="2" stroke="#2E2344" stroke-width="2"/>
-              <rect x="26" y="4" width="18" height="10" rx="2" stroke="#2E2344" stroke-width="2"/>
-              <rect x="4" y="26" width="18" height="10" rx="2" stroke="#2E2344" stroke-width="2"/>
-              <rect x="26" y="18" width="18" height="18" rx="2" stroke="#2E2344" stroke-width="2" fill="none"/>
-              <rect x="4" y="40" width="40" height="4" rx="2" stroke="#2E2344" stroke-width="2"/>
+              <rect x="4" y="8" width="40" height="32" rx="4" stroke="#BA3017" stroke-width="2"/>
+              <path d="M4 18h40" stroke="#BA3017" stroke-width="2"/>
+              <circle cx="34" cy="30" r="4" stroke="#BA3017" stroke-width="2"/>
+              <path d="M12 28h10M12 34h6" stroke="#BA3017" stroke-width="2" stroke-linecap="round"/>
             </svg>
           </div>
         </div>
@@ -64,72 +65,76 @@
     </div>
   </section>
 
+  <!-- How it works -->
   <section class="product-section" id="como-funciona">
     <div class="container">
       <div class="section-header">
         <span class="label reveal">Como funciona</span>
-        <h2 class="reveal reveal-delay-1">Seu negócio<br>em uma tela</h2>
+        <h2 class="reveal reveal-delay-1">Cobrança inteligente<br>em 4 etapas</h2>
       </div>
       <div class="steps-grid">
         <div class="step reveal reveal-delay-1">
-          <div class="step-number" style="color:var(--color-navy);">01</div>
-          <h4>Integração de Fontes</h4>
-          <p>Conecte ERPs, bancos, CRMs e outras fontes de dados. O dashboard centraliza tudo em uma visão unificada.</p>
+          <div class="step-number">01</div>
+          <h4>Importação</h4>
+          <p>Conecte seu ERP, banco ou planilha. O bot importa automaticamente os títulos em aberto e classifica por risco.</p>
         </div>
         <div class="step reveal reveal-delay-2">
-          <div class="step-number" style="color:var(--color-navy);">02</div>
-          <h4>Painéis Customizáveis</h4>
-          <p>Monte dashboards por perfil — CEO, financeiro, operacional. Cada usuário vê exatamente o que precisa.</p>
+          <div class="step-number">02</div>
+          <h4>Régua Inteligente</h4>
+          <p>Réguas de cobrança personalizadas por perfil de devedor — frequência, canal e tom de comunicação ajustados por IA.</p>
         </div>
         <div class="step reveal reveal-delay-3">
-          <div class="step-number" style="color:var(--color-navy);">03</div>
-          <h4>Dados em Tempo Real</h4>
-          <p>Métricas e KPIs atualizados automaticamente. Sem esperar relatórios manuais — a informação está sempre pronta.</p>
+          <div class="step-number">03</div>
+          <h4>Multicanalidade</h4>
+          <p>Disparo automatizado via WhatsApp, e-mail, SMS e ligação. O cliente negocia direto pelo canal que preferir.</p>
         </div>
         <div class="step reveal reveal-delay-4">
-          <div class="step-number" style="color:var(--color-navy);">04</div>
-          <h4>Insights Acionáveis</h4>
-          <p>Alertas automáticos quando indicadores saem do esperado. O sistema destaca o que precisa da sua atenção.</p>
+          <div class="step-number">04</div>
+          <h4>Recuperação</h4>
+          <p>Acordos gerados automaticamente com boletos e links de pagamento. Dashboard com taxas de recuperação em tempo real.</p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- Features detail -->
   <section class="product-features-section">
     <div class="container">
       <div class="features-detail-grid">
         <div class="feature-detail reveal">
-          <h3>Widgets Drag & Drop</h3>
-          <p>Monte seus painéis arrastando widgets pré-configurados — gráficos, tabelas, KPIs, mapas de calor. Zero código necessário.</p>
+          <h3>Réguas Personalizáveis</h3>
+          <p>Configure sequências de cobrança diferentes por faixa de valor, tempo de atraso e perfil de cliente. A IA ajusta o melhor momento e canal para cada contato.</p>
         </div>
         <div class="feature-detail reveal reveal-delay-1">
-          <h3>Multi-empresa</h3>
-          <p>Gerencie múltiplas empresas e filiais em uma única interface. Visão consolidada ou individual com alternância instantânea.</p>
+          <h3>Negociação Assistida</h3>
+          <p>O bot negocia condições de pagamento dentro de parâmetros que você define — descontos, parcelamentos, prazos — e fecha acordos sem intervenção humana.</p>
         </div>
         <div class="feature-detail reveal reveal-delay-2">
-          <h3>Compartilhamento Seguro</h3>
-          <p>Exporte PDFs executivos, compartilhe links com acesso controlado ou programe envio automático por e-mail.</p>
+          <h3>Integração Nativa</h3>
+          <p>Conecta com os principais ERPs, bancos e gateways de pagamento do mercado. Setup em menos de 48 horas, sem desenvolvimento.</p>
         </div>
         <div class="feature-detail reveal reveal-delay-3">
-          <h3>Mobile-First</h3>
-          <p>Acesse seus dashboards de qualquer dispositivo. Interface responsiva otimizada para tomada de decisão em movimento.</p>
+          <h3>Compliance Total</h3>
+          <p>Respeita horários permitidos, limites de contato e todas as regulamentações do setor. Histórico completo de interações para auditoria.</p>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- CTA -->
   <section class="cta">
     <div class="container">
-      <h2 class="reveal">Chega de<br>relatórios<br><span style="color:var(--color-navy);">atrasados</span></h2>
+      <h2 class="reveal">Seu dinheiro<br>de volta ao<br><span class="accent">caixa</span></h2>
       <p class="subtitle reveal reveal-delay-1">
-        Veja seus dados em tempo real com o Dashboard UÚBA Tech.
+        Veja o UÚBA Collect em ação com uma demonstração personalizada para o seu cenário.
       </p>
       <div class="cta-buttons reveal reveal-delay-2">
-        <a href="../index.html#contato" class="btn" style="background:var(--color-navy);border-color:var(--color-navy);">Agendar Demonstração</a>
+        <a href="../index.html#contato" class="btn">Agendar Demonstração</a>
       </div>
     </div>
   </section>
 
+  <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer-brand">
