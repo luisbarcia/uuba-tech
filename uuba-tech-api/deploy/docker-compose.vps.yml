@@ -1,0 +1,46 @@
+# Snippet para adicionar ao /opt/stack/docker-compose.yml existente
+# Copiar estes services para dentro do docker-compose.yml da VPS
+
+  uuba-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: uuba
+      POSTGRES_PASSWORD: ${UUBA_DB_PASSWORD:-uuba_secret_change_me}
+      POSTGRES_DB: uuba
+    volumes:
+      - uuba_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U uuba"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - default
+
+  uuba-api:
+    build:
+      context: ./uuba-tech-api
+      dockerfile: Dockerfile.prod
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://uuba:${UUBA_DB_PASSWORD:-uuba_secret_change_me}@uuba-db:5432/uuba
+      API_KEY: ${UUBA_API_KEY:-change_me_in_production}
+      ASAAS_WEBHOOK_SECRET: ${UUBA_ASAAS_SECRET:-}
+      WHATSAPP_VERIFY_TOKEN: ${UUBA_WHATSAPP_TOKEN:-}
+      ENVIRONMENT: production
+      DEBUG: "false"
+    depends_on:
+      uuba-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - default
+
+# Adicionar ao volumes: existente
+  uuba_pgdata:
