@@ -2,12 +2,12 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Uúba Tech API",
-    "description": "API de cobrança inteligente para PMEs brasileiras",
-    "version": "0.1.0",
+    "description": "\n# Uúba Tech API\n\nAPI de cobrança inteligente para PMEs brasileiras.\n\n## Getting Started\n\n### Autenticação\n\nTodas as requisições exigem uma API Key no header:\n\n```\nX-API-Key: sua_chave_aqui\n```\n\n### Base URL\n\n```\nhttps://api.uuba.tech\n```\n\n### Primeira requisição\n\nCrie um cliente:\n\n```bash\ncurl -X POST https://api.uuba.tech/api/v1/clientes \\\n  -H \"X-API-Key: sua_chave_aqui\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"nome\": \"Padaria Bom Pão\",\n    \"documento\": \"12345678000190\",\n    \"telefone\": \"5511999001234\"\n  }'\n```\n\nResposta:\n\n```json\n{\n  \"id\": \"cli_abc123def456\",\n  \"object\": \"cliente\",\n  \"nome\": \"Padaria Bom Pão\",\n  \"documento\": \"12345678000190\",\n  \"telefone\": \"5511999001234\",\n  \"created_at\": \"2026-03-15T10:00:00-03:00\",\n  \"updated_at\": \"2026-03-15T10:00:00-03:00\"\n}\n```\n\n### Criar uma fatura\n\n```bash\ncurl -X POST https://api.uuba.tech/api/v1/faturas \\\n  -H \"X-API-Key: sua_chave_aqui\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\n    \"cliente_id\": \"cli_abc123def456\",\n    \"valor\": 250000,\n    \"vencimento\": \"2026-04-01T00:00:00-03:00\",\n    \"descricao\": \"NF 1234 - Serviços março\"\n  }'\n```\n\n> **Nota:** Valores monetários são sempre em **centavos**. R$ 2.500,00 = `250000`.\n\n### Consultar métricas do cliente\n\n```bash\ncurl https://api.uuba.tech/api/v1/clientes/cli_abc123def456/metricas \\\n  -H \"X-API-Key: sua_chave_aqui\"\n```\n\nResposta:\n\n```json\n{\n  \"dso_dias\": 28.5,\n  \"total_em_aberto\": 430000,\n  \"total_vencido\": 120000,\n  \"faturas_em_aberto\": 3,\n  \"faturas_vencidas\": 1\n}\n```\n\n## Convenções\n\n| Convenção | Detalhe |\n|-----------|---------|\n| **IDs** | Prefixo descritivo + nanoid: `cli_`, `fat_`, `cob_` |\n| **Valores** | Inteiro em centavos. `15000` = R$ 150,00 |\n| **Datas** | ISO 8601 com timezone: `2026-03-15T10:00:00-03:00` |\n| **Status** | Strings descritivas: `pendente`, `pago`, `vencido`, `cancelado` |\n| **Campos** | snake_case em todo lugar |\n\n## Erros\n\nA API usa [RFC 9457 (Problem Details)](https://www.rfc-editor.org/rfc/rfc9457) para todas as respostas de erro:\n\n```json\n{\n  \"type\": \"https://api.uubatech.com/errors/fatura-nao-encontrada\",\n  \"title\": \"Fatura não encontrada\",\n  \"status\": 404,\n  \"detail\": \"Fatura fat_abc123 não existe.\",\n  \"instance\": \"/api/v1/faturas/fat_abc123\",\n  \"request_id\": \"req_7f3a2b1c4d5e\",\n  \"errors\": []\n}\n```\n\n| Status | Significado |\n|--------|-------------|\n| `401` | API Key ausente ou inválida |\n| `404` | Recurso não encontrado |\n| `409` | Conflito de integridade (FK ou UNIQUE violation) |\n| `422` | Erro de validação nos dados enviados |\n| `500` | Erro interno do servidor |\n\n## Paginação\n\nEndpoints de listagem retornam envelope paginado:\n\n```json\n{\n  \"object\": \"list\",\n  \"data\": [...],\n  \"pagination\": {\n    \"total\": 42,\n    \"page_size\": 50,\n    \"has_more\": false,\n    \"offset\": 0\n  }\n}\n```\n\nParâmetros: `?limit=50&offset=0`\n\n## Rate Limiting\n\nPor enquanto sem limite. Quando implementado, os headers padrão serão:\n\n```\nX-RateLimit-Limit: 1000\nX-RateLimit-Remaining: 999\nX-RateLimit-Reset: 1709994000\n```\n",
     "contact": {
       "name": "Uúba Tech",
       "url": "https://uuba.tech"
-    }
+    },
+    "version": "0.1.0"
   },
   "paths": {
     "/api/v1/clientes": {
@@ -1507,5 +1507,19 @@
         "name": "X-API-Key"
       }
     }
-  }
+  },
+  "tags": [
+    {
+      "name": "clientes",
+      "description": "Cadastro e métricas de clientes (devedores). Cada cliente tem um documento (CPF/CNPJ) único e pode ter múltiplas faturas."
+    },
+    {
+      "name": "faturas",
+      "description": "CRUD de faturas a receber. Valores em centavos (R$ 150,00 = `15000`). Status: `pendente`, `pago`, `vencido`, `cancelado`."
+    },
+    {
+      "name": "cobrancas",
+      "description": "Registro de cobranças enviadas aos clientes. Cada cobrança está vinculada a uma fatura. Suporte a pausar/retomar régua."
+    }
+  ]
 }
