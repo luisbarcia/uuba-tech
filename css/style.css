@@ -630,7 +630,7 @@ section {
   margin-bottom: 1rem;
 }
 
-.mockup-header-row h4 {
+.mockup-header-row .mockup-title {
   font-size: 1.2rem;
   font-family: var(--font-display);
   text-transform: uppercase;
