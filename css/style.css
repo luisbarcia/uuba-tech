@@ -366,7 +366,7 @@ section {
 
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
 }
 
@@ -833,6 +833,12 @@ section {
 
   .hero h1 {
     font-size: clamp(3.5rem, 10vw, 6rem);
+  }
+}
+
+@media (max-width: 900px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
