@@ -201,6 +201,10 @@ app = FastAPI(
             "description": "Acompanhe as ações de cobrança realizadas sobre cada fatura. Cada cobrança registra o canal (WhatsApp, email), o tom da mensagem (amigável, neutro, firme, urgente), e pode ser pausada ou retomada. Use o histórico por fatura para ver toda a timeline de comunicação com o cliente.",
         },
         {
+            "name": "admin",
+            "description": "Endpoints administrativos para seed de dados mock, reset do banco e operações de manutenção. Requerem autenticação.",
+        },
+        {
             "name": "infraestrutura",
             "description": "Endpoints de monitoramento e operação. Não requerem autenticação.",
         },
@@ -299,11 +303,12 @@ app.add_middleware(RequestIdMiddleware)
 
 
 # --- Routers ---
-from app.routers import clientes, faturas, cobrancas
+from app.routers import clientes, faturas, cobrancas, admin
 
 app.include_router(clientes.router)
 app.include_router(faturas.router)
 app.include_router(cobrancas.router)
+app.include_router(admin.router)
 
 
 # --- Health ---

@@ -1,0 +1,72 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db
+from app.auth.api_key import verify_api_key
+from app.models.cliente import Cliente
+from app.models.fatura import Fatura
+from app.models.cobranca import Cobranca
+from app.seed import build_seed_data
+
+router = APIRouter(
+    prefix="/api/v1/admin",
+    tags=["admin"],
+    dependencies=[Depends(verify_api_key)],
+)
+
+
+@router.post(
+    "/seed",
+    summary="Popular com dados mock",
+    description="Limpa todos os dados e popula com dados mock realistas para demo. **Cuidado: apaga tudo antes de inserir.**",
+)
+async def seed_database(db: AsyncSession = Depends(get_db)):
+    # Limpar na ordem correta (FK constraints)
+    await db.execute(delete(Cobranca))
+    await db.execute(delete(Fatura))
+    await db.execute(delete(Cliente))
+    await db.commit()
+
+    data = build_seed_data()
+
+    for c in data["clientes"]:
+        db.add(Cliente(**c))
+    await db.commit()
+
+    for f in data["faturas"]:
+        db.add(Fatura(**f))
+    await db.commit()
+
+    for cob in data["cobrancas"]:
+        db.add(Cobranca(**cob))
+    await db.commit()
+
+    return {
+        "status": "ok",
+        "seed": {
+            "clientes": len(data["clientes"]),
+            "faturas": len(data["faturas"]),
+            "cobrancas": len(data["cobrancas"]),
+        },
+    }
+
+
+@router.delete(
+    "/reset",
+    summary="Limpar todos os dados",
+    description="Remove todos os registros de cobrancas, faturas e clientes. **Irreversível.**",
+)
+async def reset_database(db: AsyncSession = Depends(get_db)):
+    r_cob = await db.execute(delete(Cobranca))
+    r_fat = await db.execute(delete(Fatura))
+    r_cli = await db.execute(delete(Cliente))
+    await db.commit()
+    return {
+        "status": "ok",
+        "deleted": {
+            "cobrancas": r_cob.rowcount,
+            "faturas": r_fat.rowcount,
+            "clientes": r_cli.rowcount,
+        },
+    }
