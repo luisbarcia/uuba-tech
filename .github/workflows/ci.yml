@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'uuba-tech-api/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'uuba-tech-api/**'
+      - '.github/workflows/ci.yml'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: uuba-tech-api
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install ruff
+      - run: ruff check app/ tests/
+      - run: ruff format --check app/ tests/
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [lint]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: uuba
+          POSTGRES_PASSWORD: uuba
+          POSTGRES_DB: uuba_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://uuba:uuba@localhost:5432/uuba_test
+      API_KEY: test-ci-key
+      ENVIRONMENT: test
+      DEBUG: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: uuba-tech-api/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/ -v --tb=short
+      - run: echo "Tests passed - $(pytest tests/ --co -q 2>/dev/null | tail -1)"
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [test]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -f uuba-tech-api/Dockerfile.prod -t uuba-api:${{ github.sha }} uuba-tech-api/
+      - run: |
+          docker run --rm uuba-api:${{ github.sha }} python -c "from app.main import app; print('OK:', app.title)"
