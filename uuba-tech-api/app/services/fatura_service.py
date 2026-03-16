@@ -17,7 +17,9 @@ async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
     except IntegrityError:
         await db.rollback()
         raise APIError(
-            409, "integridade", "Erro de integridade",
+            409,
+            "integridade",
+            "Erro de integridade",
             f"Cliente {data.cliente_id} não existe ou violação de constraint.",
         )
     await db.refresh(fatura)

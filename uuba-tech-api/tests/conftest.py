@@ -57,6 +57,7 @@ async def client(engine):
 
 # --- Helpers ---
 
+
 async def create_test_cliente(c: AsyncClient, **overrides) -> dict:
     data = {
         "nome": "Padaria Bom Pao",

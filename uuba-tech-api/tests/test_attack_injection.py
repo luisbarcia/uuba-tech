@@ -1,4 +1,5 @@
 """Injection attacks — SQL, XSS, command injection, path traversal."""
+
 from tests.conftest import AUTH, create_test_cliente, create_test_fatura
 
 
@@ -27,6 +28,7 @@ COMMAND_PAYLOADS = [
 
 
 # --- SQL injection in query parameters ---
+
 
 async def test_sql_injection_in_telefone_filter(client):
     for payload in SQL_PAYLOADS:
@@ -57,6 +59,7 @@ async def test_sql_injection_in_periodo_filter(client):
 
 # --- SQL injection in path parameters ---
 
+
 async def test_sql_injection_in_path_cliente_id(client):
     for payload in SQL_PAYLOADS:
         resp = await client.get(f"/api/v1/clientes/{payload}", headers=AUTH)
@@ -71,12 +74,17 @@ async def test_sql_injection_in_path_fatura_id(client):
 
 # --- SQL injection in JSON body ---
 
+
 async def test_sql_injection_in_cliente_nome(client):
     for payload in SQL_PAYLOADS:
-        resp = await client.post("/api/v1/clientes", json={
-            "nome": payload,
-            "documento": "99999999000100",
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/clientes",
+            json={
+                "nome": payload,
+                "documento": "99999999000100",
+            },
+            headers=AUTH,
+        )
         # Should succeed (store the string literally) or 422
         assert resp.status_code in (201, 409, 422)
         if resp.status_code == 201:
@@ -87,26 +95,36 @@ async def test_sql_injection_in_cliente_nome(client):
 async def test_sql_injection_in_fatura_descricao(client):
     cli = await create_test_cliente(client)
     from datetime import datetime, timezone, timedelta
+
     for payload in SQL_PAYLOADS:
-        resp = await client.post("/api/v1/faturas", json={
-            "cliente_id": cli["id"],
-            "valor": 10000,
-            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-            "descricao": payload,
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/faturas",
+            json={
+                "cliente_id": cli["id"],
+                "valor": 10000,
+                "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+                "descricao": payload,
+            },
+            headers=AUTH,
+        )
         assert resp.status_code == 201
         assert resp.json()["descricao"] == payload
 
 
 # --- XSS stored in responses ---
 
+
 async def test_xss_in_cliente_nome_returned_literally(client):
     """XSS payload stored and returned as-is (not HTML-encoded in JSON API)."""
     for payload in XSS_PAYLOADS:
-        resp = await client.post("/api/v1/clientes", json={
-            "nome": payload,
-            "documento": f"XSS{hash(payload) % 99999:05d}000100",
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/clientes",
+            json={
+                "nome": payload,
+                "documento": f"XSS{hash(payload) % 99999:05d}000100",
+            },
+            headers=AUTH,
+        )
         if resp.status_code == 201:
             assert resp.json()["nome"] == payload
 
@@ -115,30 +133,40 @@ async def test_xss_in_cobranca_mensagem(client):
     cli = await create_test_cliente(client, documento="77777777000177")
     fat = await create_test_fatura(client, cli["id"])
     for payload in XSS_PAYLOADS:
-        resp = await client.post("/api/v1/cobrancas", json={
-            "fatura_id": fat["id"],
-            "cliente_id": cli["id"],
-            "tipo": "lembrete",
-            "mensagem": payload,
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/cobrancas",
+            json={
+                "fatura_id": fat["id"],
+                "cliente_id": cli["id"],
+                "tipo": "lembrete",
+                "mensagem": payload,
+            },
+            headers=AUTH,
+        )
         assert resp.status_code == 201
         assert resp.json()["mensagem"] == payload
 
 
 # --- Command injection ---
 
+
 async def test_command_injection_in_nome(client):
     for payload in COMMAND_PAYLOADS:
-        resp = await client.post("/api/v1/clientes", json={
-            "nome": payload,
-            "documento": f"CMD{abs(hash(payload)) % 99999:05d}000100",
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/clientes",
+            json={
+                "nome": payload,
+                "documento": f"CMD{abs(hash(payload)) % 99999:05d}000100",
+            },
+            headers=AUTH,
+        )
         assert resp.status_code in (201, 422)
         if resp.status_code == 201:
             assert resp.json()["nome"] == payload
 
 
 # --- Path traversal ---
+
 
 async def test_path_traversal_in_id(client):
     traversal_payloads = [
@@ -154,6 +182,7 @@ async def test_path_traversal_in_id(client):
 
 
 # --- Error responses don't leak internals ---
+
 
 async def test_error_no_stack_trace(client):
     """Error responses should not expose stack traces."""
@@ -179,11 +208,16 @@ async def test_error_no_db_schema_leak(client):
 
     # FK violation error
     from datetime import datetime, timezone, timedelta
-    resp2 = await client.post("/api/v1/faturas", json={
-        "cliente_id": "cli_DOESNOTEXIST",
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-    }, headers=AUTH)
+
+    resp2 = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": "cli_DOESNOTEXIST",
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        },
+        headers=AUTH,
+    )
     body2 = resp2.json()
     assert "SELECT" not in str(body2)
     assert "INSERT" not in str(body2)

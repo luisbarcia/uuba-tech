@@ -1,8 +1,10 @@
 """Auth attack vectors — bypass attempts, timing, enumeration."""
+
 from tests.conftest import AUTH
 
 
 # --- Missing/malformed auth ---
+
 
 async def test_no_header_all_protected_endpoints(client):
     """Verify ALL protected endpoints reject requests without auth."""
@@ -77,11 +79,13 @@ async def test_auth_with_whitespace_key(client):
 
 # --- Auth error response ---
 
+
 async def test_auth_error_does_not_leak_valid_key(client):
     """Error response should not contain the expected key."""
     resp = await client.get("/api/v1/clientes")
     body = resp.text
     from app.config import settings
+
     assert settings.api_key not in body
 
 
@@ -94,6 +98,7 @@ async def test_auth_error_consistent_message(client):
 
 
 # --- Health endpoint should NOT require auth ---
+
 
 async def test_health_accessible_without_auth(client):
     resp = await client.get("/health")

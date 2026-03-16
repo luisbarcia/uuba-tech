@@ -4,6 +4,7 @@ from typing import Any
 
 class ProblemDetail(BaseModel):
     """RFC 9457 Problem Details for HTTP APIs."""
+
     type: str
     title: str
     status: int

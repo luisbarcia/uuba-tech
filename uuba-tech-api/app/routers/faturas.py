@@ -33,7 +33,10 @@ async def create_fatura(data: FaturaCreate, db: AsyncSession = Depends(get_db)):
     description="Retorna faturas com filtros opcionais por status e cliente. Use `status=pendente,vencido` para faturas em aberto.",
 )
 async def list_faturas(
-    status: str | None = Query(None, description="Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)"),
+    status: str | None = Query(
+        None,
+        description="Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)",
+    ),
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
@@ -60,7 +63,9 @@ async def get_fatura(fatura_id: str, db: AsyncSession = Depends(get_db)):
     fatura = await fatura_service.get_fatura(db, fatura_id)
     if not fatura:
         raise APIError(
-            404, "fatura-nao-encontrada", "Fatura não encontrada",
+            404,
+            "fatura-nao-encontrada",
+            "Fatura não encontrada",
             f"Fatura {fatura_id} não existe.",
         )
     return fatura
@@ -72,13 +77,13 @@ async def get_fatura(fatura_id: str, db: AsyncSession = Depends(get_db)):
     summary="Atualizar fatura",
     description="Atualiza status, promessa de pagamento, ou link de pagamento. Ao marcar como `pago`, o campo `pago_em` é preenchido automaticamente.",
 )
-async def update_fatura(
-    fatura_id: str, data: FaturaUpdate, db: AsyncSession = Depends(get_db)
-):
+async def update_fatura(fatura_id: str, data: FaturaUpdate, db: AsyncSession = Depends(get_db)):
     fatura = await fatura_service.update_fatura(db, fatura_id, data)
     if not fatura:
         raise APIError(
-            404, "fatura-nao-encontrada", "Fatura não encontrada",
+            404,
+            "fatura-nao-encontrada",
+            "Fatura não encontrada",
             f"Fatura {fatura_id} não existe.",
         )
     return fatura

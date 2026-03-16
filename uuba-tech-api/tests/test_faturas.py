@@ -4,15 +4,20 @@ from tests.conftest import AUTH, create_test_cliente, create_test_fatura
 
 # --- POST /api/v1/faturas ---
 
+
 async def test_create_fatura(client):
     cli = await create_test_cliente(client)
     venc = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 250000,
-        "vencimento": venc,
-        "descricao": "NF 1234",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 250000,
+            "vencimento": venc,
+            "descricao": "NF 1234",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     body = resp.json()
     assert body["id"].startswith("fat_")
@@ -24,32 +29,45 @@ async def test_create_fatura(client):
 
 async def test_create_fatura_valor_zero_returns_422(client):
     cli = await create_test_cliente(client)
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 0,
-        "vencimento": datetime.now(timezone.utc).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 0,
+            "vencimento": datetime.now(timezone.utc).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 async def test_create_fatura_valor_negative_returns_422(client):
     cli = await create_test_cliente(client)
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": -100,
-        "vencimento": datetime.now(timezone.utc).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": -100,
+            "vencimento": datetime.now(timezone.utc).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 async def test_create_fatura_missing_fields_returns_422(client):
-    resp = await client.post("/api/v1/faturas", json={
-        "valor": 100,
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "valor": 100,
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 # --- GET /api/v1/faturas ---
+
 
 async def test_list_faturas_empty(client):
     resp = await client.get("/api/v1/faturas", headers=AUTH)
@@ -117,6 +135,7 @@ async def test_list_faturas_pagination(client):
 
 # --- GET /api/v1/faturas/{id} ---
 
+
 async def test_get_fatura_exists(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
@@ -133,6 +152,7 @@ async def test_get_fatura_not_found(client):
 
 
 # --- PATCH /api/v1/faturas/{id} ---
+
 
 async def test_update_fatura_status_pago_sets_pago_em(client):
     cli = await create_test_cliente(client)

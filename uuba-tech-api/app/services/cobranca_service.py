@@ -22,7 +22,9 @@ async def create_cobranca(db: AsyncSession, data: CobrancaCreate) -> Cobranca:
     except IntegrityError:
         await db.rollback()
         raise APIError(
-            409, "integridade", "Erro de integridade",
+            409,
+            "integridade",
+            "Erro de integridade",
             f"Fatura {data.fatura_id} ou cliente {data.cliente_id} não existe.",
         )
     await db.refresh(cobranca)
@@ -42,7 +44,9 @@ async def list_cobrancas(
         match = re.fullmatch(r"(\d+)d", periodo)
         if not match:
             raise APIError(
-                422, "periodo-invalido", "Formato de período inválido",
+                422,
+                "periodo-invalido",
+                "Formato de período inválido",
                 f"Use o formato Nd (ex: 7d, 30d). Recebido: '{periodo}'.",
             )
         days = int(match.group(1))
@@ -63,15 +67,15 @@ async def list_cobrancas(
         count_q = count_q.where(Cobranca.fatura_id == fatura_id)
     total = len((await db.execute(count_q)).all())
 
-    result = await db.execute(query.order_by(Cobranca.created_at.desc()).limit(limit).offset(offset))
+    result = await db.execute(
+        query.order_by(Cobranca.created_at.desc()).limit(limit).offset(offset)
+    )
     return result.scalars().all(), total
 
 
 async def get_historico(db: AsyncSession, fatura_id: str) -> list[Cobranca]:
     result = await db.execute(
-        select(Cobranca)
-        .where(Cobranca.fatura_id == fatura_id)
-        .order_by(Cobranca.created_at.desc())
+        select(Cobranca).where(Cobranca.fatura_id == fatura_id).order_by(Cobranca.created_at.desc())
     )
     return result.scalars().all()
 

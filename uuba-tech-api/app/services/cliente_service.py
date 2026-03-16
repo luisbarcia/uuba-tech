@@ -25,7 +25,9 @@ async def create_cliente(db: AsyncSession, data: ClienteCreate) -> Cliente:
     except IntegrityError:
         await db.rollback()
         raise APIError(
-            409, "documento-duplicado", "Documento já cadastrado",
+            409,
+            "documento-duplicado",
+            "Documento já cadastrado",
             f"Já existe um cliente com o documento {data.documento}.",
         )
     await db.refresh(cliente)

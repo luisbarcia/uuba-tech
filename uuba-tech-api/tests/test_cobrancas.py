@@ -3,17 +3,22 @@ from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create
 
 # --- POST /api/v1/cobrancas ---
 
+
 async def test_create_cobranca(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": fat["id"],
-        "cliente_id": cli["id"],
-        "tipo": "lembrete",
-        "canal": "whatsapp",
-        "tom": "amigavel",
-        "mensagem": "Ola, sua fatura vence em breve!",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": fat["id"],
+            "cliente_id": cli["id"],
+            "tipo": "lembrete",
+            "canal": "whatsapp",
+            "tom": "amigavel",
+            "mensagem": "Ola, sua fatura vence em breve!",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     body = resp.json()
     assert body["id"].startswith("cob_")
@@ -28,27 +33,36 @@ async def test_create_cobranca(client):
 async def test_create_cobranca_invalid_tipo_returns_422(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": fat["id"],
-        "cliente_id": cli["id"],
-        "tipo": "invalido",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": fat["id"],
+            "cliente_id": cli["id"],
+            "tipo": "invalido",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 async def test_create_cobranca_default_canal(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": fat["id"],
-        "cliente_id": cli["id"],
-        "tipo": "cobranca",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": fat["id"],
+            "cliente_id": cli["id"],
+            "tipo": "cobranca",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     assert resp.json()["canal"] == "whatsapp"
 
 
 # --- GET /api/v1/cobrancas ---
+
 
 async def test_list_cobrancas_empty(client):
     resp = await client.get("/api/v1/cobrancas", headers=AUTH)
@@ -95,6 +109,7 @@ async def test_list_cobrancas_filter_by_cliente_id(client):
 
 # --- GET /api/v1/cobrancas/{fatura_id}/historico ---
 
+
 async def test_get_historico(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
@@ -118,6 +133,7 @@ async def test_get_historico_empty(client):
 
 # --- PATCH /api/v1/cobrancas/{id}/pausar ---
 
+
 async def test_pausar_cobranca(client):
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
@@ -137,6 +153,7 @@ async def test_pausar_cobranca_not_found(client):
 
 
 # --- PATCH /api/v1/cobrancas/{id}/retomar ---
+
 
 async def test_retomar_cobranca(client):
     cli = await create_test_cliente(client)

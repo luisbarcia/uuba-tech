@@ -41,8 +41,12 @@ async def list_cobrancas(
     db: AsyncSession = Depends(get_db),
 ):
     items, total = await cobranca_service.list_cobrancas(
-        db, periodo=periodo, cliente_id=cliente_id, fatura_id=fatura_id,
-        limit=limit, offset=offset,
+        db,
+        periodo=periodo,
+        cliente_id=cliente_id,
+        fatura_id=fatura_id,
+        limit=limit,
+        offset=offset,
     )
     return ListResponse(
         data=[CobrancaResponse.model_validate(c) for c in items],
@@ -76,7 +80,9 @@ async def pausar(cobranca_id: str, db: AsyncSession = Depends(get_db)):
     cobranca = await cobranca_service.pausar(db, cobranca_id)
     if not cobranca:
         raise APIError(
-            404, "cobranca-nao-encontrada", "Cobrança não encontrada",
+            404,
+            "cobranca-nao-encontrada",
+            "Cobrança não encontrada",
             f"Cobrança {cobranca_id} não existe.",
         )
     return cobranca
@@ -92,7 +98,9 @@ async def retomar(cobranca_id: str, db: AsyncSession = Depends(get_db)):
     cobranca = await cobranca_service.retomar(db, cobranca_id)
     if not cobranca:
         raise APIError(
-            404, "cobranca-nao-encontrada", "Cobrança não encontrada",
+            404,
+            "cobranca-nao-encontrada",
+            "Cobrança não encontrada",
             f"Cobrança {cobranca_id} não existe.",
         )
     return cobranca

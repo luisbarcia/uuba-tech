@@ -33,7 +33,9 @@ async def create_cliente(data: ClienteCreate, db: AsyncSession = Depends(get_db)
     description="Retorna a lista de clientes com suporte a filtro por telefone. Use `telefone` para buscar pelo número WhatsApp.",
 )
 async def list_clientes(
-    telefone: str | None = Query(None, description="Filtrar por número WhatsApp (ex: 5511999001234)"),
+    telefone: str | None = Query(
+        None, description="Filtrar por número WhatsApp (ex: 5511999001234)"
+    ),
     order_by: str | None = Query(None, description="Ordenação (ex: total_vencido)"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
@@ -60,7 +62,9 @@ async def get_cliente(cliente_id: str, db: AsyncSession = Depends(get_db)):
     cliente = await cliente_service.get_cliente(db, cliente_id)
     if not cliente:
         raise APIError(
-            404, "cliente-nao-encontrado", "Cliente não encontrado",
+            404,
+            "cliente-nao-encontrado",
+            "Cliente não encontrado",
             f"Cliente {cliente_id} não existe.",
         )
     return cliente
@@ -72,13 +76,13 @@ async def get_cliente(cliente_id: str, db: AsyncSession = Depends(get_db)):
     summary="Atualizar cliente",
     description="Atualiza parcialmente os dados de um cliente. Envie apenas os campos que deseja alterar.",
 )
-async def update_cliente(
-    cliente_id: str, data: ClienteUpdate, db: AsyncSession = Depends(get_db)
-):
+async def update_cliente(cliente_id: str, data: ClienteUpdate, db: AsyncSession = Depends(get_db)):
     cliente = await cliente_service.update_cliente(db, cliente_id, data)
     if not cliente:
         raise APIError(
-            404, "cliente-nao-encontrado", "Cliente não encontrado",
+            404,
+            "cliente-nao-encontrado",
+            "Cliente não encontrado",
             f"Cliente {cliente_id} não existe.",
         )
     return cliente
@@ -94,7 +98,9 @@ async def get_metricas(cliente_id: str, db: AsyncSession = Depends(get_db)):
     cliente = await cliente_service.get_cliente(db, cliente_id)
     if not cliente:
         raise APIError(
-            404, "cliente-nao-encontrado", "Cliente não encontrado",
+            404,
+            "cliente-nao-encontrado",
+            "Cliente não encontrado",
             f"Cliente {cliente_id} não existe.",
         )
     return await cliente_service.get_metricas(db, cliente_id)

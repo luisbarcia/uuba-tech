@@ -1,9 +1,11 @@
 """Business logic attacks — state violations, boundary values, edge cases."""
+
 from datetime import datetime, timezone, timedelta
 from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create_test_cobranca
 
 
 # --- Fatura state machine attacks ---
+
 
 async def test_cancel_already_cancelled_fatura(client):
     cli = await create_test_cliente(client)
@@ -48,6 +50,7 @@ async def test_revert_paid_to_pendente(client):
 
 # --- Cobranca state attacks ---
 
+
 async def test_pause_already_paused_cobranca(client):
     cli = await create_test_cliente(client, documento="22222222000123")
     fat = await create_test_fatura(client, cli["id"])
@@ -67,35 +70,48 @@ async def test_resume_already_active_cobranca(client):
 
 # --- Boundary value attacks ---
 
+
 async def test_fatura_valor_max_int(client):
     """Very large valor — should not overflow."""
     cli = await create_test_cliente(client, documento="33333333000134")
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 2**31 - 1,  # max 32-bit int
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 2**31 - 1,  # max 32-bit int
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     assert resp.json()["valor"] == 2**31 - 1
 
 
 async def test_fatura_valor_one_centavo(client):
     cli = await create_test_cliente(client, documento="33333333000135")
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 1,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 1,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     assert resp.json()["valor"] == 1
 
 
 async def test_cliente_nome_very_long(client):
     """255 char limit on nome column."""
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "A" * 300,
-        "documento": "33333333000136",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "A" * 300,
+            "documento": "33333333000136",
+        },
+        headers=AUTH,
+    )
     # Should either truncate, succeed, or 422 — should NOT crash
     assert resp.status_code in (201, 422, 500)
 
@@ -103,40 +119,54 @@ async def test_cliente_nome_very_long(client):
 async def test_fatura_descricao_very_long(client):
     """500 char limit on descricao."""
     cli = await create_test_cliente(client, documento="33333333000137")
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-        "descricao": "X" * 1000,
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+            "descricao": "X" * 1000,
+        },
+        headers=AUTH,
+    )
     assert resp.status_code in (201, 422, 500)
 
 
 # --- Date edge cases ---
 
+
 async def test_fatura_vencimento_in_the_past(client):
     """Creating a fatura with past vencimento — should this be allowed?"""
     cli = await create_test_cliente(client, documento="44444444000145")
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) - timedelta(days=365)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) - timedelta(days=365)).isoformat(),
+        },
+        headers=AUTH,
+    )
     # Currently allowed — document the behavior
     assert resp.status_code in (201, 422)
 
 
 async def test_fatura_vencimento_far_future(client):
     cli = await create_test_cliente(client, documento="44444444000146")
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=36500)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=36500)).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
 
 
 # --- Pagination abuse ---
+
 
 async def test_pagination_negative_offset(client):
     resp = await client.get("/api/v1/clientes?offset=-1", headers=AUTH)
@@ -172,13 +202,18 @@ async def test_pagination_string_values(client):
 
 # --- FK integrity attacks ---
 
+
 async def test_create_fatura_nonexistent_cliente(client):
     """FK violation — fatura with non-existent cliente_id returns 409."""
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": "cli_DOESNOTEXIST",
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": "cli_DOESNOTEXIST",
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
     body = resp.json()
     assert "type" in body
@@ -187,15 +222,20 @@ async def test_create_fatura_nonexistent_cliente(client):
 
 async def test_create_cobranca_nonexistent_fatura(client):
     cli = await create_test_cliente(client, documento="55555555000158")
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": "fat_DOESNOTEXIST",
-        "cliente_id": cli["id"],
-        "tipo": "lembrete",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": "fat_DOESNOTEXIST",
+            "cliente_id": cli["id"],
+            "tipo": "lembrete",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
 # --- Request body attacks ---
+
 
 async def test_empty_json_body(client):
     resp = await client.post("/api/v1/clientes", json={}, headers=AUTH)
@@ -226,6 +266,7 @@ async def test_null_body(client):
 
 
 # --- Response contract ---
+
 
 async def test_all_list_endpoints_return_envelope(client):
     """All list endpoints must return {object, data, pagination}."""

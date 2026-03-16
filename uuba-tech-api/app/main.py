@@ -240,6 +240,7 @@ async def api_error_handler(request: Request, exc: APIError):
 async def generic_error_handler(request: Request, exc: Exception):
     logger.exception("Unhandled error")
     from sqlalchemy.exc import IntegrityError
+
     if isinstance(exc, IntegrityError):
         return JSONResponse(
             status_code=409,
@@ -299,6 +300,7 @@ app.add_middleware(RequestIdMiddleware)
 
 # --- Routers ---
 from app.routers import clientes, faturas, cobrancas
+
 app.include_router(clientes.router)
 app.include_router(faturas.router)
 app.include_router(cobrancas.router)

@@ -1,4 +1,5 @@
 """Data integrity hunting — encoding, constraints, temporal, consistency."""
+
 import asyncio
 from datetime import datetime, timezone, timedelta
 from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create_test_cobranca
@@ -18,7 +19,7 @@ ENCODING_PAYLOADS = {
     "accented": "Pâtisserie résumé naïve café über Ñoño",
     "surrogate_pair": "𝕳𝖊𝖑𝖑𝖔 𝕿𝖊𝖘𝖙",
     "newlines": "Linha 1\nLinha 2\r\nLinha 3",
-    "special_chars": 'Teste "com" \'aspas\' & <tags> \\backslash',
+    "special_chars": "Teste \"com\" 'aspas' & <tags> \\backslash",
     "zero_width": "Te\u200bst\u200be",  # zero-width space
     "rtl_markers": "\u200fRight-to-left\u200e",
 }
@@ -28,10 +29,14 @@ async def test_encoding_in_cliente_nome(client):
     """All encodings must be stored and returned correctly in nome."""
     for label, payload in ENCODING_PAYLOADS.items():
         doc = f"ENC{abs(hash(label)) % 9999999:07d}00"
-        resp = await client.post("/api/v1/clientes", json={
-            "nome": payload,
-            "documento": doc,
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/clientes",
+            json={
+                "nome": payload,
+                "documento": doc,
+            },
+            headers=AUTH,
+        )
         assert resp.status_code == 201, f"Failed for {label}: {resp.text}"
         body = resp.json()
         assert body["nome"] == payload, f"Encoding corrupted for {label}"
@@ -44,12 +49,16 @@ async def test_encoding_in_cliente_nome(client):
 async def test_encoding_in_fatura_descricao(client):
     cli = await create_test_cliente(client)
     for label, payload in ENCODING_PAYLOADS.items():
-        resp = await client.post("/api/v1/faturas", json={
-            "cliente_id": cli["id"],
-            "valor": 10000,
-            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-            "descricao": payload,
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/faturas",
+            json={
+                "cliente_id": cli["id"],
+                "valor": 10000,
+                "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+                "descricao": payload,
+            },
+            headers=AUTH,
+        )
         assert resp.status_code == 201, f"Failed for {label}"
         assert resp.json()["descricao"] == payload, f"Corrupted for {label}"
 
@@ -58,35 +67,47 @@ async def test_encoding_in_cobranca_mensagem(client):
     cli = await create_test_cliente(client, documento="98765432000198")
     fat = await create_test_fatura(client, cli["id"])
     for label, payload in ENCODING_PAYLOADS.items():
-        resp = await client.post("/api/v1/cobrancas", json={
-            "fatura_id": fat["id"],
-            "cliente_id": cli["id"],
-            "tipo": "lembrete",
-            "mensagem": payload,
-        }, headers=AUTH)
+        resp = await client.post(
+            "/api/v1/cobrancas",
+            json={
+                "fatura_id": fat["id"],
+                "cliente_id": cli["id"],
+                "tipo": "lembrete",
+                "mensagem": payload,
+            },
+            headers=AUTH,
+        )
         assert resp.status_code == 201, f"Failed for {label}"
         assert resp.json()["mensagem"] == payload, f"Corrupted for {label}"
 
 
 async def test_encoding_in_email(client):
     """Email with international chars."""
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Teste Email",
-        "documento": "98765432000199",
-        "email": "josé@domínio.com.br",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Teste Email",
+            "documento": "98765432000199",
+            "email": "josé@domínio.com.br",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     assert resp.json()["email"] == "josé@domínio.com.br"
 
 
 async def test_empty_string_vs_null(client):
     """Empty string in optional fields — should be stored, not converted to null."""
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Teste Empty",
-        "documento": "11122233000144",
-        "email": "",
-        "telefone": "",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Teste Empty",
+            "documento": "11122233000144",
+            "email": "",
+            "telefone": "",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     body = resp.json()
     # Empty strings should be stored as empty strings, not null
@@ -97,34 +118,47 @@ async def test_empty_string_vs_null(client):
 # CONSTRAINT ENFORCEMENT AT DB LEVEL
 # =============================================================================
 
+
 async def test_unique_documento_enforced_at_db(client):
     """UNIQUE constraint must be enforced even with concurrent-like requests."""
     await create_test_cliente(client, documento="UNIQUE00000001")
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Duplicate",
-        "documento": "UNIQUE00000001",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Duplicate",
+            "documento": "UNIQUE00000001",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
 async def test_fk_cliente_enforced_on_fatura(client):
     """FK constraint: fatura must reference existing cliente."""
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": "cli_GHOST0000000",
-        "valor": 10000,
-        "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": "cli_GHOST0000000",
+            "valor": 10000,
+            "vencimento": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
 async def test_fk_fatura_enforced_on_cobranca(client):
     """FK constraint: cobranca must reference existing fatura."""
     cli = await create_test_cliente(client)
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": "fat_GHOST0000000",
-        "cliente_id": cli["id"],
-        "tipo": "lembrete",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": "fat_GHOST0000000",
+            "cliente_id": cli["id"],
+            "tipo": "lembrete",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
@@ -132,17 +166,22 @@ async def test_fk_cliente_enforced_on_cobranca(client):
     """FK constraint: cobranca.cliente_id must reference existing cliente."""
     cli = await create_test_cliente(client, documento="FK_TEST_000001")
     fat = await create_test_fatura(client, cli["id"])
-    resp = await client.post("/api/v1/cobrancas", json={
-        "fatura_id": fat["id"],
-        "cliente_id": "cli_GHOST0000000",
-        "tipo": "lembrete",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/cobrancas",
+        json={
+            "fatura_id": fat["id"],
+            "cliente_id": "cli_GHOST0000000",
+            "tipo": "lembrete",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
 # =============================================================================
 # TEMPORAL DATA ATTACKS
 # =============================================================================
+
 
 async def test_created_at_auto_populated(client):
     """created_at must be set automatically on creation."""
@@ -197,11 +236,15 @@ async def test_vencimento_datetime_stored_correctly(client):
     cli = await create_test_cliente(client, documento="TIME000000004")
     # Use UTC to avoid SQLite timezone limitations
     venc_dt = datetime(2026, 4, 1, 3, 0, 0, tzinfo=timezone.utc)
-    resp = await client.post("/api/v1/faturas", json={
-        "cliente_id": cli["id"],
-        "valor": 10000,
-        "vencimento": venc_dt.isoformat(),
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/faturas",
+        json={
+            "cliente_id": cli["id"],
+            "valor": 10000,
+            "vencimento": venc_dt.isoformat(),
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     stored = resp.json()["vencimento"]
     returned = datetime.fromisoformat(stored)
@@ -221,6 +264,7 @@ async def test_enviado_em_set_on_cobranca_creation(client):
 # =============================================================================
 # DATA CONSISTENCY — metricas reflect actual fatura state
 # =============================================================================
+
 
 async def test_metricas_consistent_after_fatura_paid(client):
     """Metricas must update correctly when fatura is marked as paid."""
@@ -261,7 +305,9 @@ async def test_metricas_vencido_count(client):
     cli = await create_test_cliente(client, documento="CONS000000003")
     # Create fatura with past vencimento
     await create_test_fatura(
-        client, cli["id"], valor=75000,
+        client,
+        cli["id"],
+        valor=75000,
         vencimento=(datetime.now(timezone.utc) - timedelta(days=10)).isoformat(),
     )
 
@@ -289,12 +335,17 @@ async def test_cobranca_historico_consistent_with_list(client):
 # CONCURRENT WRITE SIMULATION
 # =============================================================================
 
+
 async def test_sequential_duplicate_documento(client):
     """Second insert with same documento must fail cleanly."""
     doc = "RACE000000001"
-    resp1 = await client.post("/api/v1/clientes", json={"nome": "A", "documento": doc}, headers=AUTH)
+    resp1 = await client.post(
+        "/api/v1/clientes", json={"nome": "A", "documento": doc}, headers=AUTH
+    )
     assert resp1.status_code == 201
-    resp2 = await client.post("/api/v1/clientes", json={"nome": "B", "documento": doc}, headers=AUTH)
+    resp2 = await client.post(
+        "/api/v1/clientes", json={"nome": "B", "documento": doc}, headers=AUTH
+    )
     assert resp2.status_code == 409
     # Verify first record is intact
     get_resp = await client.get(f"/api/v1/clientes/{resp1.json()['id']}", headers=AUTH)
@@ -323,6 +374,7 @@ async def test_concurrent_fatura_updates(client):
 # =============================================================================
 # BULK DATA CONSISTENCY
 # =============================================================================
+
 
 async def test_pagination_total_matches_data_count(client):
     """Total in pagination must match actual number of records."""

@@ -3,12 +3,17 @@ from tests.conftest import AUTH, create_test_cliente, create_test_fatura
 
 # --- POST /api/v1/clientes ---
 
+
 async def test_create_cliente(client):
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Padaria Bom Pao",
-        "documento": "12345678000190",
-        "telefone": "5511999001234",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Padaria Bom Pao",
+            "documento": "12345678000190",
+            "telefone": "5511999001234",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 201
     body = resp.json()
     assert body["id"].startswith("cli_")
@@ -20,29 +25,42 @@ async def test_create_cliente(client):
 
 
 async def test_create_cliente_missing_nome_returns_422(client):
-    resp = await client.post("/api/v1/clientes", json={
-        "documento": "12345678000190",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "documento": "12345678000190",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 async def test_create_cliente_missing_documento_returns_422(client):
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Padaria",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Padaria",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 422
 
 
 async def test_create_cliente_duplicate_documento_returns_409(client):
     await create_test_cliente(client, documento="99999999000199")
-    resp = await client.post("/api/v1/clientes", json={
-        "nome": "Outro Nome",
-        "documento": "99999999000199",
-    }, headers=AUTH)
+    resp = await client.post(
+        "/api/v1/clientes",
+        json={
+            "nome": "Outro Nome",
+            "documento": "99999999000199",
+        },
+        headers=AUTH,
+    )
     assert resp.status_code == 409
 
 
 # --- GET /api/v1/clientes ---
+
 
 async def test_list_clientes_empty(client):
     resp = await client.get("/api/v1/clientes", headers=AUTH)
@@ -64,7 +82,9 @@ async def test_list_clientes_with_data(client):
 
 async def test_list_clientes_filter_by_telefone(client):
     await create_test_cliente(client, documento="33333333000133", telefone="5511888887777")
-    await create_test_cliente(client, nome="Outro", documento="44444444000144", telefone="5521999990000")
+    await create_test_cliente(
+        client, nome="Outro", documento="44444444000144", telefone="5521999990000"
+    )
     resp = await client.get("/api/v1/clientes?telefone=5511888887777", headers=AUTH)
     body = resp.json()
     assert body["pagination"]["total"] == 1
@@ -88,6 +108,7 @@ async def test_list_clientes_pagination(client):
 
 # --- GET /api/v1/clientes/{id} ---
 
+
 async def test_get_cliente_exists(client):
     created = await create_test_cliente(client)
     resp = await client.get(f"/api/v1/clientes/{created['id']}", headers=AUTH)
@@ -104,6 +125,7 @@ async def test_get_cliente_not_found(client):
 
 
 # --- PATCH /api/v1/clientes/{id} ---
+
 
 async def test_update_cliente(client):
     created = await create_test_cliente(client)
@@ -126,6 +148,7 @@ async def test_update_cliente_not_found(client):
 
 
 # --- GET /api/v1/clientes/{id}/metricas ---
+
 
 async def test_get_metricas_empty(client):
     created = await create_test_cliente(client)

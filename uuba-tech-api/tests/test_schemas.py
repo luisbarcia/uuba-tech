@@ -10,6 +10,7 @@ from app.schemas.common import ProblemDetail, PaginationMeta, ListResponse
 
 # --- ClienteCreate ---
 
+
 def test_cliente_create_valid():
     c = ClienteCreate(nome="Padaria", documento="12345678000190")
     assert c.nome == "Padaria"
@@ -19,8 +20,10 @@ def test_cliente_create_valid():
 
 def test_cliente_create_with_optionals():
     c = ClienteCreate(
-        nome="Padaria", documento="12345678000190",
-        email="a@b.com", telefone="5511999001234",
+        nome="Padaria",
+        documento="12345678000190",
+        email="a@b.com",
+        telefone="5511999001234",
     )
     assert c.email == "a@b.com"
 
@@ -39,6 +42,7 @@ def test_cliente_create_missing_documento():
 
 # --- ClienteUpdate ---
 
+
 def test_cliente_update_partial():
     u = ClienteUpdate(nome="Novo Nome")
     assert u.nome == "Novo Nome"
@@ -52,6 +56,7 @@ def test_cliente_update_empty():
 
 # --- FaturaCreate ---
 
+
 def test_fatura_create_valid():
     f = FaturaCreate(
         cliente_id="cli_abc123",
@@ -64,7 +69,8 @@ def test_fatura_create_valid():
 def test_fatura_create_valor_zero_rejected():
     with pytest.raises(ValidationError) as exc_info:
         FaturaCreate(
-            cliente_id="cli_abc123", valor=0,
+            cliente_id="cli_abc123",
+            valor=0,
             vencimento=datetime.now(timezone.utc),
         )
     assert "greater_than" in str(exc_info.value).lower() or "gt" in str(exc_info.value).lower()
@@ -73,7 +79,8 @@ def test_fatura_create_valor_zero_rejected():
 def test_fatura_create_valor_negative_rejected():
     with pytest.raises(ValidationError):
         FaturaCreate(
-            cliente_id="cli_abc123", valor=-100,
+            cliente_id="cli_abc123",
+            valor=-100,
             vencimento=datetime.now(timezone.utc),
         )
 
@@ -89,6 +96,7 @@ def test_fatura_create_missing_vencimento():
 
 
 # --- FaturaUpdate ---
+
 
 def test_fatura_update_valid_status():
     for status in ("pendente", "pago", "vencido", "cancelado"):
@@ -108,9 +116,12 @@ def test_fatura_update_empty():
 
 # --- CobrancaCreate ---
 
+
 def test_cobranca_create_valid():
     c = CobrancaCreate(
-        fatura_id="fat_abc", cliente_id="cli_abc", tipo="lembrete",
+        fatura_id="fat_abc",
+        cliente_id="cli_abc",
+        tipo="lembrete",
     )
     assert c.canal == "whatsapp"  # default
     assert c.tom is None
@@ -150,6 +161,7 @@ def test_cobranca_create_invalid_tom():
 
 
 # --- Common schemas ---
+
 
 def test_pagination_meta():
     p = PaginationMeta(total=100, page_size=50, has_more=True, offset=0)
