@@ -405,20 +405,35 @@
   <p style="margin-bottom: 1rem;">Escalada gradual de pressão psicológica baseada em ciência comportamental. Cada etapa usa uma técnica diferente. O link de pagamento vai em <strong>toda mensagem</strong> (fricção zero).</p>
 
   <div class="kpi-grid">
-    <div class="kpi"><div class="value">6</div><div class="label">Etapas da régua</div></div>
+    <div class="kpi"><div class="value">7</div><div class="label">Etapas da régua</div></div>
     <div class="kpi green"><div class="value">10%</div><div class="label">Desconto máximo</div></div>
     <div class="kpi"><div class="value">15+</div><div class="label">Dias até escalação</div></div>
     <div class="kpi green"><div class="value">98%</div><div class="label">Taxa abertura WhatsApp</div></div>
   </div>
 
+  <!-- D-3 -->
+  <h3>Dia -3 — Lembrete Pré-Vencimento</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Evitar o atraso antes que aconteça. Muitos pagamentos atrasam por esquecimento simples.</p>
+  <div class="flow-card">
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Olá, [Nome]! Sua fatura de R$ [valor] vence em 3 dias ([data]).<br><br>
+      Segue o link para facilitar:<br>
+      [Boleto/Link Pix]<br><br>
+      Qualquer dúvida, estou à disposição!"
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">
+      <strong>Técnica:</strong> Lembrete preventivo, curto e direto. Previne atrasos por esquecimento.
+    </div>
+  </div>
+
   <!-- DIA 1 -->
   <h3>Dia 1 — Lembrete Neutro + Fricção Zero</h3>
-  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Avisar sem pressão. Muitos pagamentos atrasam por esquecimento simples.</p>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Avisar sem pressão. Tom 100% profissional e cordial.</p>
   <div class="flow-card">
     <div style="font-size: 0.9rem; line-height: 1.7;">
       "Olá, [Nome]! Tudo bem?<br><br>
-      Passando para avisar que identificamos que o boleto referente a [serviço/mês] no valor de R$ [valor], com vencimento em [data], está em aberto.<br><br>
-      Segue o boleto atualizado para facilitar:<br>
+      O boleto de R$ [valor] ref. [serviço/mês] com vencimento em [data] está em aberto.<br><br>
+      Segue atualizado para facilitar:<br>
       [Boleto/Link Pix]<br><br>
       Qualquer dúvida, estou à disposição!"
     </div>
@@ -545,10 +560,10 @@
     <h4>Nível 3 (D+15) — Última tentativa antes de escalação</h4>
     <div style="font-size: 0.9rem; line-height: 1.7;">
       "[Nome], essa é a última tentativa amigável antes de precisarmos formalizar a cobrança.<br><br>
-      O débito de R$ [valor] está em aberto há [X] dias. A partir de [data], seremos obrigados a:<br><br>
-      - Aplicar multa e juros contratuais<br>
-      - Registrar a pendência nos órgãos de proteção ao crédito<br>
-      - Suspender os serviços contratados<br><br>
+      O débito de R$ [valor] está em aberto há [X] dias. A partir de [data], seremos obrigados a tomar as medidas contratuais cabíveis, incluindo:<br><br>
+      - Aplicação de multa e juros previstos em contrato<br>
+      - Encaminhamento para cobrança formal<br>
+      - Suspensão dos serviços contratados<br><br>
       Sei que essa não é a intenção de nenhum dos lados. Vamos resolver juntos hoje?<br><br>
       [Boleto/Link Pix]"
     </div>
@@ -557,34 +572,48 @@
     </div>
   </div>
 
+  <!-- PÓS-PAGAMENTO -->
+  <h3>Pós-pagamento — Reforço Positivo</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Estudo BIT/UK provou que agradecer após pagamento aumenta em +19% a adesão futura. Fecha o ciclo de forma positiva.</p>
+  <div class="flow-card" style="border-color: var(--green);">
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Pagamento confirmado! Obrigado, [Nome].<br><br>
+      Seu histórico com a gente continua impecável. Qualquer coisa, estou por aqui!"
+    </div>
+  </div>
+
   <!-- FLUXO VISUAL -->
   <h3>Fluxo visual do protocolo</h3>
   <div class="arch">
-DIA 1 ──&rarr; Lembrete Neutro + Link pagamento
+D-3 ────&rarr; Lembrete pré-vencimento + Link pagamento
+  │
+  │ (não pagou)
+  ▼
+D+1 ────&rarr; Lembrete Neutro + Link pagamento
   │
   │ (sem resposta)
   ▼
-DIA 3 ──&rarr; Implementação de Intenção + Link pagamento
+D+3 ────&rarr; Implementação de Intenção + Link pagamento
   │        "Qual dia você costuma organizar pagamentos?"
   │
   │ (sem resposta)
   ▼
-DIA 5 ──&rarr; Prova Social (tom direto) + Link pagamento
+D+5 ────&rarr; Prova Social (tom direto) + Link pagamento
   │        "Todos do seu segmento estão em dia"
   │
   │ (sem resposta)
   ▼
-DIA 7 ──&rarr; Aversão à Perda Nível 1
+D+7 ────&rarr; Aversão à Perda Nível 1
   │        "Suas condições especiais expiram em 48h"
   │
   │ (sem resposta)
   ▼
-DIA 10 ─&rarr; Aversão à Perda Nível 2
+D+10 ───&rarr; Aversão à Perda Nível 2
   │        "Seu histórico de bom pagador está em risco"
   │
   │ (sem resposta)
   ▼
-DIA 15 ─&rarr; Aversão à Perda Nível 3
+D+15 ───&rarr; Aversão à Perda Nível 3
   │        "Última tentativa antes da formalização"
   │
   │ (sem resposta)
@@ -598,6 +627,13 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
   │  &rarr; Desconto máximo: 10%                            │
   │  &rarr; Se pedir mais: escala para funcionário          │
   │  &rarr; Link de pagamento SEMPRE junto                  │
+  └─────────────────────────────────────────────────┘
+
+  ┌─────────────────────────────────────────────────┐
+  │  CLIENTE PAGOU?                                  │
+  │  &rarr; Enviar agradecimento (reforço positivo)         │
+  │  &rarr; "Pagamento confirmado! Obrigado, [nome]"        │
+  │  &rarr; +19% adesão futura (estudo BIT/UK)              │
   └─────────────────────────────────────────────────┘</div>
 
   <!-- REGRAS DE OURO -->
@@ -611,6 +647,9 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
     <tr><td><strong>Personalizar o segmento na prova social</strong></td><td>"Empresas de tecnologia" > "empresas em geral"</td></tr>
     <tr><td><strong>Desconto máximo 10%</strong></td><td>Acima disso, escala para funcionário humano</td></tr>
     <tr><td><strong>Máximo 1 mensagem por dia</strong></td><td>Excesso gera bloqueio no WhatsApp</td></tr>
+    <tr><td><strong>Horário: 8h-20h (seg-sex), 9h-14h (sáb)</strong></td><td>Respeitar horário comercial, nunca domingo</td></tr>
+    <tr><td><strong>Agradecer após pagamento</strong></td><td>Reforço positivo = +19% adesão futura (BIT/UK)</td></tr>
+    <tr><td><strong>Sem emojis em excesso</strong></td><td>Contexto B2B — manter tom profissional</td></tr>
   </table>
 
   <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Baseado em: Thaler &amp; Sunstein (Nudge), Kahneman (Prospect Theory), Cialdini (Influence), Gollwitzer (Implementation Intentions), Behavioural Insights Team (UK).</p>
