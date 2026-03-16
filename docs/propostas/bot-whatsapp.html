@@ -198,13 +198,13 @@
   </div>
 
   <div class="flow-card">
-    <h4>Fluxo 3 — Pagamento (Pix / Boleto via Asaas)</h4>
+    <h4>Fluxo 3 — Pagamento (Pix / Boleto via Conta Azul)</h4>
     <div class="flow-steps">
       <div class="flow-step"><span class="step-num">1</span> Cliente diz "quero pagar" ou bot envia cobrança</div>
       <div class="flow-step"><span class="step-num">2</span> Bot consulta faturas em aberto na API da Uúba</div>
-      <div class="flow-step"><span class="step-num">3</span> Bot gera link de pagamento via Asaas (Pix ou boleto)</div>
+      <div class="flow-step"><span class="step-num">3</span> Bot gera link de pagamento via Conta Azul (Pix ou boleto)</div>
       <div class="flow-step"><span class="step-num">4</span> Envia o link direto no WhatsApp — cliente clica e paga</div>
-      <div class="flow-step"><span class="step-num">5</span> Asaas confirma pagamento via webhook</div>
+      <div class="flow-step"><span class="step-num">5</span> Conta Azul confirma pagamento via webhook</div>
       <div class="flow-step"><span class="step-num">6</span> Bot atualiza a fatura na API e manda agradecimento ao cliente</div>
     </div>
   </div>
@@ -214,13 +214,13 @@
     <div class="flow-steps">
       <div class="flow-step" style="font-size: 0.85rem;">
         <span class="step-num" style="background: var(--accent2);">$</span>
-        <strong>Asaas</strong> é a plataforma de pagamentos. Ela gera boletos, Pix e links de pagamento. Quando o cliente paga, o Asaas avisa nosso sistema via webhook (notificação automática). O bot nunca processa dinheiro — ele só envia o link e espera a confirmação.
+        <strong>Conta Azul</strong> é a plataforma de pagamentos. Ela gera boletos, Pix e links de pagamento. Quando o cliente paga, o Conta Azul avisa nosso sistema via webhook (notificação automática). O bot nunca processa dinheiro — ele só envia o link e espera a confirmação.
       </div>
     </div>
     <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">
       <strong>Pix:</strong> Pagamento instantâneo — cliente escaneia QR code ou copia o código, dinheiro cai na hora.<br>
       <strong>Boleto:</strong> Cliente pode pagar no banco, app ou lotérica. Compensação em 1-2 dias úteis.<br>
-      <strong>Link de pagamento:</strong> URL que o Asaas gera — o cliente abre no navegador, escolhe Pix ou boleto, e paga. Não precisa instalar nada.
+      <strong>Link de pagamento:</strong> URL que o Conta Azul gera — o cliente abre no navegador, escolhe Pix ou boleto, e paga. Não precisa instalar nada.
     </div>
   </div>
 </div>
@@ -246,9 +246,24 @@
       <td><span class="tag tag-blue">Registro</span></td>
     </tr>
     <tr>
-      <td>"Já paguei"</td>
-      <td>Verifica no sistema; se confirmado, agradece; senão, pede comprovante</td>
+      <td>"Já paguei" (Pix)</td>
+      <td>Verifica no Conta Azul em tempo real; se confirmado, agradece e atualiza a fatura</td>
       <td><span class="tag tag-green">Verificação</span></td>
+    </tr>
+    <tr>
+      <td>"Já paguei" (Boleto)</td>
+      <td>Verifica no Conta Azul; se ainda não compensou, avisa: "Boletos levam 1-2 dias úteis para compensar. Vou acompanhar e te aviso assim que confirmar!" Agenda follow-up automático para verificar novamente</td>
+      <td><span class="tag tag-green">Verificação</span></td>
+    </tr>
+    <tr>
+      <td>Boleto compensou</td>
+      <td>Bot recebe webhook do Conta Azul confirmando, atualiza fatura e manda: "Pagamento confirmado! Obrigado, [nome]."</td>
+      <td><span class="tag tag-green">Automação</span></td>
+    </tr>
+    <tr>
+      <td>Boleto não compensou (2+ dias)</td>
+      <td>Bot verifica novamente no Conta Azul; se não caiu, avisa o cliente: "Ainda não identifiquei seu pagamento. Pode enviar o comprovante?"</td>
+      <td><span class="tag tag-orange">Follow-up</span></td>
     </tr>
     <tr>
       <td>"Que fatura é essa?"</td>
@@ -262,7 +277,7 @@
     </tr>
     <tr>
       <td>"Quero pagar agora"</td>
-      <td>Envia link de pagamento (Pix/boleto via Asaas)</td>
+      <td>Envia link de pagamento (Pix/boleto via Conta Azul)</td>
       <td><span class="tag tag-green">Pagamento</span></td>
     </tr>
     <tr>
@@ -292,7 +307,7 @@
     </tr>
     <tr>
       <td>Pagamento confirmado</td>
-      <td>Recebe webhook do Asaas, atualiza fatura, agradece o cliente</td>
+      <td>Recebe webhook do Conta Azul, atualiza fatura, agradece o cliente</td>
       <td><span class="tag tag-green">Automação</span></td>
     </tr>
   </table>
@@ -514,7 +529,7 @@
       <td><span class="tag tag-green">Sprint 6</span></td>
       <td>Pagamento + Polish</td>
       <td>
-        Webhook Asaas (pagamento confirmado),<br>
+        Webhook Conta Azul (pagamento confirmado),<br>
         link de pagamento via WhatsApp,<br>
         feedback loop do agente
       </td>
@@ -545,7 +560,7 @@
       <td>Equipe</td>
     </tr>
     <tr>
-      <td>Conta Asaas (sandbox para testes de pagamento)</td>
+      <td>Conta Conta Azul (sandbox para testes de pagamento)</td>
       <td>Sprint 6</td>
       <td>Equipe</td>
     </tr>
