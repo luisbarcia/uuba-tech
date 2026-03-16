@@ -1,17 +1,33 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cliente import Cliente
 from app.models.fatura import Fatura
 from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteMetricas
+from app.exceptions import APIError
 from app.utils.ids import generate_id
+
+
+def _aware(dt: datetime) -> datetime:
+    """Garante que datetime tem timezone (defensivo contra DBs que retornam naive)."""
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
 
 
 async def create_cliente(db: AsyncSession, data: ClienteCreate) -> Cliente:
     cliente = Cliente(id=generate_id("cli"), **data.model_dump())
     db.add(cliente)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise APIError(
+            409, "documento-duplicado", "Documento já cadastrado",
+            f"Já existe um cliente com o documento {data.documento}.",
+        )
     await db.refresh(cliente)
     return cliente
 
@@ -57,7 +73,7 @@ async def get_metricas(db: AsyncSession, cliente_id: str) -> ClienteMetricas:
     faturas = result.scalars().all()
 
     em_aberto = [f for f in faturas if f.status in ("pendente", "vencido")]
-    vencidas = [f for f in em_aberto if f.vencimento < now]
+    vencidas = [f for f in em_aberto if _aware(f.vencimento) < now]
 
     total_em_aberto = sum(f.valor for f in em_aberto)
     total_vencido = sum(f.valor for f in vencidas)
@@ -65,7 +81,7 @@ async def get_metricas(db: AsyncSession, cliente_id: str) -> ClienteMetricas:
     dso_dias = 0.0
     pagas = [f for f in faturas if f.status == "pago" and f.pago_em]
     if pagas:
-        total_dias = sum((f.pago_em - f.vencimento).days for f in pagas)
+        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
         dso_dias = total_dias / len(pagas)
 
     return ClienteMetricas(

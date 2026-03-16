@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from scalar_fastapi import get_scalar_api_reference
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from app.utils.ids import generate_id
 from app.exceptions import APIError
 from app.database import get_db
@@ -266,15 +267,34 @@ async def generic_error_handler(request: Request, exc: Exception):
     )
 
 
-# --- Middleware ---
-@app.middleware("http")
-async def add_request_id(request: Request, call_next):
-    request_id = generate_id("req")
-    request.state.request_id = request_id
-    logger.info(f"{request.method} {request.url.path}", extra={"request_id": request_id})
-    response = await call_next(request)
-    response.headers["X-Request-Id"] = request_id
-    return response
+# --- Middleware (pure ASGI — não interfere com exception handlers) ---
+class RequestIdMiddleware:
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        request_id = generate_id("req")
+        scope.setdefault("state", {})["request_id"] = request_id
+        logger.info(
+            f"{scope.get('method', '')} {scope.get('path', '')}",
+            extra={"request_id": request_id},
+        )
+
+        async def send_with_request_id(message: Message):
+            if message["type"] == "http.response.start":
+                headers = list(message.get("headers", []))
+                headers.append((b"x-request-id", request_id.encode()))
+                message["headers"] = headers
+            await send(message)
+
+        await self.app(scope, receive, send_with_request_id)
+
+
+app.add_middleware(RequestIdMiddleware)
 
 
 # --- Routers ---

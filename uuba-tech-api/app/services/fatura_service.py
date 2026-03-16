@@ -1,16 +1,25 @@
 from datetime import datetime, timezone
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.fatura import Fatura
 from app.schemas.fatura import FaturaCreate, FaturaUpdate
+from app.exceptions import APIError
 from app.utils.ids import generate_id
 
 
 async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
     fatura = Fatura(id=generate_id("fat"), **data.model_dump())
     db.add(fatura)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise APIError(
+            409, "integridade", "Erro de integridade",
+            f"Cliente {data.cliente_id} não existe ou violação de constraint.",
+        )
     await db.refresh(fatura)
     return fatura
 

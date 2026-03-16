@@ -35,7 +35,7 @@ async def create_fatura(data: FaturaCreate, db: AsyncSession = Depends(get_db)):
 async def list_faturas(
     status: str | None = Query(None, description="Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)"),
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
-    limit: int = Query(50, le=100, description="Itens por página (max 100)"),
+    limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
     db: AsyncSession = Depends(get_db),
 ):

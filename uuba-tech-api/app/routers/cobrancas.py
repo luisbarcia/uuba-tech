@@ -36,7 +36,7 @@ async def list_cobrancas(
     periodo: str | None = Query(None, description="Período em dias (ex: 7d, 30d)"),
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
     fatura_id: str | None = Query(None, description="Filtrar por fatura"),
-    limit: int = Query(50, le=100, description="Itens por página (max 100)"),
+    limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
     db: AsyncSession = Depends(get_db),
 ):

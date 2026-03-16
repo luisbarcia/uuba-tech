@@ -1,9 +1,12 @@
+import re
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cobranca import Cobranca
 from app.schemas.cobranca import CobrancaCreate
+from app.exceptions import APIError
 from app.utils.ids import generate_id
 
 
@@ -14,7 +17,14 @@ async def create_cobranca(db: AsyncSession, data: CobrancaCreate) -> Cobranca:
         **data.model_dump(),
     )
     db.add(cobranca)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise APIError(
+            409, "integridade", "Erro de integridade",
+            f"Fatura {data.fatura_id} ou cliente {data.cliente_id} não existe.",
+        )
     await db.refresh(cobranca)
     return cobranca
 
@@ -29,7 +39,13 @@ async def list_cobrancas(
 ) -> tuple[list[Cobranca], int]:
     query = select(Cobranca)
     if periodo:
-        days = int(periodo.replace("d", ""))
+        match = re.fullmatch(r"(\d+)d", periodo)
+        if not match:
+            raise APIError(
+                422, "periodo-invalido", "Formato de período inválido",
+                f"Use o formato Nd (ex: 7d, 30d). Recebido: '{periodo}'.",
+            )
+        days = int(match.group(1))
         since = datetime.now(timezone.utc) - timedelta(days=days)
         query = query.where(Cobranca.created_at >= since)
     if cliente_id:
@@ -39,7 +55,6 @@ async def list_cobrancas(
 
     count_q = select(Cobranca.id)
     if periodo:
-        days = int(periodo.replace("d", ""))
         since = datetime.now(timezone.utc) - timedelta(days=days)
         count_q = count_q.where(Cobranca.created_at >= since)
     if cliente_id:
