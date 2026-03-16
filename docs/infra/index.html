@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Infraestrutura</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  nav .links { display: flex; gap: 0.5rem; margin-left: auto; }
+  nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+  nav .links a:hover { color: var(--text); background: var(--surface2); }
+  nav .links a.active { color: var(--accent); background: var(--surface2); }
+
+  .deck { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; }
+  .hero .date { color: var(--accent2); font-size: 0.95rem; margin-top: 1rem; font-weight: 600; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .kpi { background: var(--surface2); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .kpi .value { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .kpi .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+  .kpi.green .value { color: var(--green); }
+
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 0.15rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag-orange { background: rgba(251,146,60,0.15); color: var(--orange); }
+
+  .arch { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Fira Code', monospace; font-size: 0.75rem; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid var(--surface2); }
+
+  code { background: var(--bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); }
+  .cmd { background: var(--bg); border-radius: 8px; padding: 1rem 1.25rem; margin: 0.5rem 0; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.6; overflow-x: auto; border: 1px solid var(--surface2); color: var(--green); }
+  .cmd .comment { color: var(--muted); }
+
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.3rem 0; }
+  li::marker { color: var(--accent); }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.75rem; }
+    .slide { padding: 1.5rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .arch { font-size: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="../propostas/">Propostas</a>
+    <a href="./" class="active">Infra</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://api.uuba.tech/health" target="_blank">Status</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="slide hero">
+  <h1>Infraestrutura <span>Uúba Tech</span></h1>
+  <div class="subtitle">Documentação completa da VPS, serviços e configurações</div>
+  <div class="date">Atualizado em 16 de Março de 2026</div>
+</div>
+
+<div class="deck">
+
+<!-- SLIDE 1: VISÃO GERAL -->
+<div class="slide">
+  <h2><span class="num">1</span> Visão Geral da VPS</h2>
+
+  <div class="kpi-grid">
+    <div class="kpi"><div class="value">4</div><div class="label">vCPUs</div></div>
+    <div class="kpi"><div class="value">8 GB</div><div class="label">RAM</div></div>
+    <div class="kpi"><div class="value">145 GB</div><div class="label">Disco (9% usado)</div></div>
+    <div class="kpi green"><div class="value">13</div><div class="label">Containers</div></div>
+  </div>
+
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>Hostname</td><td><code>vmi3095712</code></td></tr>
+    <tr><td>IP público</td><td><code>5.189.155.226</code></td></tr>
+    <tr><td>OS</td><td>Ubuntu 24.04.4 LTS</td></tr>
+    <tr><td>Kernel</td><td>6.8.0-100-generic</td></tr>
+    <tr><td>Acesso SSH</td><td><code>ssh root@5.189.155.226</code></td></tr>
+    <tr><td>Stack path</td><td><code>/opt/stack/</code></td></tr>
+    <tr><td>Docker Compose</td><td><code>/opt/stack/docker-compose.yml</code></td></tr>
+    <tr><td>Variáveis de ambiente</td><td><code>/opt/stack/.env</code></td></tr>
+    <tr><td>Timezone</td><td>America/Sao_Paulo</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 2: DOMÍNIOS E SSL -->
+<div class="slide">
+  <h2><span class="num">2</span> Domínios, DNS e SSL</h2>
+
+  <h3>DNS (gerenciado na Wix)</h3>
+  <table>
+    <tr><th>Domínio</th><th>Tipo</th><th>Destino</th><th>Função</th></tr>
+    <tr><td><code>uuba.tech</code></td><td>—</td><td>Wix (site institucional)</td><td>Site público</td></tr>
+    <tr><td><code>api.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>REST API</td></tr>
+    <tr><td><code>developers.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Documentação API (Scalar)</td></tr>
+    <tr><td><code>wa.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Evolution API (WhatsApp)</td></tr>
+    <tr><td><code>n8n.servs.dev</code></td><td>—</td><td>Cloudflare Tunnel</td><td>n8n (automação)</td></tr>
+  </table>
+
+  <h3>Certificados SSL (Let's Encrypt)</h3>
+  <table>
+    <tr><th>Certificado</th><th>Domínios</th><th>Expira</th><th>Renovação</th></tr>
+    <tr>
+      <td><code>developers.uuba.tech</code></td>
+      <td>developers.uuba.tech, api.uuba.tech</td>
+      <td>13/06/2026</td>
+      <td><span class="tag tag-green">Automática (certbot)</span></td>
+    </tr>
+    <tr>
+      <td><code>wa.uuba.tech</code></td>
+      <td>wa.uuba.tech</td>
+      <td>14/06/2026</td>
+      <td><span class="tag tag-green">Automática (certbot)</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 3: CONTAINERS -->
+<div class="slide">
+  <h2><span class="num">3</span> Containers Docker</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Todos rodam no mesmo <code>docker-compose.yml</code> na rede <code>internal</code> (bridge).</p>
+
+  <table>
+    <tr><th>Container</th><th>Imagem</th><th>Porta local</th><th>Porta pública</th><th>Função</th></tr>
+    <tr>
+      <td><code>uuba-api</code></td>
+      <td>stack-uuba-api (build local)</td>
+      <td>8000</td>
+      <td>127.0.0.1:8080</td>
+      <td><span class="tag tag-blue">API REST</span> FastAPI — clientes, faturas, cobranças</td>
+    </tr>
+    <tr>
+      <td><code>n8n</code></td>
+      <td>n8nio/n8n:latest</td>
+      <td>5678</td>
+      <td>0.0.0.0:5678</td>
+      <td><span class="tag tag-purple">Automação</span> Workflows, webhooks, agendamento</td>
+    </tr>
+    <tr>
+      <td><code>evolution-api</code></td>
+      <td>atendai/evolution-api:v2.2.3</td>
+      <td>8080</td>
+      <td>127.0.0.1:8085</td>
+      <td><span class="tag tag-green">WhatsApp</span> Gateway de mensagens</td>
+    </tr>
+    <tr>
+      <td><code>redis</code></td>
+      <td>redis:7-alpine</td>
+      <td>6379</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-orange">Cache</span> Sessões Evolution API</td>
+    </tr>
+    <tr>
+      <td><code>n8n-postgres</code></td>
+      <td>postgres:16-alpine</td>
+      <td>5432</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-orange">Database</span> Dados internos do n8n</td>
+    </tr>
+    <tr>
+      <td><code>n8n-postgres-data</code></td>
+      <td>postgres:16-alpine</td>
+      <td>5432</td>
+      <td>127.0.0.1:5433</td>
+      <td><span class="tag tag-orange">Database</span> Dados de negócio (uuba, evolution)</td>
+    </tr>
+    <tr>
+      <td><code>n8n-pgadmin</code></td>
+      <td>dpage/pgadmin4:latest</td>
+      <td>80</td>
+      <td>127.0.0.1:5050</td>
+      <td><span class="tag tag-yellow">Admin</span> Interface visual para PostgreSQL</td>
+    </tr>
+    <tr>
+      <td><code>cloudflared</code></td>
+      <td>cloudflare/cloudflared:latest</td>
+      <td>—</td>
+      <td>—</td>
+      <td><span class="tag tag-blue">Tunnel</span> Expõe n8n via n8n.servs.dev</td>
+    </tr>
+    <tr>
+      <td><code>site</code></td>
+      <td>nginx:alpine</td>
+      <td>80</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-purple">Site</span> luisbarcia.com (estático)</td>
+    </tr>
+    <tr>
+      <td><code>conduit</code></td>
+      <td>matrixconduit/matrix-conduit</td>
+      <td>6167</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-purple">Chat</span> Matrix homeserver</td>
+    </tr>
+    <tr>
+      <td><code>gomuks</code></td>
+      <td>dock.mau.dev/gomuks/gomuks</td>
+      <td>29325</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-purple">Chat</span> Matrix web client</td>
+    </tr>
+    <tr>
+      <td><code>gotosocial</code></td>
+      <td>superseriousbusiness/gotosocial</td>
+      <td>8080</td>
+      <td>— (interno)</td>
+      <td><span class="tag tag-purple">Social</span> Fediverse (social.luisbarcia.com)</td>
+    </tr>
+    <tr>
+      <td><code>tor</code></td>
+      <td>goldy/tor-hidden-service</td>
+      <td>—</td>
+      <td>—</td>
+      <td><span class="tag tag-yellow">Privacy</span> Tor hidden service</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 4: REDE DOCKER -->
+<div class="slide">
+  <h2><span class="num">4</span> Rede Docker Interna</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Todos os containers compartilham a rede <code>stack_internal</code> (172.18.0.0/16). Eles se comunicam pelo nome do container.</p>
+
+  <div class="arch">
+┌─────────────────────── stack_internal (172.18.0.0/16) ───────────────────────┐
+│                                                                               │
+│  ┌─────────────────┐   ┌──────────────────┐   ┌────────────────────┐         │
+│  │   uuba-api       │   │  evolution-api    │   │       n8n          │         │
+│  │  172.18.0.12     │   │  172.18.0.14      │   │  172.18.0.8        │         │
+│  │  :8000           │   │  :8080            │   │  :5678             │         │
+│  └────────┬─────────┘   └────────┬──────────┘   └─────────┬──────────┘         │
+│           │                      │                         │                   │
+│           │         ┌────────────┴────────┐                │                   │
+│           │         │       redis          │                │                   │
+│           │         │   172.18.0.13 :6379  │                │                   │
+│           │         └─────────────────────┘                │                   │
+│           │                                                │                   │
+│  ┌────────┴──────────────────────────────────────────────┴──────────┐         │
+│  │                    n8n-postgres-data (172.18.0.3)                  │         │
+│  │                PostgreSQL 16 — porta 5432                         │         │
+│  │          databases: datastore | uuba | evolution                  │         │
+│  └───────────────────────────────────────────────────────────────────┘         │
+│                                                                               │
+│  ┌────────────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐  │
+│  │  n8n-postgres   │  │ conduit  │  │  gomuks  │  │   tor   │  │   site   │  │
+│  │  (n8n interno)  │  │ (Matrix) │  │ (Matrix) │  │ (onion) │  │ (nginx)  │  │
+│  └────────────────┘  └──────────┘  └──────────┘  └─────────┘  └──────────┘  │
+│                                                                               │
+│  ┌────────────────┐  ┌────────────────┐                                      │
+│  │  cloudflared    │  │  gotosocial     │                                      │
+│  │  (CF Tunnel)    │  │  (Fediverse)    │                                      │
+│  └────────────────┘  └────────────────┘                                      │
+└───────────────────────────────────────────────────────────────────────────────┘</div>
+
+  <h3>Comunicação entre serviços</h3>
+  <table>
+    <tr><th>De</th><th>Para</th><th>URL interna</th></tr>
+    <tr><td>n8n</td><td>Uúba API</td><td><code>http://uuba-api:8000/api/v1/</code></td></tr>
+    <tr><td>n8n</td><td>Evolution API</td><td><code>http://evolution-api:8080/</code></td></tr>
+    <tr><td>Evolution API</td><td>n8n (webhook)</td><td><code>http://n8n:5678/webhook/evolution-webhook</code></td></tr>
+    <tr><td>Evolution API</td><td>PostgreSQL</td><td><code>postgresql://datauser:***@postgres-data:5432/evolution</code></td></tr>
+    <tr><td>Evolution API</td><td>Redis</td><td><code>redis://:***@redis:6379/0</code></td></tr>
+    <tr><td>Uúba API</td><td>PostgreSQL</td><td><code>postgresql+asyncpg://...@postgres-data:5432/uuba</code></td></tr>
+    <tr><td>n8n</td><td>PostgreSQL (interno)</td><td><code>postgresql://n8n:***@postgres:5432/n8n</code></td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 5: DATABASES -->
+<div class="slide">
+  <h2><span class="num">5</span> Databases PostgreSQL</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">2 instâncias PostgreSQL 16 — uma para o n8n, outra para dados de negócio.</p>
+
+  <h3>postgres (n8n interno)</h3>
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>Container</td><td><code>n8n-postgres</code></td></tr>
+    <tr><td>Database</td><td><code>n8n</code></td></tr>
+    <tr><td>User</td><td><code>n8n</code></td></tr>
+    <tr><td>Porta</td><td>5432 (só interno)</td></tr>
+    <tr><td>Volume</td><td><code>stack_postgres_data</code></td></tr>
+    <tr><td>Usado por</td><td>n8n (workflows, credentials, executions)</td></tr>
+  </table>
+
+  <h3>postgres-data (dados de negócio)</h3>
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>Container</td><td><code>n8n-postgres-data</code></td></tr>
+    <tr><td>User</td><td><code>datauser</code></td></tr>
+    <tr><td>Porta</td><td>5432 interno / 127.0.0.1:5433 (local)</td></tr>
+    <tr><td>Volume</td><td><code>stack_postgres_data_store</code></td></tr>
+  </table>
+
+  <table>
+    <tr><th>Database</th><th>Usado por</th><th>Conteúdo</th></tr>
+    <tr><td><code>datastore</code></td><td>—</td><td>Database padrão (vazio)</td></tr>
+    <tr><td><code>uuba</code></td><td>uuba-api</td><td>Clientes, faturas, cobranças (Alembic migrations)</td></tr>
+    <tr><td><code>evolution</code></td><td>evolution-api</td><td>Instâncias WhatsApp, mensagens (Prisma migrations)</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 6: NGINX -->
+<div class="slide">
+  <h2><span class="num">6</span> Nginx (Reverse Proxy)</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Nginx roda diretamente no host (não em container). Faz proxy reverso para os containers.</p>
+
+  <table>
+    <tr><th>Vhost</th><th>Arquivo</th><th>Domínio</th><th>Destino</th></tr>
+    <tr>
+      <td><code>uuba-tech</code></td>
+      <td><code>/etc/nginx/sites-available/uuba-tech</code></td>
+      <td>api.uuba.tech</td>
+      <td><code>127.0.0.1:8080</code> (uuba-api)</td>
+    </tr>
+    <tr>
+      <td><code>uuba-tech</code></td>
+      <td>(mesmo arquivo)</td>
+      <td>developers.uuba.tech</td>
+      <td><code>127.0.0.1:8080/docs</code> (Scalar)</td>
+    </tr>
+    <tr>
+      <td><code>wa-uuba-tech</code></td>
+      <td><code>/etc/nginx/sites-available/wa-uuba-tech</code></td>
+      <td>wa.uuba.tech</td>
+      <td><code>127.0.0.1:8085</code> (evolution-api)</td>
+    </tr>
+    <tr>
+      <td><code>default</code></td>
+      <td><code>/etc/nginx/sites-available/default</code></td>
+      <td>_ (catch-all)</td>
+      <td>/var/www/html</td>
+    </tr>
+  </table>
+
+  <h3>n8n (Cloudflare Tunnel)</h3>
+  <p>O n8n <strong>não</strong> usa nginx. Ele é exposto via Cloudflare Tunnel (<code>cloudflared</code>) diretamente para <code>n8n.servs.dev</code>.</p>
+</div>
+
+<!-- SLIDE 7: VOLUMES -->
+<div class="slide">
+  <h2><span class="num">7</span> Volumes Docker</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Dados persistentes de cada serviço.</p>
+
+  <table>
+    <tr><th>Volume</th><th>Container</th><th>Conteúdo</th></tr>
+    <tr><td><code>stack_postgres_data</code></td><td>n8n-postgres</td><td>Dados PostgreSQL (n8n)</td></tr>
+    <tr><td><code>stack_postgres_data_store</code></td><td>n8n-postgres-data</td><td>Dados PostgreSQL (uuba + evolution)</td></tr>
+    <tr><td><code>stack_n8n_data</code></td><td>n8n</td><td>Configurações, custom nodes</td></tr>
+    <tr><td><code>stack_evolution_instances</code></td><td>evolution-api</td><td>Sessões WhatsApp</td></tr>
+    <tr><td><code>stack_redis_data</code></td><td>redis</td><td>Cache Redis</td></tr>
+    <tr><td><code>stack_pgadmin_data</code></td><td>n8n-pgadmin</td><td>Configurações pgAdmin</td></tr>
+    <tr><td><code>stack_conduit_data</code></td><td>conduit</td><td>Dados Matrix homeserver</td></tr>
+    <tr><td><code>stack_gomuks_data</code></td><td>gomuks</td><td>Dados Matrix client</td></tr>
+    <tr><td><code>stack_gotosocial_data</code></td><td>gotosocial</td><td>Dados Fediverse (posts, media)</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 8: VARIÁVEIS DE AMBIENTE -->
+<div class="slide">
+  <h2><span class="num">8</span> Variáveis de Ambiente</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Arquivos de configuração com secrets.</p>
+
+  <table>
+    <tr><th>Arquivo</th><th>Contém</th><th>Usado por</th></tr>
+    <tr>
+      <td><code>/opt/stack/.env</code></td>
+      <td>
+        POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB<br>
+        N8N_ENCRYPTION_KEY, N8N_HOST<br>
+        DATA_DB_USER, DATA_DB_PASSWORD, DATA_DB_NAME<br>
+        PGADMIN_EMAIL, PGADMIN_PASSWORD<br>
+        UUBA_DB_NAME, UUBA_API_KEY<br>
+        CLOUDFLARE_TUNNEL_TOKEN<br>
+        EVOLUTION_API_KEY, REDIS_PASSWORD
+      </td>
+      <td>docker-compose.yml</td>
+    </tr>
+    <tr>
+      <td><code>/opt/stack/evolution.env</code></td>
+      <td>
+        SERVER_URL, DATABASE_CONNECTION_URI<br>
+        CACHE_REDIS_URI, AUTHENTICATION_API_KEY<br>
+        WEBHOOK_GLOBAL_URL, eventos webhook
+      </td>
+      <td>evolution-api (env_file)</td>
+    </tr>
+  </table>
+
+  <p style="margin-top: 1rem; color: var(--yellow); font-size: 0.85rem;">Nunca commitar esses arquivos no git. Eles existem apenas na VPS.</p>
+</div>
+
+<!-- SLIDE 9: URLS E ACESSOS -->
+<div class="slide">
+  <h2><span class="num">9</span> URLs e Acessos</h2>
+
+  <h3>URLs públicas</h3>
+  <table>
+    <tr><th>URL</th><th>Serviço</th><th>Auth</th></tr>
+    <tr><td><a href="https://api.uuba.tech" target="_blank">api.uuba.tech</a></td><td>REST API</td><td>Header <code>X-API-Key</code></td></tr>
+    <tr><td><a href="https://api.uuba.tech/health" target="_blank">api.uuba.tech/health</a></td><td>Health check</td><td>Público</td></tr>
+    <tr><td><a href="https://developers.uuba.tech" target="_blank">developers.uuba.tech</a></td><td>API Docs (Scalar)</td><td>Público</td></tr>
+    <tr><td><a href="https://n8n.servs.dev" target="_blank">n8n.servs.dev</a></td><td>n8n</td><td>Login (email/senha)</td></tr>
+    <tr><td><a href="https://wa.uuba.tech" target="_blank">wa.uuba.tech</a></td><td>Evolution API</td><td>Header <code>apikey</code></td></tr>
+    <tr><td><a href="https://wa.uuba.tech/manager" target="_blank">wa.uuba.tech/manager</a></td><td>Evolution Manager</td><td>API Key</td></tr>
+  </table>
+
+  <h3>Acessos locais (via SSH tunnel)</h3>
+  <table>
+    <tr><th>Porta</th><th>Serviço</th><th>Acesso</th></tr>
+    <tr><td>127.0.0.1:5050</td><td>pgAdmin</td><td><code>ssh -L 5050:127.0.0.1:5050 root@5.189.155.226</code></td></tr>
+    <tr><td>127.0.0.1:5433</td><td>PostgreSQL (data)</td><td><code>ssh -L 5433:127.0.0.1:5433 root@5.189.155.226</code></td></tr>
+    <tr><td>127.0.0.1:8080</td><td>uuba-api (direto)</td><td><code>ssh -L 8080:127.0.0.1:8080 root@5.189.155.226</code></td></tr>
+    <tr><td>127.0.0.1:8085</td><td>evolution-api (direto)</td><td><code>ssh -L 8085:127.0.0.1:8085 root@5.189.155.226</code></td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 10: COMANDOS ÚTEIS -->
+<div class="slide">
+  <h2><span class="num">10</span> Comandos Úteis</h2>
+
+  <h3>Status geral</h3>
+  <div class="cmd">ssh root@5.189.155.226 "cd /opt/stack && docker compose ps"</div>
+
+  <h3>Logs de um serviço</h3>
+  <div class="cmd">ssh root@5.189.155.226 "docker logs --tail 50 uuba-api"
+ssh root@5.189.155.226 "docker logs --tail 50 evolution-api"
+ssh root@5.189.155.226 "docker logs --tail 50 n8n"</div>
+
+  <h3>Reiniciar um serviço</h3>
+  <div class="cmd">ssh root@5.189.155.226 "cd /opt/stack && docker compose restart uuba-api"</div>
+
+  <h3>Deploy da API (pull + rebuild)</h3>
+  <div class="cmd">ssh root@5.189.155.226 "cd /opt/stack && git -C uuba-tech pull && docker compose build --no-cache uuba-api && docker compose up -d uuba-api"</div>
+
+  <h3>Acessar banco de dados</h3>
+  <div class="cmd"><span class="comment"># Database uuba</span>
+ssh root@5.189.155.226 "docker exec -it n8n-postgres-data psql -U datauser -d uuba"
+
+<span class="comment"># Database evolution</span>
+ssh root@5.189.155.226 "docker exec -it n8n-postgres-data psql -U datauser -d evolution"</div>
+
+  <h3>Migrations</h3>
+  <div class="cmd"><span class="comment"># Alembic (uuba-api)</span>
+ssh root@5.189.155.226 "docker exec uuba-api alembic upgrade head"</div>
+
+  <h3>Verificar SSL</h3>
+  <div class="cmd">ssh root@5.189.155.226 "certbot certificates"</div>
+
+  <h3>Nginx</h3>
+  <div class="cmd">ssh root@5.189.155.226 "nginx -t && systemctl reload nginx"</div>
+
+  <h3>Evolution API key</h3>
+  <div class="cmd">ssh root@5.189.155.226 "grep EVOLUTION_API_KEY /opt/stack/.env"</div>
+</div>
+
+<!-- SLIDE 11: GIT E DEPLOY -->
+<div class="slide">
+  <h2><span class="num">11</span> Git e Deploy</h2>
+
+  <h3>Repositório</h3>
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>GitHub</td><td><a href="https://github.com/luisbarcia/uuba-tech" target="_blank">github.com/luisbarcia/uuba-tech</a> (privado)</td></tr>
+    <tr><td>Branch principal</td><td><code>main</code></td></tr>
+    <tr><td>Clone na VPS</td><td><code>/opt/stack/uuba-tech/</code></td></tr>
+    <tr><td>Git remote (VPS)</td><td><code>git@github-uuba:luisbarcia/uuba-tech.git</code></td></tr>
+    <tr><td>Deploy key</td><td>SSH alias <code>github-uuba</code></td></tr>
+  </table>
+
+  <h3>CI/CD (GitHub Actions)</h3>
+  <ul>
+    <li>Trigger: push na <code>main</code></li>
+    <li>Pipeline: Lint (ruff) &rarr; Test (174 testes + PostgreSQL) &rarr; Docker Build</li>
+    <li>GitHub Pages: <code>docs/</code> publicado em <a href="https://luisbarcia.github.io/uuba-tech/" target="_blank">luisbarcia.github.io/uuba-tech</a></li>
+  </ul>
+
+  <h3>Fluxo de deploy</h3>
+  <div class="arch">
+Local (dev)
+  │
+  │ git push origin main
+  ▼
+GitHub ──────────────── GitHub Actions (CI)
+  │                         lint + test + build
+  │
+  │ ssh + git pull
+  ▼
+VPS (/opt/stack/uuba-tech/)
+  │
+  │ docker compose build + up
+  ▼
+Container uuba-api (produção)</div>
+</div>
+
+<!-- SLIDE 12: CLOUDFLARE TUNNEL -->
+<div class="slide">
+  <h2><span class="num">12</span> Cloudflare Tunnel</h2>
+  <p>O n8n é exposto via Cloudflare Tunnel ao invés de nginx direto. Isso permite acesso HTTPS sem abrir porta adicional no firewall.</p>
+
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>Container</td><td><code>cloudflared</code></td></tr>
+    <tr><td>Domínio</td><td><code>n8n.servs.dev</code></td></tr>
+    <tr><td>Destino interno</td><td><code>http://n8n:5678</code></td></tr>
+    <tr><td>Gerenciamento</td><td>Cloudflare Zero Trust Dashboard</td></tr>
+    <tr><td>Token</td><td><code>CLOUDFLARE_TUNNEL_TOKEN</code> em <code>.env</code></td></tr>
+  </table>
+</div>
+
+</div>
+
+<div class="footer">
+  Uúba Tech &copy; 2026 — Documentação de Infraestrutura — Atualizado em 16/03/2026
+</div>
+
+</body>
+</html>
