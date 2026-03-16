@@ -525,6 +525,45 @@ Container uuba-api (produção)</div>
 </div>
 
 
+<!-- SLIDE 12: WORKFLOWS N8N -->
+<div class="slide">
+  <h2><span class="num">12</span> Workflows n8n</h2>
+
+  <table>
+    <tr><th>Workflow</th><th>ID</th><th>Status</th><th>Função</th></tr>
+    <tr>
+      <td><strong>Uúba — WhatsApp Receber</strong></td>
+      <td><code>O2Qu40lBWFLBqedq</code></td>
+      <td><span class="tag tag-green">Ativo</span></td>
+      <td>Recebe mensagens do WhatsApp via webhook, identifica cliente, usa agente IA (Claude Sonnet) para responder</td>
+    </tr>
+    <tr>
+      <td><strong>Uúba — WhatsApp Enviar</strong></td>
+      <td><code>x7YyAt9NgQ1w9UpM</code></td>
+      <td><span class="tag tag-green">Ativo</span></td>
+      <td>Sub-workflow reutilizável para enviar mensagens via Evolution API</td>
+    </tr>
+    <tr>
+      <td><strong>Uúba — Régua de Cobrança</strong></td>
+      <td><code>PLmFT4LDMHCJO543</code></td>
+      <td><span class="tag tag-yellow">Protótipo</span></td>
+      <td>Régua de cobrança automática (Sprint 5)</td>
+    </tr>
+  </table>
+
+  <h3>Agente IA (WhatsApp Receber)</h3>
+  <table>
+    <tr><th>Componente</th><th>Detalhe</th></tr>
+    <tr><td>LLM</td><td>Claude Sonnet (Anthropic) — temperatura 0.3</td></tr>
+    <tr><td>Memória</td><td>Buffer window por telefone (últimas 10 mensagens)</td></tr>
+    <tr><td>Tool: Buscar Faturas</td><td>GET /api/v1/faturas?cliente_id=X&amp;status=pendente</td></tr>
+    <tr><td>Tool: Buscar Métricas</td><td>GET /api/v1/clientes/{id}/metricas</td></tr>
+    <tr><td>Tool: Registrar Promessa</td><td>PATCH /api/v1/faturas/{id} (promessa_pagamento)</td></tr>
+    <tr><td>Tool: Registrar Cobrança</td><td>POST /api/v1/cobrancas (canal: whatsapp)</td></tr>
+    <tr><td>System Prompt</td><td>Protocolo de cobrança comportamental + regras de escalação</td></tr>
+  </table>
+</div>
+
 </div>
 
 <div class="footer">
