@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Portal Interno</title>
+<style>
+  :root { --bg: #0f172a; --surface: #1e293b; --surface2: #334155; --accent: #38bdf8; --accent2: #818cf8; --text: #e2e8f0; --muted: #94a3b8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; }
+  .container { max-width: 640px; width: 100%; }
+  .logo { font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 0.25rem; }
+  .logo span { color: var(--accent); }
+  .subtitle { text-align: center; color: var(--muted); font-size: 1rem; margin-bottom: 3rem; }
+  .card { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; padding: 1.5rem 1.75rem; margin-bottom: 1rem; text-decoration: none; display: flex; align-items: center; gap: 1.25rem; transition: all 0.2s; }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); background: #1a2744; }
+  .icon { font-size: 2rem; flex-shrink: 0; width: 48px; text-align: center; }
+  .card-text h3 { color: var(--text); font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .card-text p { color: var(--muted); font-size: 0.85rem; }
+  .badge { display: inline-block; background: rgba(56,189,248,0.15); color: var(--accent); font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 20px; margin-left: 0.5rem; vertical-align: middle; }
+  .footer { text-align: center; color: var(--surface2); font-size: 0.75rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="logo"><span>UUBA</span> Tech</div>
+  <div class="subtitle">Portal Interno</div>
+
+  <a class="card" href="relatorios/">
+    <div class="icon">📊</div>
+    <div class="card-text">
+      <h3>Relatórios Semanais <span class="badge">Sem 11</span></h3>
+      <p>Apresentações interativas de progresso para reuniões de acompanhamento</p>
+    </div>
+  </a>
+
+  <a class="card" href="https://developers.uuba.tech" target="_blank">
+    <div class="icon">📖</div>
+    <div class="card-text">
+      <h3>API Docs</h3>
+      <p>Documentação OpenAPI da REST API — Scalar Reference</p>
+    </div>
+  </a>
+
+  <a class="card" href="https://api.uuba.tech/health" target="_blank">
+    <div class="icon">🟢</div>
+    <div class="card-text">
+      <h3>API Status</h3>
+      <p>Health check da API em produção</p>
+    </div>
+  </a>
+
+  <a class="card" href="https://github.com/luisbarcia/uuba-tech" target="_blank">
+    <div class="icon">💻</div>
+    <div class="card-text">
+      <h3>Repositório</h3>
+      <p>Código-fonte no GitHub (privado)</p>
+    </div>
+  </a>
+
+  <div class="footer">Uúba Tech &copy; 2026 — Acesso interno</div>
+</div>
+
+</body>
+</html>
