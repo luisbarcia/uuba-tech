@@ -342,6 +342,55 @@
     </tr>
   </table>
 
+  <h3>Estratégia Nudge (empurrõezinhos comportamentais)</h3>
+  <p style="margin-bottom: 1rem; color: var(--muted)">Técnicas de economia comportamental aplicadas em cada mensagem para incentivar o pagamento sem pressionar. O bot escolhe os nudges adequados ao contexto e fase da cobrança.</p>
+
+  <table>
+    <tr><th>Nudge</th><th>Como o bot usa</th><th>Exemplo na mensagem</th></tr>
+    <tr>
+      <td><span class="tag tag-green">Facilidade</span></td>
+      <td>Reduz atrito ao máximo — envia link de pagamento pronto, cliente só clica</td>
+      <td>"Preparei o link para você: [link] — é só clicar e escolher Pix ou boleto."</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-blue">Prova social</span></td>
+      <td>Mostra que outros clientes pagam em dia, normalizando o comportamento</td>
+      <td>"A maioria dos nossos clientes regulariza nos primeiros 3 dias."</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-purple">Reciprocidade</span></td>
+      <td>Destaca algo que a empresa fez pelo cliente, criando senso de retribuição</td>
+      <td>"Mantivemos seu acesso ativo durante esse período. Conte conosco para regularizar!"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-yellow">Aversão à perda</span></td>
+      <td>Mostra o que o cliente pode perder se não agir (desconto, condição especial)</td>
+      <td>"Quitando até sexta, você mantém o desconto de 5% — depois volta ao valor cheio."</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-orange">Ancoragem</span></td>
+      <td>Apresenta o valor original ao lado do valor com benefício, criando referência</td>
+      <td>"Valor original: R$ 1.200. Quitando hoje: R$ 1.140."</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-red">Urgência temporal</span></td>
+      <td>Cria prazo concreto, evitando que o cliente adie indefinidamente</td>
+      <td>"O prazo para regularização encerra em 2 dias úteis."</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-blue">Efeito progresso</span></td>
+      <td>Mostra que o cliente já pagou parte, incentivando a completar</td>
+      <td>"Você já quitou 3 de 5 faturas — faltam só 2 para ficar 100% em dia!"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Reforço positivo</span></td>
+      <td>Após pagamento, elogia e reforça o bom comportamento</td>
+      <td>"Pagamento confirmado! Obrigado, [nome]. Seu histórico é excelente."</td>
+    </tr>
+  </table>
+
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">O bot combina nudges de acordo com a fase da régua: nas fases iniciais usa <strong>facilidade + prova social</strong>; na fase firme, <strong>aversão à perda + urgência</strong>; e sempre fecha com <strong>reforço positivo</strong> após pagamento.</p>
+
   <h3>Escalação para Humano</h3>
   <ul>
     <li>Cliente pede parcelamento ou condições especiais</li>
