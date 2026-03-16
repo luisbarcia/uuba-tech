@@ -342,55 +342,6 @@
     </tr>
   </table>
 
-  <h3>Estratégia Nudge (empurrõezinhos comportamentais)</h3>
-  <p style="margin-bottom: 1rem; color: var(--muted)">Técnicas de economia comportamental aplicadas em cada mensagem para incentivar o pagamento sem pressionar. O bot escolhe os nudges adequados ao contexto e fase da cobrança.</p>
-
-  <table>
-    <tr><th>Nudge</th><th>Como o bot usa</th><th>Exemplo na mensagem</th></tr>
-    <tr>
-      <td><span class="tag tag-green">Facilidade</span></td>
-      <td>Reduz atrito ao máximo — envia link de pagamento pronto, cliente só clica</td>
-      <td>"Preparei o link para você: [link] — é só clicar e escolher Pix ou boleto."</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-blue">Prova social</span></td>
-      <td>Mostra que outros clientes pagam em dia, normalizando o comportamento</td>
-      <td>"A maioria dos nossos clientes regulariza nos primeiros 3 dias."</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-purple">Reciprocidade</span></td>
-      <td>Destaca algo que a empresa fez pelo cliente, criando senso de retribuição</td>
-      <td>"Mantivemos seu acesso ativo durante esse período. Conte conosco para regularizar!"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-yellow">Aversão à perda</span></td>
-      <td>Mostra o que o cliente pode perder se não agir (desconto, condição especial)</td>
-      <td>"Quitando até sexta, você mantém o desconto de 5% — depois volta ao valor cheio."</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-orange">Ancoragem</span></td>
-      <td>Apresenta o valor original ao lado do valor com benefício, criando referência</td>
-      <td>"Valor original: R$ 1.200. Quitando hoje: R$ 1.140."</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-red">Urgência temporal</span></td>
-      <td>Cria prazo concreto, evitando que o cliente adie indefinidamente</td>
-      <td>"O prazo para regularização encerra em 2 dias úteis."</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-blue">Efeito progresso</span></td>
-      <td>Mostra que o cliente já pagou parte, incentivando a completar</td>
-      <td>"Você já quitou 3 de 5 faturas — faltam só 2 para ficar 100% em dia!"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-green">Reforço positivo</span></td>
-      <td>Após pagamento, elogia e reforça o bom comportamento</td>
-      <td>"Pagamento confirmado! Obrigado, [nome]. Seu histórico é excelente."</td>
-    </tr>
-  </table>
-
-  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">O bot combina nudges de acordo com a fase da régua: nas fases iniciais usa <strong>facilidade + prova social</strong>; na fase firme, <strong>aversão à perda + urgência</strong>; e sempre fecha com <strong>reforço positivo</strong> após pagamento.</p>
-
   <h3>Escalação para Humano</h3>
   <ul>
     <li>Cliente pede parcelamento ou condições especiais</li>
@@ -448,9 +399,147 @@
   </table>
 </div>
 
-<!-- SLIDE 6: ARQUITETURA -->
+<!-- SLIDE 6: NUDGE -->
 <div class="slide">
-  <h2><span class="num">6</span> Arquitetura Técnica</h2>
+  <h2><span class="num">6</span> Estratégia de Nudge (Economia Comportamental)</h2>
+  <p style="margin-bottom: 1rem;">O bot usa técnicas de <strong>nudge</strong> — "empurrõezinhos" baseados em ciência comportamental que influenciam decisões sem obrigar. Comprovado por estudos com milhões de pessoas.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi green"><div class="value">-40%</div><div class="label">Inadimplência (caso CloQ/BR)</div></div>
+    <div class="kpi"><div class="value">98%</div><div class="label">Taxa abertura WhatsApp</div></div>
+    <div class="kpi green"><div class="value">+19%</div><div class="label">Adesão com "Obrigado" (BIT/UK)</div></div>
+    <div class="kpi"><div class="value">7</div><div class="label">Técnicas aplicadas</div></div>
+  </div>
+
+  <h3>Técnicas aplicadas no bot</h3>
+  <table>
+    <tr><th>Técnica</th><th>Como o bot aplica</th><th>Exemplo de mensagem</th></tr>
+    <tr>
+      <td><span class="tag tag-purple">Prova Social</span></td>
+      <td>Mostra que outros clientes do setor já regularizaram</td>
+      <td>"92% das empresas do seu setor regularizaram em até 7 dias"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-orange">Aversão à Perda</span></td>
+      <td>Destaca o que o cliente perde se não agir (não o que ganha)</td>
+      <td>"Seu desconto de 15% expira hoje às 18h. Depois, o valor volta ao normal"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-blue">Reciprocidade</span></td>
+      <td>Reconhece o bom histórico antes de cobrar</td>
+      <td>"Você sempre pagou em dia nos últimos 8 meses. Por isso, preparamos uma condição exclusiva"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Ancoragem</span></td>
+      <td>Apresenta o valor da parcela (menor) antes do total</td>
+      <td>"3x de R$780 (5% desc.) ou à vista R$2.160 (10% desc.). Qual prefere?"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-yellow">Compromisso</span></td>
+      <td>Pede micro-confirmações progressivas</td>
+      <td>"Você confirmou que vai pagar até sexta. Vou enviar o boleto e um lembrete na quinta. Combinado?"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-orange">Urgência</span></td>
+      <td>Prazos curtos e específicos (nunca vagos)</td>
+      <td>"Condição válida até quarta, 20/03 às 23:59. Após isso, não conseguimos manter o desconto"</td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Reforço Positivo</span></td>
+      <td>Agradece pagamentos para reforçar o comportamento</td>
+      <td>"Pagamento confirmado! Obrigado, [nome]. Seu histórico continua impecável"</td>
+    </tr>
+  </table>
+
+  <h3>Régua de cobrança com nudges</h3>
+  <table>
+    <tr><th>Dia</th><th>Nudge</th><th>Tom</th></tr>
+    <tr>
+      <td>D-3</td>
+      <td>Lembrete amigável + opção padrão</td>
+      <td><span class="tag tag-green">Amigável</span> "Lembrete: sua fatura vence em 3 dias. Já está tudo certo?"</td>
+    </tr>
+    <tr>
+      <td>D-0</td>
+      <td>Urgência leve + aversão à perda</td>
+      <td><span class="tag tag-green">Amigável</span> "Hoje é o dia! Pagando até 23:59, você mantém seu histórico perfeito"</td>
+    </tr>
+    <tr>
+      <td>D+3</td>
+      <td>Reciprocidade + condição especial</td>
+      <td><span class="tag tag-blue">Neutro</span> "Preparamos uma condição especial: 5% desc. até sexta"</td>
+    </tr>
+    <tr>
+      <td>D+7</td>
+      <td>Prova social + compromisso</td>
+      <td><span class="tag tag-blue">Neutro</span> "93% dos clientes regularizam em 7 dias. Podemos combinar uma data?"</td>
+    </tr>
+    <tr>
+      <td>D+15</td>
+      <td>Ancoragem + última chance</td>
+      <td><span class="tag tag-yellow">Firme</span> "Última oportunidade: 3x de R$X ou à vista com 10% desc."</td>
+    </tr>
+    <tr>
+      <td>D+30</td>
+      <td>Empatia + escalação humana</td>
+      <td><span class="tag tag-red">Urgente</span> "Entendemos que imprevistos acontecem. Quer falar com alguém do nosso time?"</td>
+    </tr>
+  </table>
+
+  <h3>O que o bot NUNCA faz (anti-patterns comprovados)</h3>
+  <ul>
+    <li><strong>Nudge genérico sem segmentação</strong> — comprovado que é pior que não fazer nada</li>
+    <li><strong>Lembrete após compromisso verbal</strong> — cliente interpreta como desconfiança e desiste</li>
+    <li><strong>Tom ameaçador</strong> — gera retaliação (recusa de pagar mesmo tendo condições)</li>
+    <li><strong>Urgência falsa ou repetitiva</strong> — destrói credibilidade permanentemente</li>
+    <li><strong>Mais de 1 mensagem por dia</strong> — excesso gera bloqueio no WhatsApp</li>
+  </ul>
+
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Baseado em: Thaler & Sunstein (Nudge), Kahneman (Prospect Theory), estudos PNAS com 13M pessoas, casos CloQ e Symend, e Behavioural Insights Team (UK).</p>
+</div>
+
+<!-- SLIDE 7: MODELO MULTI-NÚMERO -->
+<div class="slide">
+  <h2><span class="num">7</span> Modelo Multi-Número (WhatsApp)</h2>
+  <p style="margin-bottom: 1rem;">Cada cliente da Uúba recebe um <strong>número WhatsApp dedicado</strong>, fornecido por nós. O cliente final sempre sabe qual empresa está falando com ele.</p>
+
+  <div class="flow-card">
+    <h4>Por que um número por cliente?</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">!</span> Uma pessoa pode ser cliente de duas empresas que usam a Uúba</div>
+      <div class="flow-step"><span class="step-num">!</span> Se o bot usar o mesmo número, o cliente não sabe de qual empresa é a cobrança</div>
+      <div class="flow-step"><span class="step-num" style="background: var(--green);">✓</span> Com números separados, cada conversa é claramente identificada</div>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Item</th><th>Detalhe</th></tr>
+    <tr>
+      <td>Quem fornece o número</td>
+      <td><strong>A Uúba fornece</strong> — o cliente não precisa se preocupar com chip</td>
+    </tr>
+    <tr>
+      <td>Onboarding</td>
+      <td>Cliente assina &rarr; recebe número dedicado &rarr; já sai usando</td>
+    </tr>
+    <tr>
+      <td>Infraestrutura</td>
+      <td>Múltiplas instâncias na mesma Evolution API (sem custo extra de infra)</td>
+    </tr>
+    <tr>
+      <td>Se o número for banido</td>
+      <td>Nós trocamos sem impacto para o cliente</td>
+    </tr>
+    <tr>
+      <td>Evolução futura</td>
+      <td>Migrar para API oficial do WhatsApp Business (número verificado com selo verde)</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 8: ARQUITETURA -->
+<div class="slide">
+  <h2><span class="num">8</span> Arquitetura Técnica</h2>
   <div class="arch">
 ┌──────────────────┐
 │   WhatsApp       │  Cliente envia/recebe mensagens
@@ -504,7 +593,7 @@
 
 <!-- SLIDE 7: O QUE JÁ TEMOS -->
 <div class="slide">
-  <h2><span class="num">7</span> O que já existe</h2>
+  <h2><span class="num">9</span> O que já existe</h2>
   <p style="margin-bottom: 1rem; color: var(--muted);">Base sólida construída no Sprint 1-2:</p>
 
   <table>
@@ -544,7 +633,7 @@
 
 <!-- SLIDE 8: ROADMAP -->
 <div class="slide">
-  <h2><span class="num">8</span> Roadmap de Implementação</h2>
+  <h2><span class="num">10</span> Roadmap de Implementação</h2>
 
   <table>
     <tr><th>Sprint</th><th>Objetivo</th><th>Entregas</th></tr>
@@ -588,7 +677,7 @@
 
 <!-- SLIDE 9: DEPENDÊNCIAS E RISCOS -->
 <div class="slide">
-  <h2><span class="num">9</span> Dependências e Riscos</h2>
+  <h2><span class="num">11</span> Dependências e Riscos</h2>
 
   <h3>Dependências do Time</h3>
   <table>
@@ -609,7 +698,7 @@
       <td>Equipe</td>
     </tr>
     <tr>
-      <td>Conta Conta Azul (sandbox para testes de pagamento)</td>
+      <td>Conta Azul (sandbox para testes de pagamento)</td>
       <td>Sprint 6</td>
       <td>Equipe</td>
     </tr>
@@ -648,7 +737,7 @@
 
 <!-- SLIDE 10: MÉTRICAS -->
 <div class="slide">
-  <h2><span class="num">10</span> Métricas de Sucesso</h2>
+  <h2><span class="num">12</span> Métricas de Sucesso</h2>
   <p style="margin-bottom: 1rem; color: var(--muted);">Como vamos medir se o bot está funcionando:</p>
 
   <div class="cap-grid">
@@ -712,8 +801,16 @@
       <div class="value">8h-20h (seg-sex), 9h-14h (sáb). Correto? Domingo não envia?</div>
     </div>
     <div class="approval-item">
-      <div class="label">6. Número WhatsApp</div>
-      <div class="value">Chip dedicado disponível? Qual número será usado?</div>
+      <div class="label">6. Estratégia de Nudge</div>
+      <div class="value">Concordam com as 7 técnicas comportamentais (slide 6)? Os exemplos de mensagem estão adequados ao perfil dos clientes?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">7. Modelo Multi-Número</div>
+      <div class="value">Confirma que a Uúba fornece o número WhatsApp para cada cliente? Ou o cliente traz o próprio?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">8. Integração Conta Azul</div>
+      <div class="value">Temos acesso à API / sandbox da Conta Azul para gerar links de pagamento e receber webhooks?</div>
     </div>
   </div>
 
