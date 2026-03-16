@@ -24,21 +24,29 @@ Cliente manda WhatsApp
   → Conversa com o cliente (consultar faturas, pagar, tirar dúvidas)
 ```
 
+### Fluxo 3: Pagamento (Pix / Boleto via Conta Azul)
+```
+Cliente quer pagar → Bot gera link via Conta Azul
+  → Conta Azul confirma via webhook → Bot atualiza fatura e agradece
+```
+
 ### Capacidades do bot (v1)
 
 | Situação | Ação do bot |
 |----------|-------------|
 | Fatura vencida | Envia cobrança com tom progressivo (amigável → firme → urgente) |
 | "Vou pagar sexta" | Registra promessa de pagamento, agenda follow-up |
-| "Já paguei" | Verifica no sistema, confirma ou pede comprovante |
+| "Já paguei" (Pix) | Verifica em tempo real, confirma e atualiza |
+| "Já paguei" (Boleto) | Avisa que leva 1-2 dias úteis, agenda follow-up |
 | "Que fatura é essa?" | Puxa NF, valor, descrição, envia detalhes |
 | "Quanto devo?" | Lista total em aberto + faturas pendentes |
-| "Quero pagar agora" | Envia link de pagamento |
+| "Quero pagar agora" | Envia link de pagamento (Pix/boleto via Conta Azul) |
 | "Quero parcelar" | Escala para humano |
 | Cliente irritado / palavrão | Detecta sentimento, acalma, escala para humano |
 | Cliente ignora | Escala tom automaticamente pela régua |
 | Número desconhecido | "Não encontrei seu cadastro, qual seu CNPJ?" |
 | "Oi" / saudação | Identifica pelo telefone, cumprimenta, oferece ajuda |
+| Pagamento confirmado | Webhook Conta Azul → atualiza fatura → agradece |
 
 ---
 
@@ -51,6 +59,11 @@ Cliente manda WhatsApp
 - [x] n8n rodando na VPS
 - [x] Workflow protótipo da régua (funcional)
 - [x] Infra: VPS + Docker + Nginx + SSL
+- [x] Evolution API v2.3.7 + Redis (wa.uuba.tech)
+- [x] WhatsApp bidirecional (receber + enviar via n8n)
+- [x] Agente IA (Claude Sonnet) com 4 tools + memória por cliente
+- [x] Protocolo de cobrança comportamental (nudge)
+- [x] Modelo multi-número (Uúba fornece número por cliente)
 
 ---
 
@@ -64,8 +77,8 @@ Cliente manda WhatsApp
                           │ mensagens
                           ▼
 ┌──────────────────────────────────────────────────────────────┐
-│                    Evolution API v2                            │
-│              (self-hosted na VPS, porta 8080)                  │
+│                Evolution API v2.3.7                            │
+│          (wa.uuba.tech — self-hosted na VPS)                  │
 │         recebe mensagens + envia mensagens                    │
 └─────────────────────────┬────────────────────────────────────┘
                           │ webhook
@@ -77,9 +90,9 @@ Cliente manda WhatsApp
 │  │ Webhook      │   │ Identificar  │   │ Agente Claude    │  │
 │  │ recebe msg   │──▶│ cliente pelo │──▶│ (Sonnet)         │  │
 │  │              │   │ telefone     │   │                  │  │
-│  └─────────────┘   └──────────────┘   │ - contexto API   │  │
-│                                        │ - histórico chat │  │
-│  ┌─────────────┐                      │ - regras negócio │  │
+│  └─────────────┘   └──────────────┘   │ - 4 tools API    │  │
+│                                        │ - memória/cliente│  │
+│  ┌─────────────┐                      │ - protocolo nudge│  │
 │  │ Régua       │                      │ - tom adaptativo │  │
 │  │ (cron/      │─────────────────────▶│                  │  │
 │  │  schedule)  │                      └────────┬─────────┘  │
@@ -108,37 +121,38 @@ Cliente manda WhatsApp
 
 ---
 
-## Sprints Revisados
+## Sprints
 
-### Sprint 3 — WhatsApp bidirecional
+### Sprint 3 — WhatsApp bidirecional ✅
 **Objetivo:** Conectar WhatsApp ao n8n
 
-- [ ] Instalar Evolution API v2 na VPS (docker-compose)
-- [ ] Configurar instância WhatsApp (QR code, número)
-- [ ] Nginx + SSL para evolution.uuba.tech (ou subpath)
-- [ ] Webhook: Evolution API → n8n (mensagem recebida)
-- [ ] Workflow n8n: receber mensagem → identificar cliente pelo telefone → responder "Olá {nome}"
-- [ ] Workflow n8n: enviar mensagem via Evolution API (HTTP Request)
-- [ ] Testar: enviar e receber mensagens manualmente
+- [x] Instalar Evolution API v2.3.7 + Redis na VPS (docker-compose)
+- [x] Nginx + SSL para wa.uuba.tech
+- [x] Criar database evolution no PostgreSQL
+- [x] Configurar instância WhatsApp (QR code)
+- [x] Webhook: Evolution API → n8n (mensagem recebida)
+- [x] Workflow n8n: receber mensagem → identificar cliente → responder
+- [x] Workflow n8n: enviar mensagem via Evolution API (sub-workflow)
+- [x] Filtro: ignorar mensagens de grupo (só diretas)
+- [x] Testar: enviar e receber mensagens
 
 **Entrega:** WhatsApp funcionando bidirecionalmente via n8n
 
 ---
 
-### Sprint 4 — Agente conversacional
+### Sprint 4 — Agente conversacional ✅
 **Objetivo:** Bot que entende e responde o cliente
 
-- [ ] Criar prompt do agente com contexto (role, regras, tom)
-- [ ] Workflow n8n: cliente manda msg → buscar dados na API → Claude gera resposta → enviar WhatsApp
-- [ ] Tools do agente:
+- [x] Criar prompt do agente com protocolo de cobrança comportamental
+- [x] Workflow n8n: cliente manda msg → buscar dados na API → Claude gera resposta → enviar WhatsApp
+- [x] Tools do agente:
   - Buscar faturas em aberto do cliente
   - Buscar métricas do cliente
   - Registrar promessa de pagamento
   - Registrar cobrança realizada
-  - Escalar para humano
-- [ ] Memória de conversa (últimas N mensagens por cliente — n8n memory node ou Redis)
-- [ ] Detecção de intenção: pagar, dúvida, reclamação, saudação
-- [ ] Escalonamento para humano quando necessário
+- [x] Memória de conversa (últimas 10 mensagens por cliente — buffer window por telefone)
+- [x] System prompt com regras de negócio, tom, escalação
+- [ ] Escalonamento para humano (encaminhar para atendente)
 - [ ] Testar com cenários reais (mock clients)
 
 **Entrega:** Bot conversacional funcional no WhatsApp
@@ -149,7 +163,7 @@ Cliente manda WhatsApp
 **Objetivo:** Bot inicia cobranças + se integra com a conversa
 
 - [ ] Workflow cron: verificar faturas vencidas → enviar cobrança automática
-- [ ] Régua de tom progressivo (amigável → neutro → firme → urgente)
+- [ ] Régua de tom progressivo (protocolo comportamental: D-3 a D+15)
 - [ ] Integrar com histórico de conversa (não cobrar se já está conversando)
 - [ ] Promessa de pagamento: agendar follow-up automático
 - [ ] Fatura paga: enviar agradecimento automático
@@ -162,8 +176,8 @@ Cliente manda WhatsApp
 ### Sprint 6 — Webhook pagamento + polish
 **Objetivo:** Fechar o ciclo completo
 
-- [ ] Webhook Asaas: pagamento confirmado → atualizar fatura → notificar cliente
-- [ ] Link de pagamento: gerar via Asaas e enviar no WhatsApp
+- [ ] Webhook Conta Azul: pagamento confirmado → atualizar fatura → notificar cliente
+- [ ] Link de pagamento: gerar via Conta Azul e enviar no WhatsApp
 - [ ] Tabelas de agentes (agent_decisions, agent_prompts) para feedback loop
 - [ ] Few-shot learning: agente melhora com exemplos aprovados
 - [ ] Testes e2e do fluxo completo
@@ -177,9 +191,9 @@ Cliente manda WhatsApp
 
 | Item | Responsável | Precisa para |
 |------|-------------|-------------|
-| Número WhatsApp (chip/linha) | Equipe | Sprint 3 |
-| Conta Asaas (sandbox) | Equipe | Sprint 6 |
-| Aprovação do tom/mensagens | Equipe | Sprint 4 |
+| ~~Número WhatsApp (chip/linha)~~ | ~~Equipe~~ | ~~Sprint 3~~ ✅ Uúba fornece |
+| Conta Azul (sandbox) | Equipe | Sprint 6 |
+| ~~Aprovação do tom/mensagens~~ | ~~Equipe~~ | ~~Sprint 4~~ ✅ Protocolo comportamental aprovado |
 
 ---
 
@@ -187,10 +201,11 @@ Cliente manda WhatsApp
 
 | Risco | Mitigação |
 |-------|-----------|
-| WhatsApp bane número por spam | Começar com poucos clientes, tom amigável, opt-in |
-| Evolution API instável | Monitorar, fallback para API oficial se necessário |
-| Claude alucina respostas financeiras | Prompt rigoroso, validar dados contra API antes de responder |
+| WhatsApp bane número por spam | Começar com poucos clientes, tom amigável, opt-in, protocolo comportamental |
+| Evolution API instável | Monitorar, fallback para API oficial se necessário. Atualizado para v2.3.7 |
+| Claude alucina respostas financeiras | Prompt rigoroso, bot só responde com dados das tools (API), nunca inventa |
 | Cliente confunde bot com humano | Mensagem inicial "Sou o assistente da Uúba" |
+| Desconto abusivo | Máximo 10% pelo bot, acima escala para humano |
 
 ---
 
