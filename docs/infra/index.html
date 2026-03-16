@@ -107,8 +107,10 @@
 
 <!-- SLIDE 1: VISÃO GERAL -->
 <div class="slide">
-  <h2><span class="num">1</span> Visão Geral da VPS</h2>
+  <h2><span class="num">1</span> Visão Geral — Duas VPS</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted)">A Uúba Tech usa duas VPS. A infraestrutura principal (API, WhatsApp) está na Contabo. O n8n da empresa está na Hostinger. Migração futura planejada para unificar.</p>
 
+  <h3>VPS Contabo (principal — API + WhatsApp)</h3>
   <div class="kpi-grid">
     <div class="kpi"><div class="value">4</div><div class="label">vCPUs</div></div>
     <div class="kpi"><div class="value">8 GB</div><div class="label">RAM</div></div>
@@ -128,6 +130,16 @@
     <tr><td>Variáveis de ambiente</td><td><code>/opt/stack/.env</code></td></tr>
     <tr><td>Timezone</td><td>America/Sao_Paulo</td></tr>
   </table>
+
+  <h3>VPS Hostinger (n8n empresa)</h3>
+  <table>
+    <tr><th>Item</th><th>Valor</th></tr>
+    <tr><td>n8n URL</td><td><a href="https://n8n.srv921702.hstgr.cloud/" target="_blank">n8n.srv921702.hstgr.cloud</a></td></tr>
+    <tr><td>Função</td><td>Workflows de automação da Uúba (régua, bot, integrações)</td></tr>
+    <tr><td>Status</td><td><span class="tag tag-green">Ativo</span></td></tr>
+  </table>
+
+  <p style="margin-top: 1rem; color: var(--yellow); font-size: 0.85rem;">Nota: A VPS Contabo também roda um n8n pessoal (<code>n8n.servs.dev</code>) que não faz parte da empresa.</p>
 </div>
 
 <!-- SLIDE 2: DOMÍNIOS E SSL -->
@@ -141,7 +153,8 @@
     <tr><td><code>api.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>REST API</td></tr>
     <tr><td><code>developers.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Documentação API (Scalar)</td></tr>
     <tr><td><code>wa.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Evolution API (WhatsApp)</td></tr>
-    <tr><td><code>n8n.servs.dev</code></td><td>—</td><td>Cloudflare Tunnel</td><td>n8n (automação)</td></tr>
+    <tr><td><code>n8n.srv921702.hstgr.cloud</code></td><td>—</td><td>Hostinger VPS</td><td>n8n empresa (Uúba)</td></tr>
+    <tr style="color: var(--muted)"><td><code>n8n.servs.dev</code></td><td>—</td><td>Cloudflare Tunnel (Contabo)</td><td>n8n pessoal (não é empresa)</td></tr>
   </table>
 
   <h3>Certificados SSL (Let's Encrypt)</h3>
@@ -223,7 +236,7 @@
       <td>cloudflare/cloudflared:latest</td>
       <td>—</td>
       <td>—</td>
-      <td><span class="tag tag-blue">Tunnel</span> Expõe n8n via n8n.servs.dev</td>
+      <td><span class="tag tag-blue">Tunnel</span> Expõe n8n pessoal via n8n.servs.dev</td>
     </tr>
     <tr>
       <td><code>site</code></td>
@@ -379,7 +392,7 @@
   </table>
 
   <h3>n8n (Cloudflare Tunnel)</h3>
-  <p>O n8n <strong>não</strong> usa nginx. Ele é exposto via Cloudflare Tunnel (<code>cloudflared</code>) diretamente para <code>n8n.servs.dev</code>.</p>
+  <p>O n8n pessoal (<code>n8n.servs.dev</code>) é exposto via Cloudflare Tunnel (<code>cloudflared</code>). O n8n da empresa (<code>n8n.srv921702.hstgr.cloud</code>) roda na VPS Hostinger, separado desta infra.</p>
 </div>
 
 <!-- SLIDE 7: VOLUMES -->
@@ -445,7 +458,8 @@
     <tr><td><a href="https://api.uuba.tech" target="_blank">api.uuba.tech</a></td><td>REST API</td><td>Header <code>X-API-Key</code></td></tr>
     <tr><td><a href="https://api.uuba.tech/health" target="_blank">api.uuba.tech/health</a></td><td>Health check</td><td>Público</td></tr>
     <tr><td><a href="https://developers.uuba.tech" target="_blank">developers.uuba.tech</a></td><td>API Docs (Scalar)</td><td>Público</td></tr>
-    <tr><td><a href="https://n8n.servs.dev" target="_blank">n8n.servs.dev</a></td><td>n8n</td><td>Login (email/senha)</td></tr>
+    <tr><td><a href="https://n8n.srv921702.hstgr.cloud/" target="_blank">n8n.srv921702.hstgr.cloud</a></td><td>n8n (empresa)</td><td>Login (email/senha)</td></tr>
+    <tr style="color: var(--muted)"><td><a href="https://n8n.servs.dev" target="_blank">n8n.servs.dev</a></td><td>n8n (pessoal)</td><td>Login (email/senha)</td></tr>
     <tr><td><a href="https://wa.uuba.tech" target="_blank">wa.uuba.tech</a></td><td>Evolution API</td><td>Header <code>apikey</code></td></tr>
     <tr><td><a href="https://wa.uuba.tech/manager" target="_blank">wa.uuba.tech/manager</a></td><td>Evolution Manager</td><td>API Key</td></tr>
   </table>
@@ -546,7 +560,8 @@ Container uuba-api (produção)</div>
   <table>
     <tr><th>Item</th><th>Valor</th></tr>
     <tr><td>Container</td><td><code>cloudflared</code></td></tr>
-    <tr><td>Domínio</td><td><code>n8n.servs.dev</code></td></tr>
+    <tr><td>Domínio (pessoal)</td><td><code>n8n.servs.dev</code></td></tr>
+    <tr><td>n8n empresa</td><td><code>n8n.srv921702.hstgr.cloud</code> (Hostinger, separado)</td></tr>
     <tr><td>Destino interno</td><td><code>http://n8n:5678</code></td></tr>
     <tr><td>Gerenciamento</td><td>Cloudflare Zero Trust Dashboard</td></tr>
     <tr><td>Token</td><td><code>CLOUDFLARE_TUNNEL_TOKEN</code> em <code>.env</code></td></tr>
