@@ -163,7 +163,7 @@
       <div class="label">Claude (Anthropic)</div>
     </div>
     <div class="kpi yellow">
-      <div class="value">2</div>
+      <div class="value">3</div>
       <div class="label">Fluxos principais</div>
     </div>
     <div class="kpi">
@@ -194,6 +194,33 @@
       <div class="flow-step"><span class="step-num">2</span> Bot identifica o cliente pelo número de telefone</div>
       <div class="flow-step"><span class="step-num">3</span> Puxa contexto: faturas, cobranças, histórico</div>
       <div class="flow-step"><span class="step-num">4</span> Conversa com o cliente: consultar faturas, tirar dúvidas, pagar</div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <h4>Fluxo 3 — Pagamento (Pix / Boleto via Asaas)</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Cliente diz "quero pagar" ou bot envia cobrança</div>
+      <div class="flow-step"><span class="step-num">2</span> Bot consulta faturas em aberto na API da Uúba</div>
+      <div class="flow-step"><span class="step-num">3</span> Bot gera link de pagamento via Asaas (Pix ou boleto)</div>
+      <div class="flow-step"><span class="step-num">4</span> Envia o link direto no WhatsApp — cliente clica e paga</div>
+      <div class="flow-step"><span class="step-num">5</span> Asaas confirma pagamento via webhook</div>
+      <div class="flow-step"><span class="step-num">6</span> Bot atualiza a fatura na API e manda agradecimento ao cliente</div>
+    </div>
+  </div>
+
+  <div class="flow-card" style="border-color: var(--accent2);">
+    <h4>Como funciona o pagamento por baixo dos panos</h4>
+    <div class="flow-steps">
+      <div class="flow-step" style="font-size: 0.85rem;">
+        <span class="step-num" style="background: var(--accent2);">$</span>
+        <strong>Asaas</strong> é a plataforma de pagamentos. Ela gera boletos, Pix e links de pagamento. Quando o cliente paga, o Asaas avisa nosso sistema via webhook (notificação automática). O bot nunca processa dinheiro — ele só envia o link e espera a confirmação.
+      </div>
+    </div>
+    <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--muted);">
+      <strong>Pix:</strong> Pagamento instantâneo — cliente escaneia QR code ou copia o código, dinheiro cai na hora.<br>
+      <strong>Boleto:</strong> Cliente pode pagar no banco, app ou lotérica. Compensação em 1-2 dias úteis.<br>
+      <strong>Link de pagamento:</strong> URL que o Asaas gera — o cliente abre no navegador, escolhe Pix ou boleto, e paga. Não precisa instalar nada.
     </div>
   </div>
 </div>
