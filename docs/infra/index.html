@@ -139,7 +139,7 @@
     <tr><td>Status</td><td><span class="tag tag-green">Ativo</span></td></tr>
   </table>
 
-  <p style="margin-top: 1rem; color: var(--yellow); font-size: 0.85rem;">Nota: A VPS Contabo também roda um n8n pessoal (<code>n8n.servs.dev</code>) que não faz parte da empresa.</p>
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Nota: Esta VPS também hospeda outros serviços não relacionados à Uúba.</p>
 </div>
 
 <!-- SLIDE 2: DOMÍNIOS E SSL -->
@@ -154,7 +154,6 @@
     <tr><td><code>developers.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Documentação API (Scalar)</td></tr>
     <tr><td><code>wa.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Evolution API (WhatsApp)</td></tr>
     <tr><td><code>n8n.srv921702.hstgr.cloud</code></td><td>—</td><td>Hostinger VPS</td><td>n8n empresa (Uúba)</td></tr>
-    <tr style="color: var(--muted)"><td><code>n8n.servs.dev</code></td><td>—</td><td>Cloudflare Tunnel (Contabo)</td><td>n8n pessoal (não é empresa)</td></tr>
   </table>
 
   <h3>Certificados SSL (Let's Encrypt)</h3>
@@ -231,7 +230,7 @@
       <td>
         <span class="tag tag-purple">Automação</span><br>
         <strong>Plataforma de automação low-code.</strong> É onde ficam os workflows — régua de cobrança, bot WhatsApp, integrações. Recebe webhooks da Evolution API, processa a lógica, e chama a API da Uúba e o Claude (IA). Este é o n8n pessoal, usado para desenvolvimento.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: n8nio/n8n:latest &middot; URL: n8n.servs.dev (pessoal) &middot; Empresa: n8n.srv921702.hstgr.cloud</span>
+        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: n8nio/n8n:latest &middot; Usado para desenvolvimento &middot; Empresa: n8n.srv921702.hstgr.cloud</span>
       </td>
       <td>5678 &rarr; 0.0.0.0:5678</td>
     </tr>
@@ -255,65 +254,7 @@
     </tr>
   </table>
 
-  <h3>Pessoal (não relacionado à Uúba)</h3>
 
-  <table>
-    <tr><th>Container</th><th>O que é</th><th>Portas</th></tr>
-    <tr>
-      <td><code>cloudflared</code></td>
-      <td>
-        <span class="tag tag-blue">Tunnel</span><br>
-        <strong>Túnel Cloudflare.</strong> Cria uma conexão segura entre a VPS e a rede Cloudflare, permitindo expor o n8n pessoal como <code>n8n.servs.dev</code> sem abrir portas no firewall.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: cloudflare/cloudflared:latest</span>
-      </td>
-      <td>—</td>
-    </tr>
-    <tr>
-      <td><code>site</code></td>
-      <td>
-        <span class="tag tag-purple">Site</span><br>
-        <strong>Site pessoal estático.</strong> Servidor nginx que serve o site luisbarcia.com com arquivos HTML estáticos.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: nginx:alpine</span>
-      </td>
-      <td>80 (interno)</td>
-    </tr>
-    <tr>
-      <td><code>conduit</code></td>
-      <td>
-        <span class="tag tag-purple">Chat</span><br>
-        <strong>Servidor Matrix.</strong> Homeserver do protocolo Matrix (alternativa descentralizada ao Slack/Discord). Permite chat federado com outros servidores Matrix.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: matrixconduit/matrix-conduit</span>
-      </td>
-      <td>6167 (interno)</td>
-    </tr>
-    <tr>
-      <td><code>gomuks</code></td>
-      <td>
-        <span class="tag tag-purple">Chat</span><br>
-        <strong>Cliente web Matrix.</strong> Interface web para acessar o chat Matrix no navegador. Conecta ao Conduit.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: dock.mau.dev/gomuks/gomuks</span>
-      </td>
-      <td>29325 (interno)</td>
-    </tr>
-    <tr>
-      <td><code>gotosocial</code></td>
-      <td>
-        <span class="tag tag-purple">Social</span><br>
-        <strong>Servidor Fediverse.</strong> Rede social federada (tipo Mastodon) em social.luisbarcia.com. Permite publicar posts que aparecem em toda a rede ActivityPub.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: superseriousbusiness/gotosocial</span>
-      </td>
-      <td>8080 (interno)</td>
-    </tr>
-    <tr>
-      <td><code>tor</code></td>
-      <td>
-        <span class="tag tag-yellow">Privacy</span><br>
-        <strong>Serviço oculto Tor.</strong> Permite acessar o site pessoal pela rede Tor (endereço .onion), garantindo acesso anônimo e resistente a censura.<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: goldy/tor-hidden-service</span>
-      </td>
-      <td>—</td>
-    </tr>
-  </table>
 </div>
 
 <!-- SLIDE 4: REDE DOCKER -->
@@ -341,15 +282,10 @@
 │  │          databases: datastore | uuba | evolution                  │         │
 │  └───────────────────────────────────────────────────────────────────┘         │
 │                                                                               │
-│  ┌────────────────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐  ┌──────────┐  │
-│  │  n8n-postgres   │  │ conduit  │  │  gomuks  │  │   tor   │  │   site   │  │
-│  │  (n8n interno)  │  │ (Matrix) │  │ (Matrix) │  │ (onion) │  │ (nginx)  │  │
-│  └────────────────┘  └──────────┘  └──────────┘  └─────────┘  └──────────┘  │
-│                                                                               │
-│  ┌────────────────┐  ┌────────────────┐                                      │
-│  │  cloudflared    │  │  gotosocial     │                                      │
-│  │  (CF Tunnel)    │  │  (Fediverse)    │                                      │
-│  └────────────────┘  └────────────────┘                                      │
+│  ┌────────────────┐                                                           │
+│  │  n8n-postgres   │  + outros containers na mesma rede                       │
+│  │  (n8n interno)  │                                                           │
+│  └────────────────┘                                                           │
 └───────────────────────────────────────────────────────────────────────────────┘</div>
 
   <h3>Comunicação entre serviços</h3>
@@ -432,7 +368,7 @@
   </table>
 
   <h3>n8n (Cloudflare Tunnel)</h3>
-  <p>O n8n pessoal (<code>n8n.servs.dev</code>) é exposto via Cloudflare Tunnel (<code>cloudflared</code>). O n8n da empresa (<code>n8n.srv921702.hstgr.cloud</code>) roda na VPS Hostinger, separado desta infra.</p>
+  <p>O n8n da empresa (<code>n8n.srv921702.hstgr.cloud</code>) roda na VPS Hostinger, separado desta infra.</p>
 </div>
 
 <!-- SLIDE 7: VOLUMES -->
@@ -448,9 +384,6 @@
     <tr><td><code>stack_evolution_instances</code></td><td>evolution-api</td><td>Sessões WhatsApp</td></tr>
     <tr><td><code>stack_redis_data</code></td><td>redis</td><td>Cache Redis</td></tr>
     <tr><td><code>stack_pgadmin_data</code></td><td>n8n-pgadmin</td><td>Configurações pgAdmin</td></tr>
-    <tr><td><code>stack_conduit_data</code></td><td>conduit</td><td>Dados Matrix homeserver</td></tr>
-    <tr><td><code>stack_gomuks_data</code></td><td>gomuks</td><td>Dados Matrix client</td></tr>
-    <tr><td><code>stack_gotosocial_data</code></td><td>gotosocial</td><td>Dados Fediverse (posts, media)</td></tr>
   </table>
 </div>
 
@@ -499,7 +432,6 @@
     <tr><td><a href="https://api.uuba.tech/health" target="_blank">api.uuba.tech/health</a></td><td>Health check</td><td>Público</td></tr>
     <tr><td><a href="https://developers.uuba.tech" target="_blank">developers.uuba.tech</a></td><td>API Docs (Scalar)</td><td>Público</td></tr>
     <tr><td><a href="https://n8n.srv921702.hstgr.cloud/" target="_blank">n8n.srv921702.hstgr.cloud</a></td><td>n8n (empresa)</td><td>Login (email/senha)</td></tr>
-    <tr style="color: var(--muted)"><td><a href="https://n8n.servs.dev" target="_blank">n8n.servs.dev</a></td><td>n8n (pessoal)</td><td>Login (email/senha)</td></tr>
     <tr><td><a href="https://wa.uuba.tech" target="_blank">wa.uuba.tech</a></td><td>Evolution API</td><td>Header <code>apikey</code></td></tr>
     <tr><td><a href="https://wa.uuba.tech/manager" target="_blank">wa.uuba.tech/manager</a></td><td>Evolution Manager</td><td>API Key</td></tr>
   </table>
@@ -592,21 +524,6 @@ VPS (/opt/stack/uuba-tech/)
 Container uuba-api (produção)</div>
 </div>
 
-<!-- SLIDE 12: CLOUDFLARE TUNNEL -->
-<div class="slide">
-  <h2><span class="num">12</span> Cloudflare Tunnel</h2>
-  <p>O n8n é exposto via Cloudflare Tunnel ao invés de nginx direto. Isso permite acesso HTTPS sem abrir porta adicional no firewall.</p>
-
-  <table>
-    <tr><th>Item</th><th>Valor</th></tr>
-    <tr><td>Container</td><td><code>cloudflared</code></td></tr>
-    <tr><td>Domínio (pessoal)</td><td><code>n8n.servs.dev</code></td></tr>
-    <tr><td>n8n empresa</td><td><code>n8n.srv921702.hstgr.cloud</code> (Hostinger, separado)</td></tr>
-    <tr><td>Destino interno</td><td><code>http://n8n:5678</code></td></tr>
-    <tr><td>Gerenciamento</td><td>Cloudflare Zero Trust Dashboard</td></tr>
-    <tr><td>Token</td><td><code>CLOUDFLARE_TUNNEL_TOKEN</code> em <code>.env</code></td></tr>
-  </table>
-</div>
 
 </div>
 
