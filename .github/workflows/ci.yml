@@ -75,6 +75,9 @@ jobs:
     timeout-minutes: 10
     needs: [test]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: .
     steps:
       - uses: actions/checkout@v4
       - run: docker build -f uuba-tech-api/Dockerfile.prod -t uuba-api:${{ github.sha }} uuba-tech-api/
