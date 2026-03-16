@@ -399,103 +399,221 @@
   </table>
 </div>
 
-<!-- SLIDE 6: NUDGE -->
+<!-- SLIDE 6: PROTOCOLO DE COBRANÇA COMPORTAMENTAL -->
 <div class="slide">
-  <h2><span class="num">6</span> Estratégia de Nudge (Economia Comportamental)</h2>
-  <p style="margin-bottom: 1rem;">O bot usa técnicas de <strong>nudge</strong> — "empurrõezinhos" baseados em ciência comportamental que influenciam decisões sem obrigar. Comprovado por estudos com milhões de pessoas.</p>
+  <h2><span class="num">6</span> Protocolo de Cobrança Comportamental</h2>
+  <p style="margin-bottom: 1rem;">Escalada gradual de pressão psicológica baseada em ciência comportamental. Cada etapa usa uma técnica diferente. O link de pagamento vai em <strong>toda mensagem</strong> (fricção zero).</p>
 
   <div class="kpi-grid">
-    <div class="kpi green"><div class="value">-40%</div><div class="label">Inadimplência (caso CloQ/BR)</div></div>
-    <div class="kpi"><div class="value">98%</div><div class="label">Taxa abertura WhatsApp</div></div>
-    <div class="kpi green"><div class="value">+19%</div><div class="label">Adesão com "Obrigado" (BIT/UK)</div></div>
-    <div class="kpi"><div class="value">7</div><div class="label">Técnicas aplicadas</div></div>
+    <div class="kpi"><div class="value">6</div><div class="label">Etapas da régua</div></div>
+    <div class="kpi green"><div class="value">10%</div><div class="label">Desconto máximo</div></div>
+    <div class="kpi"><div class="value">15+</div><div class="label">Dias até escalação</div></div>
+    <div class="kpi green"><div class="value">98%</div><div class="label">Taxa abertura WhatsApp</div></div>
   </div>
 
-  <h3>Técnicas aplicadas no bot</h3>
+  <!-- DIA 1 -->
+  <h3>Dia 1 — Lembrete Neutro + Fricção Zero</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Avisar sem pressão. Muitos pagamentos atrasam por esquecimento simples.</p>
+  <div class="flow-card">
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Olá, [Nome]! Tudo bem?<br><br>
+      Passando para avisar que identificamos que o boleto referente a [serviço/mês] no valor de R$ [valor], com vencimento em [data], está em aberto.<br><br>
+      Segue o boleto atualizado para facilitar:<br>
+      [Boleto/Link Pix]<br><br>
+      Qualquer dúvida, estou à disposição!"
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">
+      <strong>Técnica:</strong> Sem julgamento, assume boa-fé (esquecimento). Boleto já no chat = fricção zero.
+    </div>
+  </div>
+
+  <!-- DIA 3 -->
+  <h3>Dia 3 — Implementação de Intenção (Gollwitzer)</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Transformar "vou pagar" em plano concreto com data e ação. Triplica a chance de execução.</p>
+  <div class="flow-card">
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Olá, [Nome]! Tudo certo?<br><br>
+      Vi que o boleto de R$ [valor] ainda está em aberto. Sem problemas — sei que a rotina aperta!<br><br>
+      Me diz: <strong>qual dia da semana você costuma organizar os pagamentos da empresa?</strong> Assim consigo te enviar um lembrete no momento certo pra facilitar.<br><br>
+      Enquanto isso, segue o boleto atualizado:<br>
+      [Boleto/Link Pix]"
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">
+      <strong>Técnica:</strong> Não cobra diretamente — pergunta sobre a rotina. O cliente se sente respeitado. Ao responder, cria compromisso implícito.
+    </div>
+  </div>
+  <div class="flow-card" style="border-color: var(--accent2);">
+    <div style="font-size: 0.85rem;">
+      <strong>Se o cliente responder</strong> (ex: "Geralmente pago às terças"):<br><br>
+      "Perfeito! Então vou te enviar o boleto atualizado na terça-feira de manhã, combinado?"
+    </div>
+  </div>
+
+  <!-- DIA 5 -->
+  <h3>Dia 5 — Prova Social (Cialdini / BIT)</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Objetivo: Pressão do grupo. Ninguém quer ser o único fora do padrão. Quanto mais específica a comparação, mais eficaz.</p>
+  <div class="flow-card">
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Olá, [Nome]!<br><br>
+      Só um acompanhamento sobre o boleto de R$ [valor] que está pendente desde [data].<br><br>
+      <strong>Todos os nossos clientes do segmento [X] já estão adimplentes este mês. Não quero que você seja a exceção.</strong><br><br>
+      Vamos resolver isso juntos?<br><br>
+      Segue o boleto atualizado:<br>
+      [Boleto/Link Pix]<br><br>
+      Me fala o que funciona melhor pra você e a gente resolve hoje."
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">
+      <strong>Técnica:</strong> Tom direto. O cérebro humano odeia ser o diferente do grupo. A especificidade do segmento torna a comparação pessoal.
+    </div>
+  </div>
+
+  <!-- COMPROMISSO -->
+  <h3>A qualquer resposta — Compromisso (Cialdini / Thaler)</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Sempre que o cliente responder em qualquer etapa, travar acordo com confirmação escrita. O viés de consistência trabalha a favor.</p>
+  <div class="flow-card">
+    <h4>Cliente diz que vai pagar</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Ótimo, [Nome]! Então fica combinado assim:<br><br>
+      Valor: R$ [valor]<br>
+      Data: [data específica]<br>
+      Meio: Boleto/Pix<br><br>
+      <strong>Pode confirmar com um "ok" pra eu registrar o acordo aqui?</strong><br><br>
+      [Boleto/Link Pix]"
+    </div>
+  </div>
+  <div class="flow-card">
+    <h4>Cliente pede prazo</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Entendo, [Nome]. Sem problemas! Qual dia da semana que vem funciona?<br><br>
+      Assim que combinarmos, te envio tudo certinho pra facilitar."<br><br>
+      Após a resposta:<br><br>
+      "Perfeito! Registrando aqui:<br>
+      Valor: R$ [valor]<br>
+      Data: [dia que ele escolheu]<br><br>
+      <strong>Confirma com um "combinado" pra eu travar essas condições?</strong>"
+    </div>
+  </div>
+  <div class="flow-card">
+    <h4>Cliente pede desconto</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Vou verificar o que consigo fazer por você, [Nome]. Me dá um momento."<br><br>
+      Depois:<br><br>
+      "Consegui aprovar <strong>10% de desconto</strong> para pagamento até [data]. O valor fica R$ [valor com desconto].<br><br>
+      Valor com desconto: R$ [valor]<br>
+      Válido até: [data]<br><br>
+      <strong>Confirma que seguimos com esse acordo?</strong><br><br>
+      [Boleto atualizado/Link Pix]"
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--yellow);">
+      <strong>Desconto máximo: 10%.</strong> Se o cliente insistir em valor maior, escala para funcionário humano.
+    </div>
+  </div>
+  <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--muted);">
+    <strong>Por que funciona:</strong> Pedir "ok" ou "combinado" escrito ativa o viés de consistência. Depois de confirmar, quebrar a palavra gera desconforto psicológico. E temos registro documentado.
+  </div>
+
+  <!-- AVERSÃO À PERDA -->
+  <h3>Dia 7+ — Aversão à Perda (Kahneman &amp; Tversky)</h3>
+  <p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem;">Último recurso. Enquadra o não-pagamento como perda de algo que o cliente já possui. Usar com moderação — é a arma mais forte.</p>
+
+  <div class="flow-card">
+    <h4>Nível 1 (D+7) — Perda de Condições Especiais</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "Olá, [Nome].<br><br>
+      As condições especiais que reservamos para você estão próximas de expirar.<br><br>
+      Até [data], você ainda consegue:<br>
+      - Manter o desconto de 10%<br>
+      - Evitar encargos adicionais<br><br>
+      Após essa data, essas condições serão canceladas e o valor volta ao integral de R$ [valor cheio].<br><br>
+      [Boleto/Link Pix]<br><br>
+      Posso contar com o pagamento até [data]?"
+    </div>
+  </div>
+  <div class="flow-card">
+    <h4>Nível 2 (D+10) — Perda de Status e Benefícios</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "[Nome], preciso te informar sobre uma situação importante.<br><br>
+      Seu histórico conosco sempre foi excelente, e por isso mantemos condições diferenciadas para você. Porém, com o débito em aberto desde [data], essas condições estão em risco:<br><br>
+      - Condições de pagamento diferenciadas<br>
+      - Prioridade no atendimento<br>
+      - Seu histórico de bom pagador<br><br>
+      Não quero que você perca tudo isso. Vamos resolver agora?<br><br>
+      [Boleto/Link Pix]"
+    </div>
+  </div>
+  <div class="flow-card" style="border-color: var(--red);">
+    <h4>Nível 3 (D+15) — Última tentativa antes de escalação</h4>
+    <div style="font-size: 0.9rem; line-height: 1.7;">
+      "[Nome], essa é a última tentativa amigável antes de precisarmos formalizar a cobrança.<br><br>
+      O débito de R$ [valor] está em aberto há [X] dias. A partir de [data], seremos obrigados a:<br><br>
+      - Aplicar multa e juros contratuais<br>
+      - Registrar a pendência nos órgãos de proteção ao crédito<br>
+      - Suspender os serviços contratados<br><br>
+      Sei que essa não é a intenção de nenhum dos lados. Vamos resolver juntos hoje?<br><br>
+      [Boleto/Link Pix]"
+    </div>
+    <div style="margin-top: 0.75rem; font-size: 0.8rem; color: var(--red);">
+      <strong>Sem resposta após esta etapa:</strong> Conversa é transferida para funcionário humano da Uúba.
+    </div>
+  </div>
+
+  <!-- FLUXO VISUAL -->
+  <h3>Fluxo visual do protocolo</h3>
+  <div class="arch">
+DIA 1 ──&rarr; Lembrete Neutro + Link pagamento
+  │
+  │ (sem resposta)
+  ▼
+DIA 3 ──&rarr; Implementação de Intenção + Link pagamento
+  │        "Qual dia você costuma organizar pagamentos?"
+  │
+  │ (sem resposta)
+  ▼
+DIA 5 ──&rarr; Prova Social (tom direto) + Link pagamento
+  │        "Todos do seu segmento estão em dia"
+  │
+  │ (sem resposta)
+  ▼
+DIA 7 ──&rarr; Aversão à Perda Nível 1
+  │        "Suas condições especiais expiram em 48h"
+  │
+  │ (sem resposta)
+  ▼
+DIA 10 ─&rarr; Aversão à Perda Nível 2
+  │        "Seu histórico de bom pagador está em risco"
+  │
+  │ (sem resposta)
+  ▼
+DIA 15 ─&rarr; Aversão à Perda Nível 3
+  │        "Última tentativa antes da formalização"
+  │
+  │ (sem resposta)
+  ▼
+HUMANO ─&rarr; Funcionário Uúba assume a conversa
+
+  ┌─────────────────────────────────────────────────┐
+  │  CLIENTE RESPONDEU EM QUALQUER ETAPA?            │
+  │  &rarr; Ativar COMPROMISSO                              │
+  │  &rarr; Confirmar acordo por escrito                    │
+  │  &rarr; Desconto máximo: 10%                            │
+  │  &rarr; Se pedir mais: escala para funcionário          │
+  │  &rarr; Link de pagamento SEMPRE junto                  │
+  └─────────────────────────────────────────────────┘</div>
+
+  <!-- REGRAS DE OURO -->
+  <h3>Regras de ouro</h3>
   <table>
-    <tr><th>Técnica</th><th>Como o bot aplica</th><th>Exemplo de mensagem</th></tr>
-    <tr>
-      <td><span class="tag tag-purple">Prova Social</span></td>
-      <td>Mostra que outros clientes do setor já regularizaram</td>
-      <td>"92% das empresas do seu setor regularizaram em até 7 dias"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-orange">Aversão à Perda</span></td>
-      <td>Destaca o que o cliente perde se não agir (não o que ganha)</td>
-      <td>"Seu desconto de 15% expira hoje às 18h. Depois, o valor volta ao normal"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-blue">Reciprocidade</span></td>
-      <td>Reconhece o bom histórico antes de cobrar</td>
-      <td>"Você sempre pagou em dia nos últimos 8 meses. Por isso, preparamos uma condição exclusiva"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-green">Ancoragem</span></td>
-      <td>Apresenta o valor da parcela (menor) antes do total</td>
-      <td>"3x de R$780 (5% desc.) ou à vista R$2.160 (10% desc.). Qual prefere?"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-yellow">Compromisso</span></td>
-      <td>Pede micro-confirmações progressivas</td>
-      <td>"Você confirmou que vai pagar até sexta. Vou enviar o boleto e um lembrete na quinta. Combinado?"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-orange">Urgência</span></td>
-      <td>Prazos curtos e específicos (nunca vagos)</td>
-      <td>"Condição válida até quarta, 20/03 às 23:59. Após isso, não conseguimos manter o desconto"</td>
-    </tr>
-    <tr>
-      <td><span class="tag tag-green">Reforço Positivo</span></td>
-      <td>Agradece pagamentos para reforçar o comportamento</td>
-      <td>"Pagamento confirmado! Obrigado, [nome]. Seu histórico continua impecável"</td>
-    </tr>
+    <tr><th>Regra</th><th>Por quê</th></tr>
+    <tr><td><strong>Link de pagamento em TODA mensagem</strong></td><td>Fricção zero — o cliente paga no impulso</td></tr>
+    <tr><td><strong>Nunca começar pela aversão à perda</strong></td><td>Queima o relacionamento cedo demais</td></tr>
+    <tr><td><strong>Sempre pedir confirmação escrita</strong></td><td>Compromisso por escrito = 3x mais cumprimento</td></tr>
+    <tr><td><strong>Tom empático antes de ser firme</strong></td><td>Tom agressivo faz o cliente sumir (efeito avestruz)</td></tr>
+    <tr><td><strong>Personalizar o segmento na prova social</strong></td><td>"Empresas de tecnologia" > "empresas em geral"</td></tr>
+    <tr><td><strong>Desconto máximo 10%</strong></td><td>Acima disso, escala para funcionário humano</td></tr>
+    <tr><td><strong>Máximo 1 mensagem por dia</strong></td><td>Excesso gera bloqueio no WhatsApp</td></tr>
   </table>
 
-  <h3>Régua de cobrança com nudges</h3>
-  <table>
-    <tr><th>Dia</th><th>Nudge</th><th>Tom</th></tr>
-    <tr>
-      <td>D-3</td>
-      <td>Lembrete amigável + opção padrão</td>
-      <td><span class="tag tag-green">Amigável</span> "Lembrete: sua fatura vence em 3 dias. Já está tudo certo?"</td>
-    </tr>
-    <tr>
-      <td>D-0</td>
-      <td>Urgência leve + aversão à perda</td>
-      <td><span class="tag tag-green">Amigável</span> "Hoje é o dia! Pagando até 23:59, você mantém seu histórico perfeito"</td>
-    </tr>
-    <tr>
-      <td>D+3</td>
-      <td>Reciprocidade + condição especial</td>
-      <td><span class="tag tag-blue">Neutro</span> "Preparamos uma condição especial: 5% desc. até sexta"</td>
-    </tr>
-    <tr>
-      <td>D+7</td>
-      <td>Prova social + compromisso</td>
-      <td><span class="tag tag-blue">Neutro</span> "93% dos clientes regularizam em 7 dias. Podemos combinar uma data?"</td>
-    </tr>
-    <tr>
-      <td>D+15</td>
-      <td>Ancoragem + última chance</td>
-      <td><span class="tag tag-yellow">Firme</span> "Última oportunidade: 3x de R$X ou à vista com 10% desc."</td>
-    </tr>
-    <tr>
-      <td>D+30</td>
-      <td>Empatia + escalação humana</td>
-      <td><span class="tag tag-red">Urgente</span> "Entendemos que imprevistos acontecem. Quer falar com alguém do nosso time?"</td>
-    </tr>
-  </table>
-
-  <h3>O que o bot NUNCA faz (anti-patterns comprovados)</h3>
-  <ul>
-    <li><strong>Nudge genérico sem segmentação</strong> — comprovado que é pior que não fazer nada</li>
-    <li><strong>Lembrete após compromisso verbal</strong> — cliente interpreta como desconfiança e desiste</li>
-    <li><strong>Tom ameaçador</strong> — gera retaliação (recusa de pagar mesmo tendo condições)</li>
-    <li><strong>Urgência falsa ou repetitiva</strong> — destrói credibilidade permanentemente</li>
-    <li><strong>Mais de 1 mensagem por dia</strong> — excesso gera bloqueio no WhatsApp</li>
-  </ul>
-
-  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Baseado em: Thaler & Sunstein (Nudge), Kahneman (Prospect Theory), estudos PNAS com 13M pessoas, casos CloQ e Symend, e Behavioural Insights Team (UK).</p>
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Baseado em: Thaler &amp; Sunstein (Nudge), Kahneman (Prospect Theory), Cialdini (Influence), Gollwitzer (Implementation Intentions), Behavioural Insights Team (UK).</p>
 </div>
 
 <!-- SLIDE 7: MODELO MULTI-NÚMERO -->
