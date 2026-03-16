@@ -148,6 +148,49 @@
 
 <div class="deck">
 
+<!-- DECISÕES NECESSÁRIAS (topo) -->
+<div class="slide approval">
+  <h2><span class="num">!</span> Decisões Necessárias</h2>
+  <p style="margin-bottom: 1.5rem;">Para prosseguir com a implementação, precisamos de aprovação nos seguintes pontos:</p>
+
+  <div class="approval-grid">
+    <div class="approval-item">
+      <div class="label">1. Escopo do Bot</div>
+      <div class="value">As capacidades listadas no slide 3 estão corretas? Falta algo? Algo deve ser removido?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">2. Tom das Mensagens</div>
+      <div class="value">A régua progressiva (amigável &rarr; urgente) está adequada para os clientes da Uúba?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">3. Regras de Escalação</div>
+      <div class="value">Os critérios para escalar para humano estão corretos? Quem recebe a escalação?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">4. Limites do Bot</div>
+      <div class="value">Concorda com o que o bot NÃO deve fazer (slide 5)?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">5. Horário de Envio</div>
+      <div class="value">8h-20h (seg-sex), 9h-14h (sáb). Correto? Domingo não envia?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">6. Protocolo de Cobrança Comportamental</div>
+      <div class="value">Concordam com as etapas e técnicas do protocolo (slide 6)? Os exemplos de mensagem estão adequados?</div>
+    </div>
+    <div class="approval-item" style="border-color: var(--green); opacity: 0.7;">
+      <div class="label">7. Modelo Multi-Número <span class="tag tag-green">Aprovado</span></div>
+      <div class="value">A Uúba fornece o número WhatsApp dedicado para cada cliente.</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">8. Integração Conta Azul</div>
+      <div class="value">Temos acesso à API / sandbox da Conta Azul para gerar links de pagamento e receber webhooks?</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.9rem; text-align: center;">Após aprovação, a implementação técnica pode começar imediatamente. Detalhes de cada ponto abaixo.</p>
+</div>
+
 <!-- SLIDE 1: VISÃO GERAL -->
 <div class="slide">
   <h2><span class="num">1</span> O que é</h2>
@@ -931,48 +974,6 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
   </div>
 </div>
 
-<!-- SLIDE 11: APROVAÇÃO -->
-<div class="slide approval">
-  <h2><span class="num">!</span> Decisão Necessária</h2>
-  <p style="margin-bottom: 1.5rem;">Para prosseguir com a implementação, precisamos de aprovação nos seguintes pontos:</p>
-
-  <div class="approval-grid">
-    <div class="approval-item">
-      <div class="label">1. Escopo do Bot</div>
-      <div class="value">As capacidades listadas no slide 3 estão corretas? Falta algo? Algo deve ser removido?</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">2. Tom das Mensagens</div>
-      <div class="value">A régua progressiva (amigável &rarr; urgente) está adequada para os clientes da Uúba?</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">3. Regras de Escalação</div>
-      <div class="value">Os critérios para escalar para humano estão corretos? Quem recebe a escalação?</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">4. Limites do Bot</div>
-      <div class="value">Concorda com o que o bot NÃO deve fazer (slide 5)?</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">5. Horário de Envio</div>
-      <div class="value">8h-20h (seg-sex), 9h-14h (sáb). Correto? Domingo não envia?</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">6. Estratégia de Nudge</div>
-      <div class="value">Concordam com as 7 técnicas comportamentais (slide 6)? Os exemplos de mensagem estão adequados ao perfil dos clientes?</div>
-    </div>
-    <div class="approval-item" style="border-color: var(--green); opacity: 0.7;">
-      <div class="label">7. Modelo Multi-Número <span class="tag tag-green">Aprovado</span></div>
-      <div class="value">A Uúba fornece o número WhatsApp dedicado para cada cliente.</div>
-    </div>
-    <div class="approval-item">
-      <div class="label">8. Integração Conta Azul</div>
-      <div class="value">Temos acesso à API / sandbox da Conta Azul para gerar links de pagamento e receber webhooks?</div>
-    </div>
-  </div>
-
-  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.9rem; text-align: center;">Após aprovação, a implementação técnica (Sprint 3) pode começar imediatamente.</p>
-</div>
 
 </div>
 
