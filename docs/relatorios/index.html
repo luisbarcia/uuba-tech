@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Relatórios Semanais</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Nav */
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+  nav .sep { color: var(--surface2); }
+  nav .title { color: var(--muted); font-size: 0.9rem; }
+  nav .week-nav { margin-left: auto; display: flex; gap: 0.5rem; }
+  nav .week-nav a { color: var(--accent); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; background: var(--surface2); transition: all 0.2s; }
+  nav .week-nav a:hover, nav .week-nav a.active { background: var(--accent); color: var(--bg); }
+
+  /* Slides */
+  .deck { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); transition: transform 0.2s; }
+  .slide:hover { transform: translateY(-2px); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; }
+  .hero .date { color: var(--accent2); font-size: 0.95rem; margin-top: 1rem; font-weight: 600; }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .kpi { background: var(--surface2); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .kpi .value { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .kpi .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+  .kpi.green .value { color: var(--green); }
+  .kpi.yellow .value { color: var(--yellow); }
+  .kpi.red .value { color: var(--red); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+  .severity-critica { color: var(--red); font-weight: 700; }
+  .severity-alta { color: var(--yellow); font-weight: 600; }
+  .severity-media { color: var(--accent); }
+
+  /* Progress bar */
+  .progress-bar { background: var(--surface2); border-radius: 20px; height: 24px; overflow: hidden; margin: 0.5rem 0; }
+  .progress-fill { height: 100%; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; transition: width 1s ease; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 0.15rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+
+  /* Lists */
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.3rem 0; }
+  li::marker { color: var(--accent); }
+
+  /* Checklist */
+  .check { color: var(--green); margin-right: 0.35rem; }
+  .pending { color: var(--muted); margin-right: 0.35rem; }
+
+  /* Architecture diagram */
+  .arch { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid var(--surface2); }
+
+  /* URLs */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.75rem; }
+    .slide { padding: 1.5rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .arch { font-size: 0.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">UUBA</span>
+  <span class="sep">|</span>
+  <span class="title">Relatórios Semanais</span>
+  <div class="week-nav">
+    <a href="#" class="active">Sem 11</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="slide hero">
+  <h1>Uúba Tech — <span>Sprint Report</span></h1>
+  <div class="subtitle">Plataforma de cobrança inteligente para PMEs brasileiras</div>
+  <div class="date">Semana 11 — 10 a 16 de Março 2026</div>
+</div>
+
+<div class="deck">
+
+<!-- SLIDE 1: RESUMO -->
+<div class="slide">
+  <h2><span class="num">1</span> Resumo Executivo</h2>
+  <p>Semana de <strong>fundação completa</strong> do projeto. Saímos do zero para uma API funcional em produção com documentação pública, 174 testes automatizados e CI/CD.</p>
+  <div class="kpi-grid" style="margin-top:1.5rem">
+    <div class="kpi"><div class="value">30</div><div class="label">Commits</div></div>
+    <div class="kpi"><div class="value">6.760</div><div class="label">Linhas de código</div></div>
+    <div class="kpi green"><div class="value">14</div><div class="label">Endpoints REST</div></div>
+    <div class="kpi green"><div class="value">174</div><div class="label">Testes automatizados</div></div>
+    <div class="kpi"><div class="value">7</div><div class="label">Bugs corrigidos</div></div>
+    <div class="kpi green"><div class="value">2.4s</div><div class="label">Tempo dos testes</div></div>
+  </div>
+</div>
+
+<!-- SLIDE 2: O QUE FOI ENTREGUE -->
+<div class="slide">
+  <h2><span class="num">2</span> Entregas da Semana</h2>
+
+  <h3>Site Institucional</h3>
+  <p><span class="tag tag-green">Publicado</span> <a href="https://uuba.tech" target="_blank">uuba.tech</a></p>
+  <ul>
+    <li>One-pager + 5 páginas de produtos (Nexo, Recebe, Bot CFO, 360, Alerta)</li>
+    <li>Copywriting profissional, SEO completo, design responsivo</li>
+  </ul>
+
+  <h3>API REST</h3>
+  <p><span class="tag tag-green">Em produção</span> <a href="https://api.uuba.tech/health" target="_blank">api.uuba.tech</a></p>
+  <ul>
+    <li>14 endpoints: Clientes (5) + Faturas (4) + Cobranças (5)</li>
+    <li>FastAPI + PostgreSQL 16 + SQLAlchemy 2.0 async</li>
+    <li>Auth por API Key, erros RFC 9457, paginação, filtros</li>
+  </ul>
+
+  <h3>Documentação</h3>
+  <p><span class="tag tag-green">Publicada</span> <a href="https://developers.uuba.tech" target="_blank">developers.uuba.tech</a></p>
+  <ul>
+    <li>OpenAPI 3.1 + Scalar API Reference (padrão Stripe/Twilio)</li>
+    <li>Getting Started com exemplos curl</li>
+  </ul>
+
+  <h3>CI/CD</h3>
+  <p><span class="tag tag-green">Verde</span> GitHub Actions</p>
+  <ul>
+    <li>Pipeline: Lint (ruff) → Test (174 testes + PostgreSQL) → Docker Build</li>
+  </ul>
+
+  <h3>Infraestrutura</h3>
+  <p><span class="tag tag-blue">VPS</span> Docker Compose + Nginx + Let's Encrypt SSL</p>
+</div>
+
+<!-- SLIDE 3: ENDPOINTS -->
+<div class="slide">
+  <h2><span class="num">3</span> API — 14 Endpoints</h2>
+  <table>
+    <tr><th>Método</th><th>Endpoint</th><th>Descrição</th></tr>
+    <tr><td><span class="tag tag-green">POST</span></td><td>/api/v1/clientes</td><td>Cadastrar cliente</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/clientes</td><td>Listar clientes</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/clientes/{id}</td><td>Buscar cliente</td></tr>
+    <tr><td><span class="tag tag-yellow">PATCH</span></td><td>/api/v1/clientes/{id}</td><td>Atualizar cliente</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/clientes/{id}/metricas</td><td>Métricas financeiras</td></tr>
+    <tr><td><span class="tag tag-green">POST</span></td><td>/api/v1/faturas</td><td>Registrar fatura</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/faturas</td><td>Listar faturas</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/faturas/{id}</td><td>Buscar fatura</td></tr>
+    <tr><td><span class="tag tag-yellow">PATCH</span></td><td>/api/v1/faturas/{id}</td><td>Atualizar status/promessa</td></tr>
+    <tr><td><span class="tag tag-green">POST</span></td><td>/api/v1/cobrancas</td><td>Registrar cobrança</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/cobrancas</td><td>Listar cobranças</td></tr>
+    <tr><td><span class="tag tag-blue">GET</span></td><td>/api/v1/cobrancas/{id}/historico</td><td>Timeline da fatura</td></tr>
+    <tr><td><span class="tag tag-yellow">PATCH</span></td><td>/api/v1/cobrancas/{id}/pausar</td><td>Pausar régua</td></tr>
+    <tr><td><span class="tag tag-yellow">PATCH</span></td><td>/api/v1/cobrancas/{id}/retomar</td><td>Retomar régua</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 4: TESTES -->
+<div class="slide">
+  <h2><span class="num">4</span> Qualidade — 174 Testes</h2>
+  <p style="margin-bottom:1rem">3 fases do Testing Arsenal aplicadas:</p>
+
+  <div style="margin-bottom: 1rem">
+    <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem">
+      <span>Foundation (unit + integration)</span><span>86 testes</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:49%; background: var(--green);">49%</div>
+    </div>
+  </div>
+  <div style="margin-bottom: 1rem">
+    <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem">
+      <span>API Breaker (security)</span><span>66 testes</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:38%; background: var(--yellow);">38%</div>
+    </div>
+  </div>
+  <div style="margin-bottom: 1.5rem">
+    <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem">
+      <span>Data Integrity</span><span>22 testes</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:13%; background: var(--accent2);">13%</div>
+    </div>
+  </div>
+
+  <h3>Vetores de Ataque Testados</h3>
+  <div style="margin-top:0.75rem">
+    <span class="tag tag-green">Auth bypass</span>
+    <span class="tag tag-green">SQL injection</span>
+    <span class="tag tag-green">XSS</span>
+    <span class="tag tag-green">Mass assignment</span>
+    <span class="tag tag-green">Path traversal</span>
+    <span class="tag tag-green">FK constraints</span>
+    <span class="tag tag-green">Encoding (emoji/CJK)</span>
+    <span class="tag tag-green">Pagination abuse</span>
+    <span class="tag tag-green">State machine</span>
+    <span class="tag tag-green">RFC 9457 contracts</span>
+  </div>
+</div>
+
+<!-- SLIDE 5: BUGS -->
+<div class="slide">
+  <h2><span class="num">5</span> Bugs Encontrados e Corrigidos</h2>
+  <p style="margin-bottom:1rem; color: var(--muted)">Todos encontrados pelos testes automatizados, corrigidos antes do deploy:</p>
+  <table>
+    <tr><th>#</th><th>Bug</th><th>Severidade</th><th>Status</th></tr>
+    <tr><td>1</td><td>Middleware bloqueava exception handlers</td><td class="severity-critica">CRITICA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>2</td><td>IntegrityError não capturado (clientes)</td><td class="severity-alta">ALTA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>3</td><td>IntegrityError não capturado (faturas)</td><td class="severity-alta">ALTA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>4</td><td>IntegrityError não capturado (cobranças)</td><td class="severity-alta">ALTA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>5</td><td>Input inválido em filtro de período crasheava</td><td class="severity-alta">ALTA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>6</td><td>Paginação aceitava limit negativo</td><td class="severity-media">MEDIA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+    <tr><td>7</td><td>Comparação de datas com timezone inconsistente</td><td class="severity-media">MEDIA</td><td><span class="tag tag-green">Corrigido</span></td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 6: ARQUITETURA -->
+<div class="slide">
+  <h2><span class="num">6</span> Arquitetura Planejada</h2>
+  <div class="arch">
+┌─────────────┐     ┌──────────────────┐     ┌─────────────┐
+│   WhatsApp   │────▶│   n8n Workflows   │────▶│  Claude AI   │
+│   Cliente    │◀────│                    │◀────│  3 Agentes   │
+└─────────────┘     └────────┬───────────┘     └─────────────┘
+                             │
+                    ┌────────▼───────────┐
+                    │   FastAPI (REST)    │  ◀── api.uuba.tech
+                    │   14 endpoints      │
+                    └────────┬───────────┘
+                             │
+                    ┌────────▼───────────┐
+                    │   PostgreSQL 16     │
+                    │   clientes          │
+                    │   faturas           │
+                    │   cobrancas         │
+                    │   agent_decisions   │  ◀── Sprint 3
+                    └────────────────────┘</div>
+
+  <h3>3 Agentes IA (próximo sprint)</h3>
+  <table>
+    <tr><th>Agente</th><th>Modelo</th><th>Função</th></tr>
+    <tr><td>Triagem</td><td>Claude Haiku</td><td>Classifica urgência e decide próxima ação</td></tr>
+    <tr><td>Cobrança</td><td>Claude Sonnet</td><td>Gera mensagens personalizadas por tom/canal</td></tr>
+    <tr><td>Relatórios</td><td>Claude Sonnet</td><td>Analisa carteira e gera insights</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 7: PRÓXIMOS PASSOS -->
+<div class="slide">
+  <h2><span class="num">7</span> Próximos Passos</h2>
+  <table>
+    <tr><th>Prioridade</th><th>Item</th><th>Sprint</th></tr>
+    <tr><td><span class="tag tag-yellow">P0</span></td><td>Rodar migração Alembic na VPS (criar tabelas)</td><td>Imediato</td></tr>
+    <tr><td><span class="tag tag-yellow">P0</span></td><td>Sistema de agentes (agent_decisions, prompts, examples)</td><td>Sprint 3</td></tr>
+    <tr><td><span class="tag tag-blue">P1</span></td><td>Escalação, relatórios, dashboard, webhooks</td><td>Sprint 4</td></tr>
+    <tr><td><span class="tag tag-blue">P1</span></td><td>Workflows n8n com agentes IA</td><td>Sprint 5</td></tr>
+    <tr><td><span class="tag tag-purple">P2</span></td><td>SonarCloud — badges de qualidade</td><td>Sprint 6</td></tr>
+    <tr><td><span class="tag tag-purple">P2</span></td><td>Testes de performance (k6 load testing)</td><td>Sprint 6</td></tr>
+  </table>
+
+  <h3 style="margin-top:1.5rem">Progresso Geral do MVP</h3>
+  <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.25rem; margin-top:0.5rem">
+    <span>Fase 1 — MVP Completo (25 tasks, 7 chunks)</span><span>Chunks 1-2 de 7</span>
+  </div>
+  <div class="progress-bar" style="height:28px">
+    <div class="progress-fill" style="width:28%; background: linear-gradient(90deg, var(--green), var(--accent));">28%</div>
+  </div>
+</div>
+
+<!-- SLIDE 8: LINKS -->
+<div class="slide">
+  <h2><span class="num">8</span> Links Úteis</h2>
+  <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr))">
+    <div class="kpi" style="text-align:left">
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem">Site</div>
+      <a href="https://uuba.tech" target="_blank">uuba.tech</a>
+    </div>
+    <div class="kpi" style="text-align:left">
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem">API</div>
+      <a href="https://api.uuba.tech/health" target="_blank">api.uuba.tech</a>
+    </div>
+    <div class="kpi" style="text-align:left">
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem">Docs</div>
+      <a href="https://developers.uuba.tech" target="_blank">developers.uuba.tech</a>
+    </div>
+    <div class="kpi" style="text-align:left">
+      <div style="font-size:0.8rem; color:var(--muted); margin-bottom:0.5rem">Repositório</div>
+      <a href="https://github.com/luisbarcia/uuba-tech" target="_blank">GitHub (privado)</a>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  Uúba Tech &copy; 2026 — Relatório gerado automaticamente
+</div>
+
+</body>
+</html>
