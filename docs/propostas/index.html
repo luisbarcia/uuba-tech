@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Propostas</title>
+<style>
+  :root { --bg: #0f172a; --surface: #1e293b; --surface2: #334155; --accent: #38bdf8; --accent2: #818cf8; --yellow: #fbbf24; --green: #4ade80; --text: #e2e8f0; --muted: #94a3b8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  nav .links { margin-left: auto; display: flex; gap: 0.5rem; }
+  nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+  nav .links a:hover { color: var(--text); background: var(--surface2); }
+  nav .links a.active { color: var(--accent); background: var(--surface2); }
+  .main { display: flex; flex-direction: column; align-items: center; padding: 3rem 2rem; }
+  .container { max-width: 640px; width: 100%; }
+  .title { font-size: 1.75rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 2.5rem; }
+  .card { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; padding: 1.5rem 1.75rem; margin-bottom: 1rem; text-decoration: none; display: flex; align-items: center; gap: 1.25rem; transition: all 0.2s; }
+  .card:hover { transform: translateY(-2px); border-color: var(--accent); background: #1a2744; }
+  .icon { font-size: 2rem; flex-shrink: 0; width: 48px; text-align: center; }
+  .card-text h3 { color: var(--text); font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .card-text p { color: var(--muted); font-size: 0.85rem; }
+  .badge { display: inline-block; font-size: 0.7rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 20px; margin-left: 0.5rem; vertical-align: middle; }
+  .badge-pending { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .badge-approved { background: rgba(74,222,128,0.15); color: var(--green); }
+  .footer { text-align: center; color: var(--surface2); font-size: 0.75rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="./" class="active">Propostas</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+  </div>
+</nav>
+
+<div class="main">
+<div class="container">
+  <div class="title">Propostas</div>
+  <div class="subtitle">Propostas de produto e funcionalidades para aprovação</div>
+
+  <a class="card" href="bot-whatsapp.html">
+    <div class="icon">🤖</div>
+    <div class="card-text">
+      <h3>Bot WhatsApp <span class="badge badge-pending">Aguardando Aprovação</span></h3>
+      <p>Assistente inteligente de cobrança via WhatsApp — cobra automaticamente e responde clientes com IA</p>
+    </div>
+  </a>
+
+  <div class="footer">Uúba Tech &copy; 2026 — Acesso interno</div>
+</div>
+</div>
+
+</body>
+</html>

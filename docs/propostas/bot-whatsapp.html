@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Proposta: Bot WhatsApp</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Nav */
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  nav .links { display: flex; gap: 0.5rem; margin-left: auto; }
+  nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+  nav .links a:hover { color: var(--text); background: var(--surface2); }
+  nav .links a.active { color: var(--accent); background: var(--surface2); }
+
+  /* Slides */
+  .deck { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); transition: transform 0.2s; }
+  .slide:hover { transform: translateY(-2px); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; }
+  .hero .date { color: var(--accent2); font-size: 0.95rem; margin-top: 1rem; font-weight: 600; }
+  .hero .status-badge { display: inline-block; margin-top: 1rem; padding: 0.4rem 1.2rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; background: rgba(251,191,36,0.2); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .kpi { background: var(--surface2); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .kpi .value { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .kpi .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+  .kpi.green .value { color: var(--green); }
+  .kpi.yellow .value { color: var(--yellow); }
+  .kpi.purple .value { color: var(--accent2); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 0.15rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-orange { background: rgba(251,146,60,0.15); color: var(--orange); }
+
+  /* Lists */
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.3rem 0; }
+  li::marker { color: var(--accent); }
+
+  /* Architecture diagram */
+  .arch { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid var(--surface2); }
+
+  /* Flow cards */
+  .flow-card { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; border: 1px solid var(--surface2); }
+  .flow-card h4 { color: var(--accent); font-size: 1rem; margin-bottom: 0.75rem; }
+  .flow-steps { display: flex; flex-direction: column; gap: 0.5rem; }
+  .flow-step { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--surface); border-radius: 8px; font-size: 0.9rem; }
+  .flow-step .step-num { background: var(--accent2); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; }
+  .flow-arrow { color: var(--accent); font-size: 1.25rem; text-align: center; }
+
+  /* Capability grid */
+  .cap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .cap-item { background: var(--bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--surface2); }
+  .cap-item .cap-icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .cap-item h4 { color: var(--text); font-size: 0.95rem; margin-bottom: 0.25rem; }
+  .cap-item p { color: var(--muted); font-size: 0.8rem; }
+
+  /* Risk table */
+  .risk-high { color: var(--red); font-weight: 700; }
+  .risk-medium { color: var(--yellow); font-weight: 600; }
+  .risk-low { color: var(--green); }
+
+  /* Approval section */
+  .approval { background: linear-gradient(135deg, #1a2744 0%, var(--surface) 100%); border: 2px solid var(--accent2); }
+  .approval h2 { color: var(--accent2); }
+  .approval-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 1.5rem 0; }
+  .approval-item { background: var(--bg); border-radius: 10px; padding: 1.25rem; border: 1px solid var(--surface2); }
+  .approval-item .label { color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+  .approval-item .value { color: var(--text); font-size: 1rem; font-weight: 600; }
+
+  /* URLs */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.75rem; }
+    .slide { padding: 1.5rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .cap-grid { grid-template-columns: 1fr; }
+    .approval-grid { grid-template-columns: 1fr; }
+    .arch { font-size: 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="./" class="active">Propostas</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="slide hero">
+  <h1>Bot WhatsApp <span>Uúba</span></h1>
+  <div class="subtitle">Assistente inteligente de cobrança via WhatsApp</div>
+  <div class="date">Proposta — Março 2026</div>
+  <div class="status-badge">Aguardando Aprovação</div>
+</div>
+
+<div class="deck">
+
+<!-- SLIDE 1: VISÃO GERAL -->
+<div class="slide">
+  <h2><span class="num">1</span> O que é</h2>
+  <p style="font-size: 1.05rem; margin-bottom: 1.5rem;">Um assistente virtual no WhatsApp que <strong>cobra clientes automaticamente</strong> e <strong>responde dúvidas em tempo real</strong>, usando inteligência artificial para adaptar tom e conteúdo a cada situação.</p>
+
+  <div class="kpi-grid">
+    <div class="kpi green">
+      <div class="value">24/7</div>
+      <div class="label">Disponível sempre</div>
+    </div>
+    <div class="kpi purple">
+      <div class="value">IA</div>
+      <div class="label">Claude (Anthropic)</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="value">2</div>
+      <div class="label">Fluxos principais</div>
+    </div>
+    <div class="kpi">
+      <div class="value">Auto</div>
+      <div class="label">Escala para humano</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 2: FLUXOS -->
+<div class="slide">
+  <h2><span class="num">2</span> Como funciona</h2>
+
+  <div class="flow-card">
+    <h4>Fluxo 1 — Bot inicia (Régua de Cobrança)</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Régua detecta fatura vencida (automático, diário)</div>
+      <div class="flow-step"><span class="step-num">2</span> Bot envia mensagem no WhatsApp com tom adequado ao atraso</div>
+      <div class="flow-step"><span class="step-num">3</span> Cliente responde</div>
+      <div class="flow-step"><span class="step-num">4</span> Bot entende a resposta e reage (promessa, dúvida, reclamação...)</div>
+    </div>
+  </div>
+
+  <div class="flow-card">
+    <h4>Fluxo 2 — Cliente inicia (Atendimento)</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Cliente manda mensagem no WhatsApp</div>
+      <div class="flow-step"><span class="step-num">2</span> Bot identifica o cliente pelo número de telefone</div>
+      <div class="flow-step"><span class="step-num">3</span> Puxa contexto: faturas, cobranças, histórico</div>
+      <div class="flow-step"><span class="step-num">4</span> Conversa com o cliente: consultar faturas, tirar dúvidas, pagar</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 3: CAPACIDADES -->
+<div class="slide">
+  <h2><span class="num">3</span> O que o bot sabe fazer</h2>
+
+  <table>
+    <tr>
+      <th>Situação</th>
+      <th>O que o bot faz</th>
+      <th>Tipo</th>
+    </tr>
+    <tr>
+      <td>Fatura vencida</td>
+      <td>Envia cobrança com tom progressivo (amigável, firme, urgente)</td>
+      <td><span class="tag tag-orange">Cobrança</span></td>
+    </tr>
+    <tr>
+      <td>"Vou pagar sexta"</td>
+      <td>Registra promessa de pagamento e agenda follow-up automático</td>
+      <td><span class="tag tag-blue">Registro</span></td>
+    </tr>
+    <tr>
+      <td>"Já paguei"</td>
+      <td>Verifica no sistema; se confirmado, agradece; senão, pede comprovante</td>
+      <td><span class="tag tag-green">Verificação</span></td>
+    </tr>
+    <tr>
+      <td>"Que fatura é essa?"</td>
+      <td>Puxa NF, valor, data de vencimento e envia os detalhes</td>
+      <td><span class="tag tag-purple">Consulta</span></td>
+    </tr>
+    <tr>
+      <td>"Quanto devo?"</td>
+      <td>Lista total em aberto e todas as faturas pendentes</td>
+      <td><span class="tag tag-purple">Consulta</span></td>
+    </tr>
+    <tr>
+      <td>"Quero pagar agora"</td>
+      <td>Envia link de pagamento (Pix/boleto via Asaas)</td>
+      <td><span class="tag tag-green">Pagamento</span></td>
+    </tr>
+    <tr>
+      <td>"Quero parcelar"</td>
+      <td>Escala para atendente humano</td>
+      <td><span class="tag tag-red">Escalação</span></td>
+    </tr>
+    <tr>
+      <td>Cliente irritado</td>
+      <td>Detecta sentimento, acalma a situação, escala para humano</td>
+      <td><span class="tag tag-red">Escalação</span></td>
+    </tr>
+    <tr>
+      <td>Cliente ignora cobranças</td>
+      <td>Escala tom automaticamente (amigável &rarr; neutro &rarr; firme &rarr; urgente)</td>
+      <td><span class="tag tag-orange">Cobrança</span></td>
+    </tr>
+    <tr>
+      <td>Número desconhecido</td>
+      <td>"Não encontrei seu cadastro. Qual seu CNPJ?"</td>
+      <td><span class="tag tag-blue">Identificação</span></td>
+    </tr>
+    <tr>
+      <td>"Oi" / saudação</td>
+      <td>Identifica pelo telefone, cumprimenta pelo nome, oferece ajuda</td>
+      <td><span class="tag tag-blue">Atendimento</span></td>
+    </tr>
+    <tr>
+      <td>Pagamento confirmado</td>
+      <td>Recebe webhook do Asaas, atualiza fatura, agradece o cliente</td>
+      <td><span class="tag tag-green">Automação</span></td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 4: REGRAS DE NEGÓCIO -->
+<div class="slide">
+  <h2><span class="num">4</span> Regras de Negócio</h2>
+
+  <h3>Tom da Cobrança (Régua Progressiva)</h3>
+  <table>
+    <tr><th>Dias de atraso</th><th>Tom</th><th>Exemplo de abertura</th></tr>
+    <tr>
+      <td>1-3 dias</td>
+      <td><span class="tag tag-green">Amigável</span></td>
+      <td>"Oi [nome]! Notei que a fatura X ficou em aberto. Pode ter passado despercebido..."</td>
+    </tr>
+    <tr>
+      <td>4-10 dias</td>
+      <td><span class="tag tag-blue">Neutro</span></td>
+      <td>"Olá [nome]. A fatura X está pendente há [N] dias. Precisa de ajuda?"</td>
+    </tr>
+    <tr>
+      <td>11-30 dias</td>
+      <td><span class="tag tag-yellow">Firme</span></td>
+      <td>"[nome], a fatura X está com [N] dias de atraso. É importante regularizar..."</td>
+    </tr>
+    <tr>
+      <td>30+ dias</td>
+      <td><span class="tag tag-red">Urgente</span></td>
+      <td>"[nome], existem pendências significativas na sua conta. Precisamos resolver..."</td>
+    </tr>
+  </table>
+
+  <h3>Escalação para Humano</h3>
+  <ul>
+    <li>Cliente pede parcelamento ou condições especiais</li>
+    <li>Cliente demonstra irritação ou usa linguagem agressiva</li>
+    <li>Questão jurídica ou contratual</li>
+    <li>Bot não consegue resolver após 3 interações</li>
+    <li>Cliente pede explicitamente para falar com humano</li>
+  </ul>
+
+  <h3>Segurança e Privacidade</h3>
+  <ul>
+    <li>Bot sempre se identifica como assistente virtual ("Sou o assistente da Uúba")</li>
+    <li>Nunca revela dados de outros clientes</li>
+    <li>Valores e dados financeiros só para o titular identificado pelo telefone</li>
+    <li>Conversas não são armazenadas indefinidamente (retenção limitada)</li>
+    <li>Opt-out: cliente pode pedir para não receber mensagens automáticas</li>
+  </ul>
+</div>
+
+<!-- SLIDE 5: LIMITES -->
+<div class="slide">
+  <h2><span class="num">5</span> O que o bot NÃO faz</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted);">Limites claros para evitar problemas:</p>
+
+  <table>
+    <tr><th>Ação</th><th>Motivo</th></tr>
+    <tr>
+      <td>Negociar descontos ou parcelamentos</td>
+      <td>Requer análise humana — política comercial</td>
+    </tr>
+    <tr>
+      <td>Cancelar contratos ou serviços</td>
+      <td>Ação irreversível — precisa de confirmação humana</td>
+    </tr>
+    <tr>
+      <td>Dar aconselhamento jurídico</td>
+      <td>Risco legal — escala para o departamento correto</td>
+    </tr>
+    <tr>
+      <td>Enviar mensagens fora do horário comercial</td>
+      <td>Respeita horário: 8h-20h (seg-sex), 9h-14h (sáb)</td>
+    </tr>
+    <tr>
+      <td>Insistir quando cliente pede para parar</td>
+      <td>Respeita opt-out imediatamente</td>
+    </tr>
+    <tr>
+      <td>Inventar informações financeiras</td>
+      <td>Só responde com dados confirmados via API</td>
+    </tr>
+    <tr>
+      <td>Cobrar clientes adimplentes</td>
+      <td>Régua só dispara para faturas realmente vencidas</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 6: ARQUITETURA -->
+<div class="slide">
+  <h2><span class="num">6</span> Arquitetura Técnica</h2>
+  <div class="arch">
+┌──────────────────┐
+│   WhatsApp       │  Cliente envia/recebe mensagens
+│   (celular)      │
+└────────┬─────────┘
+         │
+         ▼
+┌──────────────────┐
+│  Evolution API   │  Self-hosted na VPS
+│  (wa.uuba.tech)  │  Ponte entre WhatsApp e nosso sistema
+└────────┬─────────┘
+         │ webhook
+         ▼
+┌──────────────────────────────────────────┐
+│              n8n (orquestrador)           │
+│                                           │
+│  Webhook ──▶ Identificar ──▶ Agente IA   │
+│              cliente          (Claude)    │
+│                                  │        │
+│  Régua ────────────────────────▶ │        │
+│  (cron)                          │        │
+│                                  ▼        │
+│                          ┌────────────┐   │
+│                          │  Ações:    │   │
+│                          │ • Responder│   │
+│                          │ • Registrar│   │
+│                          │ • Escalar  │   │
+│                          └────────────┘   │
+└────────────────────┬─────────────────────┘
+                     │
+                     ▼
+┌──────────────────────────────────────────┐
+│           Uúba Tech API                   │
+│       (api.uuba.tech — FastAPI)           │
+│                                           │
+│  Clientes · Faturas · Cobranças           │
+│  Métricas · Histórico                     │
+└──────────────────────────────────────────┘</div>
+
+  <h3>Stack Tecnológico</h3>
+  <table>
+    <tr><th>Componente</th><th>Tecnologia</th><th>Função</th></tr>
+    <tr><td>WhatsApp Gateway</td><td>Evolution API v2</td><td>Enviar e receber mensagens</td></tr>
+    <tr><td>Orquestração</td><td>n8n (self-hosted)</td><td>Workflows, webhooks, agendamento</td></tr>
+    <tr><td>Inteligência</td><td>Claude Sonnet (Anthropic)</td><td>Entender contexto, gerar respostas</td></tr>
+    <tr><td>Backend</td><td>FastAPI + PostgreSQL</td><td>Dados de clientes, faturas, cobranças</td></tr>
+    <tr><td>Cache</td><td>Redis</td><td>Sessões WhatsApp, performance</td></tr>
+    <tr><td>Infraestrutura</td><td>VPS + Docker + Nginx + SSL</td><td>Tudo self-hosted</td></tr>
+  </table>
+</div>
+
+<!-- SLIDE 7: O QUE JÁ TEMOS -->
+<div class="slide">
+  <h2><span class="num">7</span> O que já existe</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted);">Base sólida construída no Sprint 1-2:</p>
+
+  <table>
+    <tr><th>Item</th><th>Status</th><th>Detalhe</th></tr>
+    <tr>
+      <td>API REST</td>
+      <td><span class="tag tag-green">Produção</span></td>
+      <td>14 endpoints — clientes, faturas, cobranças, métricas</td>
+    </tr>
+    <tr>
+      <td>Dados mock</td>
+      <td><span class="tag tag-green">Pronto</span></td>
+      <td>8 clientes, 16 faturas, 13 cobranças para teste</td>
+    </tr>
+    <tr>
+      <td>Testes automatizados</td>
+      <td><span class="tag tag-green">174 testes</span></td>
+      <td>Unit + integration + security + data integrity</td>
+    </tr>
+    <tr>
+      <td>CI/CD</td>
+      <td><span class="tag tag-green">Verde</span></td>
+      <td>GitHub Actions: lint + test + build</td>
+    </tr>
+    <tr>
+      <td>n8n</td>
+      <td><span class="tag tag-green">Rodando</span></td>
+      <td>Workflow protótipo da régua funcional</td>
+    </tr>
+    <tr>
+      <td>Infraestrutura</td>
+      <td><span class="tag tag-green">Pronta</span></td>
+      <td>VPS + Docker Compose + Nginx + SSL</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 8: ROADMAP -->
+<div class="slide">
+  <h2><span class="num">8</span> Roadmap de Implementação</h2>
+
+  <table>
+    <tr><th>Sprint</th><th>Objetivo</th><th>Entregas</th></tr>
+    <tr>
+      <td><span class="tag tag-blue">Sprint 3</span></td>
+      <td>WhatsApp Bidirecional</td>
+      <td>
+        Evolution API instalada, WhatsApp conectado,<br>
+        workflows de envio e recebimento funcionando
+      </td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-purple">Sprint 4</span></td>
+      <td>Agente Conversacional</td>
+      <td>
+        Bot com IA que entende contexto,<br>
+        responde dúvidas, registra promessas,<br>
+        escala para humano
+      </td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-yellow">Sprint 5</span></td>
+      <td>Régua Automática</td>
+      <td>
+        Cobrança automática com tom progressivo,<br>
+        follow-up de promessas, integração com<br>
+        histórico de conversa
+      </td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-green">Sprint 6</span></td>
+      <td>Pagamento + Polish</td>
+      <td>
+        Webhook Asaas (pagamento confirmado),<br>
+        link de pagamento via WhatsApp,<br>
+        feedback loop do agente
+      </td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 9: DEPENDÊNCIAS E RISCOS -->
+<div class="slide">
+  <h2><span class="num">9</span> Dependências e Riscos</h2>
+
+  <h3>Dependências do Time</h3>
+  <table>
+    <tr><th>Item</th><th>Quando</th><th>Responsável</th></tr>
+    <tr>
+      <td>Número WhatsApp (chip dedicado para o bot)</td>
+      <td>Sprint 3</td>
+      <td>Equipe</td>
+    </tr>
+    <tr>
+      <td>DNS wa.uuba.tech apontando para a VPS</td>
+      <td>Sprint 3</td>
+      <td>Equipe (Wix DNS)</td>
+    </tr>
+    <tr>
+      <td>Aprovação do tom e mensagens de cobrança</td>
+      <td>Sprint 4</td>
+      <td>Equipe</td>
+    </tr>
+    <tr>
+      <td>Conta Asaas (sandbox para testes de pagamento)</td>
+      <td>Sprint 6</td>
+      <td>Equipe</td>
+    </tr>
+  </table>
+
+  <h3>Riscos Identificados</h3>
+  <table>
+    <tr><th>Risco</th><th>Impacto</th><th>Mitigação</th></tr>
+    <tr>
+      <td>WhatsApp bane o número por spam</td>
+      <td class="risk-high">Alto</td>
+      <td>Começar com poucos clientes, tom amigável, respeitar opt-in/opt-out, horário comercial</td>
+    </tr>
+    <tr>
+      <td>IA alucina dados financeiros</td>
+      <td class="risk-high">Alto</td>
+      <td>Prompt rigoroso: bot SEMPRE valida dados contra a API antes de responder; nunca inventa valores</td>
+    </tr>
+    <tr>
+      <td>Cliente confunde bot com humano</td>
+      <td class="risk-medium">Médio</td>
+      <td>Primeira mensagem sempre inclui "Sou o assistente virtual da Uúba"</td>
+    </tr>
+    <tr>
+      <td>Evolution API instável</td>
+      <td class="risk-medium">Médio</td>
+      <td>Monitoramento ativo, fallback para API oficial do WhatsApp se necessário</td>
+    </tr>
+    <tr>
+      <td>Custo de API da Anthropic</td>
+      <td class="risk-low">Baixo</td>
+      <td>Claude Haiku para triagem (barato), Sonnet só para respostas complexas</td>
+    </tr>
+  </table>
+</div>
+
+<!-- SLIDE 10: MÉTRICAS -->
+<div class="slide">
+  <h2><span class="num">10</span> Métricas de Sucesso</h2>
+  <p style="margin-bottom: 1rem; color: var(--muted);">Como vamos medir se o bot está funcionando:</p>
+
+  <div class="cap-grid">
+    <div class="cap-item">
+      <div class="cap-icon">📬</div>
+      <h4>Taxa de Entrega</h4>
+      <p>% de mensagens enviadas com sucesso via WhatsApp</p>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">💬</div>
+      <h4>Taxa de Resposta</h4>
+      <p>% de clientes que respondem após cobrança</p>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">🤝</div>
+      <h4>Taxa de Resolução</h4>
+      <p>% de conversas resolvidas sem escalar para humano</p>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">💰</div>
+      <h4>Taxa de Recuperação</h4>
+      <p>% de faturas pagas após interação com o bot</p>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">⏱️</div>
+      <h4>Tempo de Resposta</h4>
+      <p>Tempo médio entre mensagem do cliente e resposta do bot</p>
+    </div>
+    <div class="cap-item">
+      <div class="cap-icon">📈</div>
+      <h4>DSO (Days Sales Outstanding)</h4>
+      <p>Redução no prazo médio de recebimento</p>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 11: APROVAÇÃO -->
+<div class="slide approval">
+  <h2><span class="num">!</span> Decisão Necessária</h2>
+  <p style="margin-bottom: 1.5rem;">Para prosseguir com a implementação, precisamos de aprovação nos seguintes pontos:</p>
+
+  <div class="approval-grid">
+    <div class="approval-item">
+      <div class="label">1. Escopo do Bot</div>
+      <div class="value">As capacidades listadas no slide 3 estão corretas? Falta algo? Algo deve ser removido?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">2. Tom das Mensagens</div>
+      <div class="value">A régua progressiva (amigável &rarr; urgente) está adequada para os clientes da Uúba?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">3. Regras de Escalação</div>
+      <div class="value">Os critérios para escalar para humano estão corretos? Quem recebe a escalação?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">4. Limites do Bot</div>
+      <div class="value">Concorda com o que o bot NÃO deve fazer (slide 5)?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">5. Horário de Envio</div>
+      <div class="value">8h-20h (seg-sex), 9h-14h (sáb). Correto? Domingo não envia?</div>
+    </div>
+    <div class="approval-item">
+      <div class="label">6. Número WhatsApp</div>
+      <div class="value">Chip dedicado disponível? Qual número será usado?</div>
+    </div>
+  </div>
+
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.9rem; text-align: center;">Após aprovação, a implementação técnica (Sprint 3) pode começar imediatamente.</p>
+</div>
+
+</div>
+
+<div class="footer">
+  Uúba Tech &copy; 2026 — Proposta interna — Bot WhatsApp v1
+</div>
+
+</body>
+</html>
