@@ -199,6 +199,10 @@ app = FastAPI(
             "name": "cobrancas",
             "description": "Acompanhe as ações de cobrança realizadas sobre cada fatura. Cada cobrança registra o canal (WhatsApp, email), o tom da mensagem (amigável, neutro, firme, urgente), e pode ser pausada ou retomada. Use o histórico por fatura para ver toda a timeline de comunicação com o cliente.",
         },
+        {
+            "name": "infraestrutura",
+            "description": "Endpoints de monitoramento e operação. Não requerem autenticação.",
+        },
     ],
     docs_url=None,
     redoc_url=None,
@@ -281,7 +285,12 @@ app.include_router(cobrancas.router)
 
 
 # --- Health ---
-@app.get("/health")
+@app.get(
+    "/health",
+    tags=["infraestrutura"],
+    summary="Verificar saúde da API",
+    description="Verifica se a API está respondendo e se a conexão com o banco de dados está ativa. Use para monitoramento e health checks.",
+)
 async def health(db: AsyncSession = Depends(get_db)):
     await db.execute(text("SELECT 1"))
     return {"status": "ok"}

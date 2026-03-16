@@ -868,7 +868,11 @@
     },
     "/health": {
       "get": {
-        "summary": "Health",
+        "tags": [
+          "infraestrutura"
+        ],
+        "summary": "Verificar saúde da API",
+        "description": "Verifica se a API está respondendo e se a conexão com o banco de dados está ativa. Use para monitoramento e health checks.",
         "operationId": "health_health_get",
         "responses": {
           "200": {
@@ -1560,6 +1564,10 @@
     {
       "name": "cobrancas",
       "description": "Acompanhe as ações de cobrança realizadas sobre cada fatura. Cada cobrança registra o canal (WhatsApp, email), o tom da mensagem (amigável, neutro, firme, urgente), e pode ser pausada ou retomada. Use o histórico por fatura para ver toda a timeline de comunicação com o cliente."
+    },
+    {
+      "name": "infraestrutura",
+      "description": "Endpoints de monitoramento e operação. Não requerem autenticação."
     }
   ]
 }
