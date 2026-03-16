@@ -2,9 +2,9 @@ import pytest
 from datetime import datetime, timezone
 from pydantic import ValidationError
 
-from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteResponse, ClienteMetricas
-from app.schemas.fatura import FaturaCreate, FaturaUpdate, FaturaResponse
-from app.schemas.cobranca import CobrancaCreate, CobrancaResponse
+from app.schemas.cliente import ClienteCreate, ClienteUpdate
+from app.schemas.fatura import FaturaCreate, FaturaUpdate
+from app.schemas.cobranca import CobrancaCreate
 from app.schemas.common import ProblemDetail, PaginationMeta, ListResponse
 
 

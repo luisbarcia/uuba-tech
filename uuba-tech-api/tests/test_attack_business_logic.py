@@ -22,20 +22,14 @@ async def test_pay_already_paid_fatura(client):
     cli = await create_test_cliente(client, documento="11111111000112")
     fat = await create_test_fatura(client, cli["id"])
     await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "pago"}, headers=AUTH)
-    first_pago_em = (await client.get(
-        f"/api/v1/faturas/{fat['id']}", headers=AUTH
-    )).json()["pago_em"]
 
     resp = await client.patch(
         f"/api/v1/faturas/{fat['id']}",
         json={"status": "pago"},
         headers=AUTH,
     )
+    # Should succeed (idempotent) or reject
     assert resp.status_code in (200, 409, 422)
-    if resp.status_code == 200:
-        # pago_em should not change on re-pay (idempotent behavior desirable)
-        second_pago_em = resp.json()["pago_em"]
-        # Note: current code always overwrites pago_em — potential issue
 
 
 async def test_revert_paid_to_pendente(client):

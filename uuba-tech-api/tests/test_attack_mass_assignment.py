@@ -1,5 +1,5 @@
 """Mass assignment attacks — attempt to overwrite protected fields."""
-from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create_test_cobranca
+from tests.conftest import AUTH, create_test_cliente, create_test_fatura
 
 
 # --- Cliente mass assignment ---
@@ -107,7 +107,7 @@ async def test_cannot_change_valor_on_update_fatura(client):
     """PATCH fatura should not allow changing valor."""
     cli = await create_test_cliente(client, documento="66666666000169")
     fat = await create_test_fatura(client, cli["id"], valor=50000)
-    resp = await client.patch(f"/api/v1/faturas/{fat['id']}", json={
+    await client.patch(f"/api/v1/faturas/{fat['id']}", json={
         "valor": 1,
     }, headers=AUTH)
     # Should ignore or 422
@@ -118,7 +118,7 @@ async def test_cannot_change_valor_on_update_fatura(client):
 async def test_cannot_change_cliente_id_on_update_fatura(client):
     cli = await create_test_cliente(client, documento="66666666000170")
     fat = await create_test_fatura(client, cli["id"])
-    resp = await client.patch(f"/api/v1/faturas/{fat['id']}", json={
+    await client.patch(f"/api/v1/faturas/{fat['id']}", json={
         "cliente_id": "cli_HACKED000000",
     }, headers=AUTH)
     get_resp = await client.get(f"/api/v1/faturas/{fat['id']}", headers=AUTH)

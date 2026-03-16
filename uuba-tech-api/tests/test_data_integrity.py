@@ -214,7 +214,6 @@ async def test_enviado_em_set_on_cobranca_creation(client):
     """enviado_em must be set automatically when cobranca is created."""
     cli = await create_test_cliente(client, documento="TIME000000005")
     fat = await create_test_fatura(client, cli["id"])
-    before = datetime.now(timezone.utc)
     cob = await create_test_cobranca(client, fat["id"], cli["id"])
     assert cob["enviado_em"] is not None
 
@@ -227,7 +226,7 @@ async def test_metricas_consistent_after_fatura_paid(client):
     """Metricas must update correctly when fatura is marked as paid."""
     cli = await create_test_cliente(client, documento="CONS000000001")
     fat1 = await create_test_fatura(client, cli["id"], valor=100000)
-    fat2 = await create_test_fatura(client, cli["id"], valor=200000)
+    await create_test_fatura(client, cli["id"], valor=200000)
 
     # Both pending
     resp = await client.get(f"/api/v1/clientes/{cli['id']}/metricas", headers=AUTH)
@@ -356,7 +355,7 @@ async def test_list_filter_does_not_alter_other_data(client):
     """Filtering should not affect data in other queries."""
     cli = await create_test_cliente(client, documento="BULK000000002")
     fat1 = await create_test_fatura(client, cli["id"], valor=10000)
-    fat2 = await create_test_fatura(client, cli["id"], valor=20000)
+    await create_test_fatura(client, cli["id"], valor=20000)
     await client.patch(f"/api/v1/faturas/{fat1['id']}", json={"status": "pago"}, headers=AUTH)
 
     # Filtered query
