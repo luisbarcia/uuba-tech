@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Produtos</title>
+<style>
+  :root { --bg: #0f172a; --surface: #1e293b; --surface2: #334155; --accent: #38bdf8; --accent2: #818cf8; --text: #e2e8f0; --muted: #94a3b8; --red: #ef4444; --gold: #d4a537; --green: #4ade80; --navy: #6366f1; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  nav .links { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+  nav .links a:hover { color: var(--text); background: var(--surface2); }
+  nav .links a.active { color: var(--accent); background: var(--surface2); }
+
+  .main { padding: 3rem 2rem; max-width: 960px; margin: 0 auto; }
+  .title { font-size: 1.75rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem; }
+  .subtitle { text-align: center; color: var(--muted); font-size: 0.95rem; margin-bottom: 2.5rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; }
+
+  .card { background: var(--surface); border: 1px solid var(--surface2); border-radius: 12px; padding: 1.75rem; text-decoration: none; transition: all 0.2s; display: flex; flex-direction: column; }
+  .card:hover { transform: translateY(-3px); border-color: var(--accent); background: #1a2744; }
+
+  .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+  .card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
+  .card-red .card-icon { background: rgba(239,68,68,0.15); color: var(--red); }
+  .card-gold .card-icon { background: rgba(212,165,55,0.15); color: var(--gold); }
+  .card-dark .card-icon { background: rgba(148,163,184,0.15); color: var(--muted); }
+  .card-navy .card-icon { background: rgba(99,102,241,0.15); color: var(--navy); }
+  .card-green .card-icon { background: rgba(74,222,128,0.15); color: var(--green); }
+
+  .card h3 { font-size: 1.1rem; color: var(--text); }
+  .card p { color: var(--muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem; flex: 1; }
+
+  .features { list-style: none; padding: 0; }
+  .features li { font-size: 0.8rem; color: var(--muted); padding: 0.25rem 0; padding-left: 1.25rem; position: relative; }
+  .features li::before { content: "→"; position: absolute; left: 0; color: var(--accent); }
+
+  .footer { text-align: center; color: var(--surface2); font-size: 0.75rem; margin-top: 3rem; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="../propostas/">Propostas</a>
+    <a href="../infra/">Infra</a>
+    <a href="../guia/">Guia</a>
+    <a href="./" class="active">Produtos</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
+    <a href="https://api.uuba.tech/health" target="_blank">Status</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="title">Produtos Uúba Tech</div>
+  <div class="subtitle">Cinco produtos. Uma operação financeira completa.</div>
+
+  <div class="grid">
+
+    <a class="card card-red" href="../../produtos/nexo.html">
+      <div class="card-header">
+        <div class="card-icon">&#9678;</div>
+        <h3>UÚBA Nexo</h3>
+      </div>
+      <p>A base de dados da operação. Centraliza CRM, ERP e bancos em uma única fonte de verdade.</p>
+      <ul class="features">
+        <li>Conectores nativos para ERPs e CRMs</li>
+        <li>Conciliação automática com dados bancários</li>
+        <li>Base compartilhada entre todos os produtos</li>
+      </ul>
+    </a>
+
+    <a class="card card-gold" href="../../produtos/financeiro.html">
+      <div class="card-header">
+        <div class="card-icon">&#9650;</div>
+        <h3>UÚBA Financeiro</h3>
+      </div>
+      <p>DRE, fluxo de caixa e projeções automatizadas. Equipe financeira UÚBA como retaguarda.</p>
+      <ul class="features">
+        <li>DRE, fluxo de caixa e balanço automatizados</li>
+        <li>Projeções com modelos preditivos</li>
+        <li>Conciliação bancária em tempo real</li>
+      </ul>
+    </a>
+
+    <a class="card card-dark" href="../../produtos/recebe.html">
+      <div class="card-header">
+        <div class="card-icon">&#9733;</div>
+        <h3>UÚBA Recebe</h3>
+      </div>
+      <p>Cobrança automatizada multicanal. Bot IA + régua progressiva + escalação para humano.</p>
+      <ul class="features">
+        <li>WhatsApp, e-mail e SMS</li>
+        <li>Acordos fechados sem intervenção</li>
+        <li>Réguas configuráveis por faixa e risco</li>
+      </ul>
+    </a>
+
+    <a class="card card-navy" href="../../produtos/360.html">
+      <div class="card-header">
+        <div class="card-icon">&#9632;</div>
+        <h3>UÚBA 360</h3>
+      </div>
+      <p>Dashboard com indicadores em tempo real, organizados por nível de acesso e cargo.</p>
+      <ul class="features">
+        <li>Visões configuráveis por cargo e área</li>
+        <li>KPIs atualizados em tempo real</li>
+        <li>Consolidação multi-empresa e filiais</li>
+      </ul>
+    </a>
+
+    <a class="card card-green" href="../../produtos/parceiros.html">
+      <div class="card-header">
+        <div class="card-icon">&#9670;</div>
+        <h3>UÚBA para Parceiros</h3>
+      </div>
+      <p>White-label completo. Sua marca, sua operação, nossa tecnologia.</p>
+      <ul class="features">
+        <li>Plataforma 100% white-label</li>
+        <li>Escolha quais produtos disponibilizar</li>
+        <li>Infraestrutura escalável com SLA garantido</li>
+      </ul>
+    </a>
+
+  </div>
+
+  <div class="footer">Uúba Tech &copy; 2026 — Produtos</div>
+</div>
+
+</body>
+</html>
