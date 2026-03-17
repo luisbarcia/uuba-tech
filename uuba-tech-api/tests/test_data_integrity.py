@@ -28,7 +28,7 @@ ENCODING_PAYLOADS = {
 async def test_encoding_in_cliente_nome(client):
     """All encodings must be stored and returned correctly in nome."""
     for label, payload in ENCODING_PAYLOADS.items():
-        doc = f"ENC{abs(hash(label)) % 9999999:07d}00"
+        doc = f"{abs(hash(label)) % 99999999999:011d}"
         resp = await client.post(
             "/api/v1/clientes",
             json={
@@ -121,12 +121,12 @@ async def test_empty_string_vs_null(client):
 
 async def test_unique_documento_enforced_at_db(client):
     """UNIQUE constraint must be enforced even with concurrent-like requests."""
-    await create_test_cliente(client, documento="UNIQUE00000001")
+    await create_test_cliente(client, documento="99900000000001")
     resp = await client.post(
         "/api/v1/clientes",
         json={
             "nome": "Duplicate",
-            "documento": "UNIQUE00000001",
+            "documento": "99900000000001",
         },
         headers=AUTH,
     )
@@ -164,7 +164,7 @@ async def test_fk_fatura_enforced_on_cobranca(client):
 
 async def test_fk_cliente_enforced_on_cobranca(client):
     """FK constraint: cobranca.cliente_id must reference existing cliente."""
-    cli = await create_test_cliente(client, documento="FK_TEST_000001")
+    cli = await create_test_cliente(client, documento="10000000000001")
     fat = await create_test_fatura(client, cli["id"])
     resp = await client.post(
         "/api/v1/cobrancas",
@@ -186,7 +186,7 @@ async def test_fk_cliente_enforced_on_cobranca(client):
 async def test_created_at_auto_populated(client):
     """created_at must be set automatically on creation."""
     before = datetime.now(timezone.utc)
-    cli = await create_test_cliente(client, documento="TIME000000001")
+    cli = await create_test_cliente(client, documento="20000000000001")
     after = datetime.now(timezone.utc)
     created = datetime.fromisoformat(cli["created_at"])
     if created.tzinfo is None:
@@ -196,7 +196,7 @@ async def test_created_at_auto_populated(client):
 
 async def test_updated_at_changes_on_update(client):
     """updated_at must change when record is modified."""
-    cli = await create_test_cliente(client, documento="TIME000000002")
+    cli = await create_test_cliente(client, documento="20000000000002")
     original_updated = cli["updated_at"]
 
     # Small delay to ensure timestamp differs
@@ -214,7 +214,7 @@ async def test_updated_at_changes_on_update(client):
 
 async def test_pago_em_set_automatically(client):
     """pago_em must be set when status changes to 'pago'."""
-    cli = await create_test_cliente(client, documento="TIME000000003")
+    cli = await create_test_cliente(client, documento="20000000000003")
     fat = await create_test_fatura(client, cli["id"])
     assert fat["pago_em"] is None
 
@@ -233,7 +233,7 @@ async def test_pago_em_set_automatically(client):
 
 async def test_vencimento_datetime_stored_correctly(client):
     """Datetime must represent the same instant after round-trip."""
-    cli = await create_test_cliente(client, documento="TIME000000004")
+    cli = await create_test_cliente(client, documento="20000000000004")
     # Use UTC to avoid SQLite timezone limitations
     venc_dt = datetime(2026, 4, 1, 3, 0, 0, tzinfo=timezone.utc)
     resp = await client.post(
@@ -255,7 +255,7 @@ async def test_vencimento_datetime_stored_correctly(client):
 
 async def test_enviado_em_set_on_cobranca_creation(client):
     """enviado_em must be set automatically when cobranca is created."""
-    cli = await create_test_cliente(client, documento="TIME000000005")
+    cli = await create_test_cliente(client, documento="20000000000005")
     fat = await create_test_fatura(client, cli["id"])
     cob = await create_test_cobranca(client, fat["id"], cli["id"])
     assert cob["enviado_em"] is not None
@@ -268,7 +268,7 @@ async def test_enviado_em_set_on_cobranca_creation(client):
 
 async def test_metricas_consistent_after_fatura_paid(client):
     """Metricas must update correctly when fatura is marked as paid."""
-    cli = await create_test_cliente(client, documento="CONS000000001")
+    cli = await create_test_cliente(client, documento="30000000000001")
     fat1 = await create_test_fatura(client, cli["id"], valor=100000)
     await create_test_fatura(client, cli["id"], valor=200000)
 
@@ -289,7 +289,7 @@ async def test_metricas_consistent_after_fatura_paid(client):
 
 async def test_metricas_consistent_after_fatura_cancelled(client):
     """Cancelled fatura should not appear in em_aberto."""
-    cli = await create_test_cliente(client, documento="CONS000000002")
+    cli = await create_test_cliente(client, documento="30000000000002")
     fat = await create_test_fatura(client, cli["id"], valor=50000)
 
     await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "cancelado"}, headers=AUTH)
@@ -302,7 +302,7 @@ async def test_metricas_consistent_after_fatura_cancelled(client):
 
 async def test_metricas_vencido_count(client):
     """Faturas with past vencimento and status pendente/vencido count as vencidas."""
-    cli = await create_test_cliente(client, documento="CONS000000003")
+    cli = await create_test_cliente(client, documento="30000000000003")
     # Create fatura with past vencimento
     await create_test_fatura(
         client,
@@ -320,7 +320,7 @@ async def test_metricas_vencido_count(client):
 
 async def test_cobranca_historico_consistent_with_list(client):
     """Historico for a fatura must match cobrancas filtered by fatura_id."""
-    cli = await create_test_cliente(client, documento="CONS000000004")
+    cli = await create_test_cliente(client, documento="30000000000004")
     fat = await create_test_fatura(client, cli["id"])
     await create_test_cobranca(client, fat["id"], cli["id"], tipo="lembrete")
     await create_test_cobranca(client, fat["id"], cli["id"], tipo="cobranca")
@@ -338,7 +338,7 @@ async def test_cobranca_historico_consistent_with_list(client):
 
 async def test_sequential_duplicate_documento(client):
     """Second insert with same documento must fail cleanly."""
-    doc = "RACE000000001"
+    doc = "40000000000001"
     resp1 = await client.post(
         "/api/v1/clientes", json={"nome": "A", "documento": doc}, headers=AUTH
     )
@@ -355,7 +355,7 @@ async def test_sequential_duplicate_documento(client):
 
 async def test_concurrent_fatura_updates(client):
     """Simulate two concurrent status updates on same fatura."""
-    cli = await create_test_cliente(client, documento="RACE000000002")
+    cli = await create_test_cliente(client, documento="40000000000002")
     fat = await create_test_fatura(client, cli["id"])
 
     results = await asyncio.gather(
@@ -378,7 +378,7 @@ async def test_concurrent_fatura_updates(client):
 
 async def test_pagination_total_matches_data_count(client):
     """Total in pagination must match actual number of records."""
-    cli = await create_test_cliente(client, documento="BULK000000001")
+    cli = await create_test_cliente(client, documento="50000000000001")
     n = 7
     for i in range(n):
         await create_test_fatura(client, cli["id"], valor=(i + 1) * 10000)
@@ -405,7 +405,7 @@ async def test_pagination_total_matches_data_count(client):
 
 async def test_list_filter_does_not_alter_other_data(client):
     """Filtering should not affect data in other queries."""
-    cli = await create_test_cliente(client, documento="BULK000000002")
+    cli = await create_test_cliente(client, documento="50000000000002")
     fat1 = await create_test_fatura(client, cli["id"], valor=10000)
     await create_test_fatura(client, cli["id"], valor=20000)
     await client.patch(f"/api/v1/faturas/{fat1['id']}", json={"status": "pago"}, headers=AUTH)

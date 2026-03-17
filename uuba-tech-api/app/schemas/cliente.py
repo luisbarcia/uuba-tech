@@ -1,18 +1,18 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ClienteCreate(BaseModel):
-    nome: str
-    documento: str
-    email: str | None = None
-    telefone: str | None = None
+    nome: str = Field(min_length=1, max_length=255)
+    documento: str = Field(min_length=11, max_length=14, pattern=r"^\d{11,14}$")
+    email: str | None = Field(default=None, max_length=255)
+    telefone: str | None = Field(default=None, max_length=20)
 
 
 class ClienteUpdate(BaseModel):
-    nome: str | None = None
-    email: str | None = None
-    telefone: str | None = None
+    nome: str | None = Field(default=None, min_length=1, max_length=255)
+    email: str | None = Field(default=None, max_length=255)
+    telefone: str | None = Field(default=None, max_length=20)
 
 
 class ClienteMetricas(BaseModel):

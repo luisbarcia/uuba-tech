@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,6 +7,13 @@ from app.models.fatura import Fatura
 from app.schemas.fatura import FaturaCreate, FaturaUpdate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
+
+FATURA_TRANSITIONS: dict[str, list[str]] = {
+    "pendente": ["pago", "vencido", "cancelado"],
+    "vencido": ["pago", "cancelado"],
+    "pago": [],
+    "cancelado": [],
+}
 
 
 async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
@@ -26,6 +33,15 @@ async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
     return fatura
 
 
+def _apply_fatura_filters(query, status: str | None, cliente_id: str | None):
+    if status:
+        statuses = [s.strip() for s in status.split(",")]
+        query = query.where(Fatura.status.in_(statuses))
+    if cliente_id:
+        query = query.where(Fatura.cliente_id == cliente_id)
+    return query
+
+
 async def list_faturas(
     db: AsyncSession,
     status: str | None = None,
@@ -33,19 +49,9 @@ async def list_faturas(
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Fatura], int]:
-    query = select(Fatura)
-    if status:
-        statuses = [s.strip() for s in status.split(",")]
-        query = query.where(Fatura.status.in_(statuses))
-    if cliente_id:
-        query = query.where(Fatura.cliente_id == cliente_id)
-
-    count_q = select(Fatura.id)
-    if status:
-        count_q = count_q.where(Fatura.status.in_([s.strip() for s in status.split(",")]))
-    if cliente_id:
-        count_q = count_q.where(Fatura.cliente_id == cliente_id)
-    total = len((await db.execute(count_q)).all())
+    query = _apply_fatura_filters(select(Fatura), status, cliente_id)
+    count_q = _apply_fatura_filters(select(func.count(Fatura.id)), status, cliente_id)
+    total = (await db.execute(count_q)).scalar() or 0
 
     result = await db.execute(query.order_by(Fatura.vencimento).limit(limit).offset(offset))
     return result.scalars().all(), total
@@ -61,8 +67,18 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
     if not fatura:
         return None
     update_data = data.model_dump(exclude_unset=True)
-    if "status" in update_data and update_data["status"] == "pago":
-        update_data["pago_em"] = datetime.now(timezone.utc)
+    if "status" in update_data:
+        new_status = update_data["status"]
+        allowed = FATURA_TRANSITIONS.get(fatura.status, [])
+        if new_status not in allowed:
+            raise APIError(
+                409,
+                "transicao-invalida",
+                "Transição de status inválida",
+                f"Não é possível mudar de '{fatura.status}' para '{new_status}'. Transições permitidas: {allowed or 'nenhuma (status terminal)'}.",
+            )
+        if new_status == "pago":
+            update_data["pago_em"] = datetime.now(timezone.utc)
     for key, value in update_data.items():
         setattr(fatura, key, value)
     await db.commit()

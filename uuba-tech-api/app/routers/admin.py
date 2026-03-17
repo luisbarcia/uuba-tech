@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import get_db
 from app.auth.api_key import verify_api_key
+from app.exceptions import APIError
 from app.models.cliente import Cliente
 from app.models.fatura import Fatura
 from app.models.cobranca import Cobranca
@@ -16,12 +18,23 @@ router = APIRouter(
 )
 
 
+def _check_not_production():
+    if settings.environment == "production":
+        raise APIError(
+            status=403,
+            error_type="admin-bloqueado",
+            title="Operação bloqueada em produção",
+            detail="Endpoints admin estão desabilitados em ambiente de produção.",
+        )
+
+
 @router.post(
     "/seed",
     summary="Popular com dados mock",
-    description="Limpa todos os dados e popula com dados mock realistas para demo. **Cuidado: apaga tudo antes de inserir.**",
+    description="Limpa todos os dados e popula com dados mock realistas para demo. **Cuidado: apaga tudo antes de inserir.** Bloqueado em produção.",
 )
 async def seed_database(db: AsyncSession = Depends(get_db)):
+    _check_not_production()
     # Limpar na ordem correta (FK constraints)
     await db.execute(delete(Cobranca))
     await db.execute(delete(Fatura))
@@ -57,7 +70,18 @@ async def seed_database(db: AsyncSession = Depends(get_db)):
     summary="Limpar todos os dados",
     description="Remove todos os registros de cobrancas, faturas e clientes. **Irreversível.**",
 )
-async def reset_database(db: AsyncSession = Depends(get_db)):
+async def reset_database(
+    db: AsyncSession = Depends(get_db),
+    confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
+):
+    _check_not_production()
+    if confirm != "delete-all-data":
+        raise APIError(
+            status=400,
+            error_type="confirmacao-necessaria",
+            title="Confirmação necessária",
+            detail="Envie ?confirm=delete-all-data para confirmar a operação.",
+        )
     r_cob = await db.execute(delete(Cobranca))
     r_fat = await db.execute(delete(Fatura))
     r_cli = await db.execute(delete(Cliente))

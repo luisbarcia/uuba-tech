@@ -252,7 +252,7 @@ async def generic_error_handler(request: Request, exc: Exception):
                 "type": "https://api.uubatech.com/errors/integridade",
                 "title": "Erro de integridade",
                 "status": 409,
-                "detail": str(exc.orig) if exc.orig else "Constraint violation",
+                "detail": "Violação de integridade de dados. Verifique os dados enviados.",
                 "instance": str(request.url.path),
                 "request_id": getattr(request.state, "request_id", ""),
                 "errors": [],

@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     asaas_webhook_secret: str = ""
     whatsapp_verify_token: str = ""
     environment: str = "development"
-    debug: bool = True
+    debug: bool = False
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

@@ -36,13 +36,12 @@ async def list_clientes(
     telefone: str | None = Query(
         None, description="Filtrar por número WhatsApp (ex: 5511999001234)"
     ),
-    order_by: str | None = Query(None, description="Ordenação (ex: total_vencido)"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
     db: AsyncSession = Depends(get_db),
 ):
     clientes, total = await cliente_service.list_clientes(
-        db, telefone=telefone, order_by=order_by, limit=limit, offset=offset
+        db, telefone=telefone, limit=limit, offset=offset
     )
     return ListResponse(
         data=[ClienteResponse.model_validate(c) for c in clientes],

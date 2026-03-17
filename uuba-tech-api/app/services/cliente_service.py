@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -37,17 +37,15 @@ async def create_cliente(db: AsyncSession, data: ClienteCreate) -> Cliente:
 async def list_clientes(
     db: AsyncSession,
     telefone: str | None = None,
-    order_by: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Cliente], int]:
     query = select(Cliente)
+    count_q = select(func.count(Cliente.id))
     if telefone:
         query = query.where(Cliente.telefone == telefone)
-    count_q = select(Cliente.id)
-    if telefone:
         count_q = count_q.where(Cliente.telefone == telefone)
-    total = len((await db.execute(count_q)).all())
+    total = (await db.execute(count_q)).scalar() or 0
     result = await db.execute(query.order_by(Cliente.nome).limit(limit).offset(offset))
     return result.scalars().all(), total
 

@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import Literal
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class CobrancaCreate(BaseModel):
-    fatura_id: str
-    cliente_id: str
+    fatura_id: str = Field(pattern=r"^fat_[a-zA-Z0-9_-]+$")
+    cliente_id: str = Field(pattern=r"^cli_[a-zA-Z0-9_-]+$")
     tipo: Literal["lembrete", "cobranca", "follow_up", "escalacao"]
     canal: Literal["whatsapp", "email", "sms"] = "whatsapp"
-    mensagem: str | None = None
+    mensagem: str | None = Field(default=None, max_length=2000)
     tom: Literal["amigavel", "neutro", "firme", "urgente"] | None = None
 
 

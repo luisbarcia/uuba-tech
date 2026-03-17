@@ -121,7 +121,7 @@ async def test_xss_in_cliente_nome_returned_literally(client):
             "/api/v1/clientes",
             json={
                 "nome": payload,
-                "documento": f"XSS{hash(payload) % 99999:05d}000100",
+                "documento": f"{abs(hash(payload)) % 99999999999:011d}",
             },
             headers=AUTH,
         )
@@ -156,7 +156,7 @@ async def test_command_injection_in_nome(client):
             "/api/v1/clientes",
             json={
                 "nome": payload,
-                "documento": f"CMD{abs(hash(payload)) % 99999:05d}000100",
+                "documento": f"{abs(hash(payload)) % 99999999999:011d}",
             },
             headers=AUTH,
         )

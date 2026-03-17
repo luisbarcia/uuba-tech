@@ -129,35 +129,35 @@ def test_cobranca_create_valid():
 
 def test_cobranca_create_all_tipos():
     for tipo in ("lembrete", "cobranca", "follow_up", "escalacao"):
-        c = CobrancaCreate(fatura_id="f", cliente_id="c", tipo=tipo)
+        c = CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo=tipo)
         assert c.tipo == tipo
 
 
 def test_cobranca_create_invalid_tipo():
     with pytest.raises(ValidationError):
-        CobrancaCreate(fatura_id="f", cliente_id="c", tipo="invalido")
+        CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo="invalido")
 
 
 def test_cobranca_create_all_canais():
     for canal in ("whatsapp", "email", "sms"):
-        c = CobrancaCreate(fatura_id="f", cliente_id="c", tipo="lembrete", canal=canal)
+        c = CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo="lembrete", canal=canal)
         assert c.canal == canal
 
 
 def test_cobranca_create_invalid_canal():
     with pytest.raises(ValidationError):
-        CobrancaCreate(fatura_id="f", cliente_id="c", tipo="lembrete", canal="telegram")
+        CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo="lembrete", canal="telegram")
 
 
 def test_cobranca_create_all_tons():
     for tom in ("amigavel", "neutro", "firme", "urgente"):
-        c = CobrancaCreate(fatura_id="f", cliente_id="c", tipo="lembrete", tom=tom)
+        c = CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo="lembrete", tom=tom)
         assert c.tom == tom
 
 
 def test_cobranca_create_invalid_tom():
     with pytest.raises(ValidationError):
-        CobrancaCreate(fatura_id="f", cliente_id="c", tipo="lembrete", tom="agressivo")
+        CobrancaCreate(fatura_id="fat_test", cliente_id="cli_test", tipo="lembrete", tom="agressivo")
 
 
 # --- Common schemas ---

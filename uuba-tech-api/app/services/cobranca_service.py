@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,15 +57,14 @@ async def list_cobrancas(
     if fatura_id:
         query = query.where(Cobranca.fatura_id == fatura_id)
 
-    count_q = select(Cobranca.id)
+    count_q = select(func.count(Cobranca.id))
     if periodo:
-        since = datetime.now(timezone.utc) - timedelta(days=days)
         count_q = count_q.where(Cobranca.created_at >= since)
     if cliente_id:
         count_q = count_q.where(Cobranca.cliente_id == cliente_id)
     if fatura_id:
         count_q = count_q.where(Cobranca.fatura_id == fatura_id)
-    total = len((await db.execute(count_q)).all())
+    total = (await db.execute(count_q)).scalar() or 0
 
     result = await db.execute(
         query.order_by(Cobranca.created_at.desc()).limit(limit).offset(offset)

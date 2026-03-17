@@ -4,11 +4,11 @@ from pydantic import BaseModel, Field
 
 
 class FaturaCreate(BaseModel):
-    cliente_id: str
+    cliente_id: str = Field(pattern=r"^cli_[a-zA-Z0-9_-]+$")
     valor: int = Field(gt=0)  # centavos, deve ser positivo
     vencimento: datetime
-    descricao: str | None = None
-    numero_nf: str | None = None
+    descricao: str | None = Field(default=None, max_length=500)
+    numero_nf: str | None = Field(default=None, max_length=50)
 
 
 class FaturaUpdate(BaseModel):
