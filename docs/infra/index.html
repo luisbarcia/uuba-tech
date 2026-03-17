@@ -93,6 +93,7 @@
     <a href="./" class="active">Infra</a>
     <a href="../guia/">Guia</a>
     <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
     <a href="https://api.uuba.tech/health" target="_blank">Status</a>
   </div>
 </nav>
@@ -101,7 +102,7 @@
 <div class="slide hero">
   <h1>Infraestrutura <span>Uúba Tech</span></h1>
   <div class="subtitle">Documentação completa da VPS, serviços e configurações</div>
-  <div class="date">Atualizado em 16 de Março de 2026</div>
+  <div class="date">Atualizado em 17 de Março de 2026</div>
 </div>
 
 <div class="deck">
@@ -116,7 +117,7 @@
     <div class="kpi"><div class="value">4</div><div class="label">vCPUs</div></div>
     <div class="kpi"><div class="value">8 GB</div><div class="label">RAM</div></div>
     <div class="kpi"><div class="value">145 GB</div><div class="label">Disco (9% usado)</div></div>
-    <div class="kpi green"><div class="value">13</div><div class="label">Containers</div></div>
+    <div class="kpi green"><div class="value">15</div><div class="label">Containers</div></div>
   </div>
 
   <table>
@@ -154,6 +155,7 @@
     <tr><td><code>api.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>REST API</td></tr>
     <tr><td><code>developers.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Documentação API (Scalar)</td></tr>
     <tr><td><code>wa.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Evolution API (WhatsApp)</td></tr>
+    <tr><td><code>chat.uuba.tech</code></td><td>A</td><td><code>5.189.155.226</code></td><td>Chatwoot (Atendimento)</td></tr>
     <tr><td><code>n8n.srv921702.hstgr.cloud</code></td><td>—</td><td>Hostinger VPS</td><td>n8n empresa (Uúba)</td></tr>
   </table>
 
@@ -170,6 +172,12 @@
       <td><code>wa.uuba.tech</code></td>
       <td>wa.uuba.tech</td>
       <td>14/06/2026</td>
+      <td><span class="tag tag-green">Automática (certbot)</span></td>
+    </tr>
+    <tr>
+      <td><code>chat.uuba.tech</code></td>
+      <td>chat.uuba.tech</td>
+      <td>15/06/2026</td>
       <td><span class="tag tag-green">Automática (certbot)</span></td>
     </tr>
   </table>
@@ -212,11 +220,29 @@
       <td>6379 (interno)</td>
     </tr>
     <tr>
+      <td><code>chatwoot-rails</code></td>
+      <td>
+        <span class="tag tag-purple">Atendimento</span><br>
+        <strong>Plataforma de atendimento humano.</strong> Chatwoot recebe conversas do WhatsApp via integração com Evolution API. Permite que atendentes humanos assumam conversas quando o bot escala. Interface web completa com inbox, contatos e relatórios.<br>
+        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: chatwoot/chatwoot:latest &middot; URL: chat.uuba.tech</span>
+      </td>
+      <td>3000 &rarr; 127.0.0.1:3000</td>
+    </tr>
+    <tr>
+      <td><code>chatwoot-sidekiq</code></td>
+      <td>
+        <span class="tag tag-purple">Background Jobs</span><br>
+        <strong>Worker do Chatwoot.</strong> Processa jobs assíncronos: envio de notificações, importação de contatos, webhooks e relatórios em background.<br>
+        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: chatwoot/chatwoot:latest &middot; Sidekiq worker</span>
+      </td>
+      <td>— (interno)</td>
+    </tr>
+    <tr>
       <td><code>n8n-postgres-data</code></td>
       <td>
         <span class="tag tag-orange">Database</span><br>
-        <strong>Banco de dados principal.</strong> PostgreSQL 16 que armazena os dados de negócio. Contém 3 databases: <code>uuba</code> (clientes/faturas/cobranças), <code>evolution</code> (instâncias WhatsApp) e <code>datastore</code> (vazio).<br>
-        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: postgres:16-alpine &middot; User: datauser</span>
+        <strong>Banco de dados principal.</strong> PostgreSQL 16 com extensão pgvector. Armazena os dados de negócio. Contém 4 databases: <code>uuba</code> (clientes/faturas/cobranças), <code>evolution</code> (instâncias WhatsApp), <code>chatwoot</code> (atendimento) e <code>datastore</code> (vazio).<br>
+        <span style="color: var(--muted); font-size: 0.8rem;">Imagem: pgvector/pgvector:pg16 &middot; User: datauser</span>
       </td>
       <td>5432 &rarr; 127.0.0.1:5433</td>
     </tr>
@@ -264,30 +290,27 @@
   <p style="margin-bottom: 1rem; color: var(--muted)">Todos os containers compartilham a rede <code>stack_internal</code> (172.18.0.0/16). Eles se comunicam pelo nome do container.</p>
 
   <div class="arch">
-┌─────────────────────── stack_internal (172.18.0.0/16) ───────────────────────┐
-│                                                                               │
-│  ┌─────────────────┐   ┌──────────────────┐   ┌────────────────────┐         │
-│  │   uuba-api       │   │  evolution-api    │   │       n8n          │         │
-│  │  172.18.0.12     │   │  172.18.0.14      │   │  172.18.0.8        │         │
-│  │  :8000           │   │  :8080            │   │  :5678             │         │
-│  └────────┬─────────┘   └────────┬──────────┘   └─────────┬──────────┘         │
-│           │                      │                         │                   │
-│           │         ┌────────────┴────────┐                │                   │
-│           │         │       redis          │                │                   │
-│           │         │   172.18.0.13 :6379  │                │                   │
-│           │         └─────────────────────┘                │                   │
-│           │                                                │                   │
-│  ┌────────┴──────────────────────────────────────────────┴──────────┐         │
-│  │                    n8n-postgres-data (172.18.0.3)                  │         │
-│  │                PostgreSQL 16 — porta 5432                         │         │
-│  │          databases: datastore | uuba | evolution                  │         │
-│  └───────────────────────────────────────────────────────────────────┘         │
-│                                                                               │
-│  ┌────────────────┐                                                           │
-│  │  n8n-postgres   │  + outros containers na mesma rede                       │
-│  │  (n8n interno)  │                                                           │
-│  └────────────────┘                                                           │
-└───────────────────────────────────────────────────────────────────────────────┘</div>
+┌──────────────────────── stack_internal (172.18.0.0/16) ────────────────────────┐
+│                                                                                │
+│  ┌───────────────┐  ┌────────────────┐  ┌──────────┐  ┌───────────────────┐   │
+│  │   uuba-api     │  │  evolution-api  │  │   n8n    │  │  chatwoot-rails   │   │
+│  │   :8000        │  │   :8080         │  │  :5678   │  │   :3000           │   │
+│  └───────┬────────┘  └───────┬─────────┘  └────┬─────┘  └────────┬──────────┘   │
+│          │                   │                  │                 │              │
+│          │      ┌────────────┴──────┐           │    ┌───────────┴────────┐    │
+│          │      │     redis :6379   │           │    │ chatwoot-sidekiq   │    │
+│          │      └───────────────────┘           │    └────────────────────┘    │
+│          │                                      │                              │
+│  ┌───────┴──────────────────────────────────────┴──────────────────────────┐   │
+│  │              n8n-postgres-data — pgvector/pgvector:pg16                  │   │
+│  │          databases: uuba | evolution | chatwoot | datastore              │   │
+│  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                │
+│  ┌────────────────┐                                                            │
+│  │  n8n-postgres   │  + n8n-pgadmin                                            │
+│  │  (n8n interno)  │                                                            │
+│  └────────────────┘                                                            │
+└────────────────────────────────────────────────────────────────────────────────┘</div>
 
   <h3>Comunicação entre serviços</h3>
   <table>
@@ -299,6 +322,8 @@
     <tr><td>Evolution API</td><td>Redis</td><td><code>redis://:***@redis:6379/0</code></td></tr>
     <tr><td>Uúba API</td><td>PostgreSQL</td><td><code>postgresql+asyncpg://...@postgres-data:5432/uuba</code></td></tr>
     <tr><td>n8n</td><td>PostgreSQL (interno)</td><td><code>postgresql://n8n:***@postgres:5432/n8n</code></td></tr>
+    <tr><td>Evolution API</td><td>Chatwoot (webhook)</td><td><code>http://chatwoot-rails:3000</code> (integração nativa)</td></tr>
+    <tr><td>Chatwoot</td><td>PostgreSQL</td><td><code>postgresql://datauser:***@postgres-data:5432/chatwoot</code></td></tr>
   </table>
 </div>
 
@@ -332,6 +357,7 @@
     <tr><td><code>datastore</code></td><td>—</td><td>Database padrão (vazio)</td></tr>
     <tr><td><code>uuba</code></td><td>uuba-api</td><td>Clientes, faturas, cobranças (Alembic migrations)</td></tr>
     <tr><td><code>evolution</code></td><td>evolution-api</td><td>Instâncias WhatsApp, mensagens (Prisma migrations)</td></tr>
+    <tr><td><code>chatwoot</code></td><td>chatwoot-rails</td><td>Conversas, contatos, inbox, times (Rails migrations)</td></tr>
   </table>
 </div>
 
@@ -361,6 +387,12 @@
       <td><code>127.0.0.1:8085</code> (evolution-api)</td>
     </tr>
     <tr>
+      <td><code>chat-uuba-tech</code></td>
+      <td><code>/etc/nginx/sites-available/chat-uuba-tech</code></td>
+      <td>chat.uuba.tech</td>
+      <td><code>127.0.0.1:3000</code> (chatwoot-rails)</td>
+    </tr>
+    <tr>
       <td><code>default</code></td>
       <td><code>/etc/nginx/sites-available/default</code></td>
       <td>_ (catch-all)</td>
@@ -385,6 +417,7 @@
     <tr><td><code>stack_evolution_instances</code></td><td>evolution-api</td><td>Sessões WhatsApp</td></tr>
     <tr><td><code>stack_redis_data</code></td><td>redis</td><td>Cache Redis</td></tr>
     <tr><td><code>stack_pgadmin_data</code></td><td>n8n-pgadmin</td><td>Configurações pgAdmin</td></tr>
+    <tr><td><code>stack_chatwoot_storage</code></td><td>chatwoot-rails</td><td>Uploads de arquivos e mídias</td></tr>
   </table>
 </div>
 
@@ -435,6 +468,7 @@
     <tr><td><a href="https://n8n.srv921702.hstgr.cloud/" target="_blank">n8n.srv921702.hstgr.cloud</a></td><td>n8n (empresa)</td><td>Login (email/senha)</td></tr>
     <tr><td><a href="https://wa.uuba.tech" target="_blank">wa.uuba.tech</a></td><td>Evolution API</td><td>Header <code>apikey</code></td></tr>
     <tr><td><a href="https://wa.uuba.tech/manager" target="_blank">wa.uuba.tech/manager</a></td><td>Evolution Manager</td><td>API Key</td></tr>
+    <tr><td><a href="https://chat.uuba.tech" target="_blank">chat.uuba.tech</a></td><td>Chatwoot (Atendimento)</td><td>Login (email/senha)</td></tr>
   </table>
 
   <h3>Acessos locais (via SSH tunnel)</h3>
@@ -564,6 +598,19 @@ Container uuba-api (produção)</div>
     <tr><td>Tool: Registrar Cobrança</td><td>POST /api/v1/cobrancas (canal: whatsapp)</td></tr>
     <tr><td>System Prompt</td><td>Protocolo de cobrança comportamental + regras de escalação + formatação WhatsApp</td></tr>
     <tr><td>Envio</td><td>Quebra resposta em parágrafos, envia com 1.5s delay, converte Markdown &rarr; WhatsApp</td></tr>
+  </table>
+
+  <h3>Integração Evolution API + Chatwoot</h3>
+  <table>
+    <tr><th>Configuração</th><th>Valor</th></tr>
+    <tr><td>Inbox</td><td>WhatsApp Uuba (Channel::Api, criado automaticamente)</td></tr>
+    <tr><td>Webhook</td><td><code>https://wa.uuba.tech/chatwoot/webhook/uuba-bot</code></td></tr>
+    <tr><td>URL interna</td><td><code>http://chatwoot-rails:3000</code></td></tr>
+    <tr><td>signMsg</td><td>true (mostra nome do atendente)</td></tr>
+    <tr><td>conversationPending</td><td>true (novas conversas ficam pendentes)</td></tr>
+    <tr><td>importMessages</td><td>true (últimos 3 dias)</td></tr>
+    <tr><td>mergeBrazilContacts</td><td>true (unifica +55 com 9 dígito)</td></tr>
+    <tr><td>autoCreate</td><td>true (cria contato automaticamente)</td></tr>
   </table>
 
   <h3>Config n8n necessária para migração</h3>
