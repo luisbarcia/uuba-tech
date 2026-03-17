@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Guia de Replicação</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface2: #334155;
+    --accent: #38bdf8;
+    --accent2: #818cf8;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --red: #f87171;
+    --orange: #fb923c;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  /* Nav */
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+  nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  nav .links { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
+  nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+  nav .links a:hover { color: var(--text); background: var(--surface2); }
+  nav .links a.active { color: var(--accent); background: var(--surface2); }
+
+  /* Layout */
+  .page-wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
+  .deck { flex: 1; min-width: 0; padding: 2rem 1.5rem; }
+
+  /* TOC Sidebar */
+  .toc { width: 260px; flex-shrink: 0; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; padding: 1.5rem 1rem; border-right: 1px solid var(--surface2); }
+  .toc h3 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .toc a { display: block; color: var(--muted); text-decoration: none; font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 4px; margin-bottom: 0.15rem; border-left: 2px solid transparent; transition: all 0.2s; }
+  .toc a:hover { color: var(--text); background: var(--surface); border-left-color: var(--accent); }
+  .toc a.toc-active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+  .toc::-webkit-scrollbar { width: 4px; }
+  .toc::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+  /* Progress bar */
+  .progress-bar { position: fixed; top: 56px; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 99; transition: width 0.2s; }
+
+  /* Slides */
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+  .slide p { margin-bottom: 0.75rem; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; }
+  .hero .date { color: var(--accent2); font-size: 0.95rem; margin-top: 1rem; font-weight: 600; }
+
+  /* KPI Grid */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin: 1rem 0; }
+  .kpi { background: var(--surface2); border-radius: 10px; padding: 1.25rem; text-align: center; }
+  .kpi .value { font-size: 2rem; font-weight: 800; color: var(--accent); }
+  .kpi .label { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; }
+  .kpi.green .value { color: var(--green); }
+  .kpi.yellow .value { color: var(--yellow); }
+  .kpi.purple .value { color: var(--accent2); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 0.15rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-orange { background: rgba(251,146,60,0.15); color: var(--orange); }
+
+  /* Code/Arch blocks */
+  .arch { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; font-family: 'Fira Code', 'Cascadia Code', monospace; font-size: 0.75rem; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid var(--surface2); }
+  code { background: var(--bg); padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--accent); }
+  .cmd { background: var(--bg); border-radius: 8px; padding: 1rem 1.25rem; margin: 0.5rem 0; font-family: 'Fira Code', monospace; font-size: 0.8rem; line-height: 1.6; overflow-x: auto; border: 1px solid var(--surface2); color: var(--green); position: relative; }
+  .cmd .comment { color: var(--muted); }
+  .cmd-copy { position: absolute; top: 0.5rem; right: 0.5rem; background: var(--surface2); border: none; color: var(--muted); padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer; font-size: 0.7rem; transition: all 0.2s; }
+  .cmd-copy:hover { color: var(--accent); background: var(--surface); }
+  .cmd-copy.copied { color: var(--green); }
+
+  /* Flow cards */
+  .flow-card { background: var(--bg); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; border: 1px solid var(--surface2); }
+  .flow-card h4 { color: var(--accent); font-size: 1rem; margin-bottom: 0.75rem; }
+  .flow-steps { display: flex; flex-direction: column; gap: 0.5rem; }
+  .flow-step { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0.75rem; background: var(--surface); border-radius: 8px; font-size: 0.9rem; }
+  .flow-step .step-num { background: var(--accent2); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+
+  /* Warning/Info/Success boxes */
+  .warn-box { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; }
+  .warn-box::before { content: "Atenção: "; color: var(--yellow); font-weight: 700; }
+  .error-box { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; }
+  .error-box::before { content: "O que pode dar errado: "; color: var(--red); font-weight: 700; }
+  .success-box { background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; }
+  .success-box::before { content: "Resultado esperado: "; color: var(--green); font-weight: 700; }
+  .info-box { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); border-radius: 8px; padding: 1rem 1.25rem; margin: 1rem 0; font-size: 0.9rem; }
+  .info-box::before { content: "Dica: "; color: var(--accent); font-weight: 700; }
+
+  /* Expandable */
+  details { background: var(--bg); border: 1px solid var(--surface2); border-radius: 8px; margin: 0.75rem 0; }
+  details > summary { padding: 0.75rem 1rem; cursor: pointer; color: var(--accent); font-weight: 600; font-size: 0.95rem; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+  details > summary::before { content: ""; display: inline-block; width: 0; height: 0; border-left: 6px solid var(--accent); border-top: 5px solid transparent; border-bottom: 5px solid transparent; transition: transform 0.2s; flex-shrink: 0; }
+  details[open] > summary::before { transform: rotate(90deg); }
+  details > summary::-webkit-details-marker { display: none; }
+  details > .details-content { padding: 0 1rem 1rem; }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { display: flex; align-items: center; gap: 0.75rem; padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); font-size: 0.9rem; cursor: pointer; transition: opacity 0.2s; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li .check-icon { width: 22px; height: 22px; border: 2px solid var(--surface2); border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.75rem; }
+  .checklist li.checked .check-icon { background: var(--green); border-color: var(--green); color: var(--bg); }
+  .checklist li.checked { opacity: 0.6; }
+
+  /* Lists */
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.3rem 0; }
+  li::marker { color: var(--accent); }
+
+  /* Links */
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Footer */
+  .footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .toc { display: none; }
+    .page-wrapper { display: block; }
+  }
+  @media (max-width: 640px) {
+    .hero h1 { font-size: 1.75rem; }
+    .slide { padding: 1.5rem; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .arch { font-size: 0.6rem; padding: 1rem; }
+    nav { padding: 0.75rem 1rem; flex-wrap: wrap; }
+    nav .links { gap: 0.25rem; }
+    nav .links a { padding: 0.3rem 0.5rem; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatorios</a>
+    <a href="../propostas/">Propostas</a>
+    <a href="../infra/">Infra</a>
+    <a href="./" class="active">Guia</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://api.uuba.tech/health" target="_blank">Status</a>
+  </div>
+</nav>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HERO -->
+<div class="slide hero">
+  <h1>Guia de <span>Replicacao</span></h1>
+  <div class="subtitle">Como montar toda a infraestrutura Uuba Tech do zero, passo a passo</div>
+  <div class="date">Guia Completo &mdash; Marco 2026</div>
+</div>
+
+<div class="page-wrapper">
+
+<!-- TOC Sidebar -->
+<aside class="toc" id="toc">
+  <h3>Indice</h3>
+  <a href="#s1">1. Visao Geral</a>
+  <a href="#s2">2. O que voce vai precisar</a>
+  <a href="#s3">3. Acesso a VPS</a>
+  <a href="#s4">4. Docker e Docker Compose</a>
+  <a href="#s5">5. Estrutura de arquivos</a>
+  <a href="#s6">6. docker-compose.yml</a>
+  <a href="#s7">7. Arquivo .env</a>
+  <a href="#s8">8. Arquivo evolution.env</a>
+  <a href="#s9">9. Nginx</a>
+  <a href="#s10">10. SSL (Let's Encrypt)</a>
+  <a href="#s11">11. DNS</a>
+  <a href="#s12">12. Subir os servicos</a>
+  <a href="#s13">13. Conectar WhatsApp</a>
+  <a href="#s14">14. Configurar n8n</a>
+  <a href="#s15">15. Importar Workflows</a>
+  <a href="#s16">16. Agente IA</a>
+  <a href="#s17">17. Testar tudo</a>
+  <a href="#s18">18. Manutencao</a>
+  <a href="#s19">19. Checklist Final</a>
+</aside>
+
+<div class="deck">
+
+<!-- ===================== SLIDE 1 ===================== -->
+<div class="slide" id="s1">
+  <h2><span class="num">1</span> Visao Geral</h2>
+  <p>A Uuba Tech e um sistema completo de <strong>cobranca inteligente via WhatsApp</strong>. Ele usa inteligencia artificial para conversar com clientes que tem faturas em aberto, de forma automatica e humanizada.</p>
+  <p style="color: var(--muted);">Ao final deste guia, voce tera uma infraestrutura identica rodando na sua propria VPS.</p>
+
+  <h3>O que voce vai montar</h3>
+  <div class="kpi-grid">
+    <div class="kpi"><div class="value">7</div><div class="label">Servicos Docker</div></div>
+    <div class="kpi green"><div class="value">API</div><div class="label">REST (FastAPI)</div></div>
+    <div class="kpi purple"><div class="value">IA</div><div class="label">Claude (Anthropic)</div></div>
+    <div class="kpi yellow"><div class="value">Bot</div><div class="label">WhatsApp 24/7</div></div>
+  </div>
+
+  <h3>Diagrama de Arquitetura</h3>
+  <div class="arch">
+                        Internet
+                           |
+                    +--------------+
+                    |    Nginx     |  (reverse proxy + SSL)
+                    +--------------+
+                     /      |      \
+                    /       |       \
+          api.uuba.tech  wa.uuba.tech  developers.uuba.tech
+               |            |                |
+         +----------+  +-----------+   (mesmo que api)
+         | uuba-api |  | evolution |
+         | (FastAPI)|  |   -api    |
+         +----+-----+  +-----+----+
+              |               |
+         +----+-----+   +----+----+
+         |PostgreSQL |   |  Redis  |
+         | (dados)   |   | (cache) |
+         +-----------+   +---------+
+                                \
+                          +------+------+
+                          |     n8n     | (automacao + IA)
+                          +------+------+
+                                 |
+                          +------+------+
+                          | PostgreSQL  |
+                          |  (n8n)      |
+                          +-------------+
+
+  Fluxo: Cliente envia WhatsApp
+     -> Evolution API recebe
+     -> Webhook para n8n
+     -> n8n consulta uuba-api (dados do cliente)
+     -> n8n chama Claude (IA) para gerar resposta
+     -> n8n envia resposta via Evolution API
+     -> Cliente recebe no WhatsApp</div>
+
+  <h3>Servicos que serao instalados</h3>
+  <table>
+    <tr><th>Servico</th><th>O que faz</th><th>Tecnologia</th></tr>
+    <tr><td><code>uuba-api</code></td><td>API principal - gerencia clientes, faturas e cobrancas</td><td>Python / FastAPI</td></tr>
+    <tr><td><code>evolution-api</code></td><td>Gateway WhatsApp - envia e recebe mensagens</td><td>Node.js</td></tr>
+    <tr><td><code>n8n</code></td><td>Automacao - workflows, agente IA, regua de cobranca</td><td>Node.js</td></tr>
+    <tr><td><code>postgres</code></td><td>Banco de dados interno do n8n</td><td>PostgreSQL 16</td></tr>
+    <tr><td><code>postgres-data</code></td><td>Banco de dados de negocio (clientes, faturas)</td><td>PostgreSQL 16</td></tr>
+    <tr><td><code>redis</code></td><td>Cache para sessoes WhatsApp e debounce</td><td>Redis 7</td></tr>
+    <tr><td><code>pgadmin</code></td><td>Interface visual para os bancos de dados</td><td>pgAdmin 4</td></tr>
+  </table>
+</div>
+
+<!-- ===================== SLIDE 2 ===================== -->
+<div class="slide" id="s2">
+  <h2><span class="num">2</span> O que voce vai precisar</h2>
+  <p>Antes de comecar, reuna todos estes itens. Sem eles, nao e possivel completar a instalacao.</p>
+
+  <h3>Checklist de pre-requisitos</h3>
+  <table>
+    <tr><th>Item</th><th>Detalhes</th><th>Onde conseguir</th></tr>
+    <tr>
+      <td><strong>VPS (servidor)</strong></td>
+      <td>Ubuntu 22.04 ou superior, minimo 4 vCPUs, 8GB RAM, 100GB disco</td>
+      <td>Contabo, Hostinger, DigitalOcean, Hetzner</td>
+    </tr>
+    <tr>
+      <td><strong>Dominio</strong></td>
+      <td>Um dominio proprio com acesso ao painel DNS (ex: suaempresa.com.br)</td>
+      <td>Registro.br, GoDaddy, Wix, Cloudflare</td>
+    </tr>
+    <tr>
+      <td><strong>Chip WhatsApp</strong></td>
+      <td>Um numero de celular dedicado para o bot (nao use seu numero pessoal)</td>
+      <td>Operadora de celular</td>
+    </tr>
+    <tr>
+      <td><strong>Conta Anthropic</strong></td>
+      <td>API key para usar o Claude (inteligencia artificial)</td>
+      <td><a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></td>
+    </tr>
+    <tr>
+      <td><strong>Conta Conta Azul</strong></td>
+      <td>Para gerar links de pagamento (Pix/boleto) - pode ser configurado depois</td>
+      <td><a href="https://contaazul.com" target="_blank">contaazul.com</a></td>
+    </tr>
+  </table>
+
+  <div class="info-box">Se voce nunca contratou uma VPS, recomendamos a Contabo (custo-beneficio) ou Hetzner (performance). Escolha um plano com pelo menos 4 vCPUs e 8GB de RAM. O processo e parecido com comprar qualquer servico online - voce cria uma conta, escolhe o plano e recebe o IP e senha por email.</div>
+
+  <div class="warn-box">O chip WhatsApp precisa ser exclusivo para o bot. Se voce usar um numero que ja tem WhatsApp pessoal, todas as suas conversas serao desconectadas. Compre um chip pre-pago novo.</div>
+
+  <h3>O que voce vai precisar saber anotar</h3>
+  <p>Durante o processo, voce vai gerar varias senhas e chaves. Tenha um lugar seguro para anotá-las (gerenciador de senhas, documento offline).</p>
+  <table>
+    <tr><th>O que</th><th>Exemplo (placeholder)</th></tr>
+    <tr><td>IP da VPS</td><td><code>YOUR_IP</code></td></tr>
+    <tr><td>Senha root da VPS</td><td><code>YOUR_VPS_PASSWORD</code></td></tr>
+    <tr><td>Senha do PostgreSQL (n8n)</td><td><code>YOUR_POSTGRES_PASSWORD</code></td></tr>
+    <tr><td>Senha do PostgreSQL (dados)</td><td><code>YOUR_DATA_DB_PASSWORD</code></td></tr>
+    <tr><td>Chave de encriptacao n8n</td><td><code>YOUR_N8N_ENCRYPTION_KEY</code></td></tr>
+    <tr><td>API Key da Uuba API</td><td><code>YOUR_UUBA_API_KEY</code></td></tr>
+    <tr><td>API Key do Evolution</td><td><code>YOUR_EVOLUTION_API_KEY</code></td></tr>
+    <tr><td>Senha do Redis</td><td><code>YOUR_REDIS_PASSWORD</code></td></tr>
+    <tr><td>API Key do Anthropic (Claude)</td><td><code>YOUR_ANTHROPIC_API_KEY</code></td></tr>
+  </table>
+</div>
+
+<!-- ===================== SLIDE 3 ===================== -->
+<div class="slide" id="s3">
+  <h2><span class="num">3</span> Acesso a VPS</h2>
+  <p><strong>Por que:</strong> A VPS e o seu servidor na nuvem. E como um computador que fica ligado 24 horas, acessivel pela internet. Voce vai controla-lo pelo terminal (linha de comando).</p>
+
+  <h3>Passo 1: Conectar via SSH</h3>
+  <p>SSH e a forma segura de acessar o servidor remotamente. Abra o terminal do seu computador e digite:</p>
+  <div class="cmd">ssh root@YOUR_IP<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p style="color: var(--muted); font-size: 0.85rem;">Substitua <code>YOUR_IP</code> pelo IP que voce recebeu por email ao contratar a VPS (ex: 5.189.155.226).</p>
+  <p>Na primeira vez, vai perguntar se confia no servidor. Digite <code>yes</code> e aperte Enter. Depois, digite a senha root.</p>
+
+  <h3>Passo 2: Atualizar o sistema</h3>
+  <p><strong>Por que:</strong> O servidor vem com software desatualizado. Atualizar previne falhas de seguranca.</p>
+  <div class="cmd"><span class="comment"># Atualizar lista de pacotes e instalar atualizacoes</span>
+apt update && apt upgrade -y<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <div class="success-box">Voce deve ver varias linhas de download. No final, sem mensagens de erro em vermelho.</div>
+
+  <h3>Passo 3: Configurar timezone</h3>
+  <p><strong>Por que:</strong> Para que as datas e horarios no sistema estejam corretos (horario de Brasilia).</p>
+  <div class="cmd">timedatectl set-timezone America/Sao_Paulo<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 4: Instalar ferramentas basicas</h3>
+  <div class="cmd">apt install -y curl wget git nano ufw<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 5: Configurar firewall</h3>
+  <p><strong>Por que:</strong> O firewall protege seu servidor bloqueando acessos nao autorizados. Vamos abrir apenas as portas necessarias.</p>
+  <div class="cmd"><span class="comment"># Permitir SSH (para nao perder acesso!)</span>
+ufw allow OpenSSH
+
+<span class="comment"># Permitir HTTP e HTTPS (para o site funcionar)</span>
+ufw allow 80/tcp
+ufw allow 443/tcp
+
+<span class="comment"># Ativar o firewall</span>
+ufw --force enable
+
+<span class="comment"># Verificar status</span>
+ufw status<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <div class="error-box">Se voce ativar o firewall SEM permitir SSH antes, voce vai perder acesso ao servidor! Sempre execute <code>ufw allow OpenSSH</code> primeiro.</div>
+</div>
+
+<!-- ===================== SLIDE 4 ===================== -->
+<div class="slide" id="s4">
+  <h2><span class="num">4</span> Instalar Docker e Docker Compose</h2>
+  <p><strong>Por que:</strong> Docker e uma tecnologia que permite rodar cada servico isolado em um "container" (como uma mini maquina virtual). Isso facilita a instalacao, atualizacao e manutencao. Em vez de instalar PostgreSQL, Redis, etc. manualmente, o Docker faz tudo automaticamente.</p>
+
+  <h3>Passo 1: Instalar Docker</h3>
+  <div class="cmd"><span class="comment"># Adicionar repositorio oficial do Docker</span>
+curl -fsSL https://get.docker.com | sh<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 2: Verificar instalacao</h3>
+  <div class="cmd">docker --version
+docker compose version<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve mostrar algo como <code>Docker version 27.x.x</code> e <code>Docker Compose version v2.x.x</code>.</div>
+
+  <h3>Passo 3: Testar Docker</h3>
+  <div class="cmd">docker run hello-world<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve mostrar "Hello from Docker!" confirmando que tudo funciona.</div>
+
+  <div class="error-box">Se aparecer "permission denied", execute: <code>usermod -aG docker $USER</code> e reconecte via SSH.</div>
+</div>
+
+<!-- ===================== SLIDE 5 ===================== -->
+<div class="slide" id="s5">
+  <h2><span class="num">5</span> Estrutura de Arquivos</h2>
+  <p><strong>Por que:</strong> Todos os arquivos de configuracao ficam organizados em um unico diretorio. Isso facilita backups e manutencao.</p>
+
+  <h3>Criar o diretorio principal</h3>
+  <div class="cmd">mkdir -p /opt/stack
+cd /opt/stack<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Estrutura final</h3>
+  <p>Ao final do guia, seu diretorio tera esta aparencia:</p>
+  <div class="arch">/opt/stack/
+  ├── docker-compose.yml     # Define todos os servicos
+  ├── .env                   # Senhas e configuracoes secretas
+  ├── evolution.env           # Configuracao do WhatsApp (Evolution API)
+  └── uuba-tech/              # Codigo-fonte da API (clonado do GitHub)
+      ├── Dockerfile.prod
+      ├── app/
+      ├── alembic/
+      └── ...</div>
+
+  <h3>O que cada arquivo faz</h3>
+  <table>
+    <tr><th>Arquivo</th><th>Funcao</th></tr>
+    <tr><td><code>docker-compose.yml</code></td><td>O "mapa" que diz ao Docker quais servicos rodar, como conecta-los e quais portas usar</td></tr>
+    <tr><td><code>.env</code></td><td>Armazena senhas e chaves secretas - nunca vai para o GitHub</td></tr>
+    <tr><td><code>evolution.env</code></td><td>Configuracao especifica do Evolution API (WhatsApp) - webhooks, cache, autenticacao</td></tr>
+    <tr><td><code>uuba-tech/</code></td><td>Codigo-fonte da API, clonado do repositorio GitHub</td></tr>
+  </table>
+
+  <h3>Clonar o repositorio da API</h3>
+  <div class="cmd">cd /opt/stack
+git clone https://github.com/luisbarcia/uuba-tech.git<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="info-box">Se o repositorio for privado, voce precisara configurar uma deploy key SSH ou usar um token de acesso pessoal do GitHub.</div>
+</div>
+
+<!-- ===================== SLIDE 6 ===================== -->
+<div class="slide" id="s6">
+  <h2><span class="num">6</span> Criar o docker-compose.yml</h2>
+  <p><strong>Por que:</strong> Este e o arquivo mais importante. Ele define todos os 7 servicos que formam o sistema, como eles se comunicam, e quais dados sao persistentes. O Docker le este arquivo e cria tudo automaticamente.</p>
+
+  <div class="warn-box">Copie o conteudo abaixo EXATAMENTE como esta. Um espaco a mais ou a menos pode causar erros. Use o botao "Copiar" para evitar erros de digitacao.</div>
+
+  <div class="cmd">nano /opt/stack/docker-compose.yml<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p>Cole o conteudo abaixo:</p>
+
+  <details>
+    <summary>Ver docker-compose.yml completo (clique para expandir)</summary>
+    <div class="details-content">
+      <div class="arch">version: "3.8"
+
+services:
+  # ============================================
+  # PostgreSQL - Banco de dados INTERNO do n8n
+  # Armazena: workflows, credenciais, historico
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: n8n-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  # ============================================
+  # PostgreSQL - Banco de dados de NEGOCIO
+  # Armazena: clientes, faturas, cobrancas, evolution
+  # ============================================
+  postgres-data:
+    image: postgres:16-alpine
+    container_name: n8n-postgres-data
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DATA_DB_USER}
+      POSTGRES_PASSWORD: ${DATA_DB_PASSWORD}
+      POSTGRES_DB: ${DATA_DB_NAME}
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data_store:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATA_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  # ============================================
+  # pgAdmin - Interface visual para os bancos
+  # Acesso via SSH tunnel na porta 5050
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: n8n-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "127.0.0.1:5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - internal
+
+  # ============================================
+  # n8n - Plataforma de automacao
+  # Recebe webhooks, processa logica, chama IA
+  # ============================================
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB}
+      DB_POSTGRESDB_USER: ${POSTGRES_USER}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY}
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://${N8N_HOST}/
+      NODE_FUNCTION_ALLOW_EXTERNAL: ioredis
+      N8N_PUBLIC_API_DISABLED: "false"
+    ports:
+      - "0.0.0.0:5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+
+  # ============================================
+  # Uuba API - Backend principal
+  # REST API em Python/FastAPI
+  # ============================================
+  uuba-api:
+    build:
+      context: ./uuba-tech/uuba-tech-api
+      dockerfile: Dockerfile.prod
+    container_name: uuba-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DATA_DB_USER}:${DATA_DB_PASSWORD}@postgres-data:5432/${UUBA_DB_NAME}
+      API_KEY: ${UUBA_API_KEY}
+      ENVIRONMENT: production
+      DEBUG: "false"
+    ports:
+      - "127.0.0.1:8080:8000"
+    depends_on:
+      postgres-data:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - internal
+
+  # ============================================
+  # Evolution API - Gateway WhatsApp
+  # Envia e recebe mensagens do WhatsApp
+  # ============================================
+  evolution-api:
+    image: evoapicloud/evolution-api:v2.3.7
+    container_name: evolution-api
+    restart: unless-stopped
+    env_file:
+      - ./evolution.env
+    ports:
+      - "127.0.0.1:8085:8080"
+    volumes:
+      - evolution_instances:/evolution/instances
+    depends_on:
+      postgres-data:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - internal
+
+  # ============================================
+  # Redis - Cache em memoria
+  # Usado pelo Evolution API e debounce do bot
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+
+  # ============================================
+  # Cloudflared - Tunnel (opcional)
+  # Expor n8n sem abrir porta no firewall
+  # ============================================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - internal
+
+volumes:
+  postgres_data:
+  postgres_data_store:
+  pgadmin_data:
+  n8n_data:
+  evolution_instances:
+  redis_data:
+
+networks:
+  internal:
+    driver: bridge</div>
+    </div>
+  </details>
+
+  <p style="margin-top: 1rem;">Salve o arquivo: pressione <code>Ctrl+O</code>, depois <code>Enter</code>, depois <code>Ctrl+X</code>.</p>
+
+  <h3>Entendendo os servicos</h3>
+  <div class="flow-card">
+    <h4>O que cada bloco significa</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> <strong>image:</strong> Qual software usar (baixado automaticamente da internet)</div>
+      <div class="flow-step"><span class="step-num">2</span> <strong>environment:</strong> Configuracoes do servico (senhas, URLs, etc.)</div>
+      <div class="flow-step"><span class="step-num">3</span> <strong>ports:</strong> Qual porta do servidor aponta para qual porta do container</div>
+      <div class="flow-step"><span class="step-num">4</span> <strong>volumes:</strong> Onde salvar dados permanentes (sobrevivem a reinicializacao)</div>
+      <div class="flow-step"><span class="step-num">5</span> <strong>depends_on:</strong> Qual servico precisa estar pronto antes deste iniciar</div>
+      <div class="flow-step"><span class="step-num">6</span> <strong>healthcheck:</strong> Como verificar se o servico esta funcionando</div>
+      <div class="flow-step"><span class="step-num">7</span> <strong>networks:</strong> Todos na mesma rede interna para se comunicarem</div>
+    </div>
+  </div>
+
+  <div class="error-box">Se ao salvar voce ver "Error parsing YAML", verifique a indentacao. YAML usa espacos (nunca tabs). Cada nivel de indentacao usa 2 espacos.</div>
+</div>
+
+<!-- ===================== SLIDE 7 ===================== -->
+<div class="slide" id="s7">
+  <h2><span class="num">7</span> Criar o arquivo .env</h2>
+  <p><strong>Por que:</strong> O arquivo <code>.env</code> armazena todas as senhas e configuracoes secretas em um unico lugar. O <code>docker-compose.yml</code> le os valores daqui (as partes com <code>${...}</code>). Assim, voce nunca coloca senhas diretamente no docker-compose.</p>
+
+  <div class="cmd">nano /opt/stack/.env<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p>Cole o conteudo abaixo, <strong>substituindo os valores YOUR_*</strong> por senhas reais:</p>
+
+  <details>
+    <summary>Ver .env completo (clique para expandir)</summary>
+    <div class="details-content">
+      <div class="arch"># ============================================
+# PostgreSQL (banco interno do n8n)
+# ============================================
+POSTGRES_USER=n8n
+POSTGRES_PASSWORD=YOUR_POSTGRES_PASSWORD
+POSTGRES_DB=n8n
+
+# ============================================
+# PostgreSQL (banco de dados de negocio)
+# ============================================
+DATA_DB_USER=datauser
+DATA_DB_PASSWORD=YOUR_DATA_DB_PASSWORD
+DATA_DB_NAME=datastore
+
+# ============================================
+# n8n
+# ============================================
+N8N_ENCRYPTION_KEY=YOUR_N8N_ENCRYPTION_KEY
+N8N_HOST=YOUR_N8N_HOST
+
+# ============================================
+# pgAdmin
+# ============================================
+PGADMIN_EMAIL=YOUR_EMAIL@example.com
+PGADMIN_PASSWORD=YOUR_PGADMIN_PASSWORD
+
+# ============================================
+# Uuba API
+# ============================================
+UUBA_DB_NAME=uuba
+UUBA_API_KEY=YOUR_UUBA_API_KEY
+
+# ============================================
+# Evolution API (WhatsApp)
+# ============================================
+EVOLUTION_API_KEY=YOUR_EVOLUTION_API_KEY
+
+# ============================================
+# Redis
+# ============================================
+REDIS_PASSWORD=YOUR_REDIS_PASSWORD
+
+# ============================================
+# Cloudflare Tunnel (opcional)
+# ============================================
+CLOUDFLARE_TUNNEL_TOKEN=YOUR_CLOUDFLARE_TOKEN</div>
+    </div>
+  </details>
+
+  <h3>Como gerar senhas seguras</h3>
+  <p>Use este comando para gerar senhas aleatorias de 32 caracteres:</p>
+  <div class="cmd">openssl rand -base64 32<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p style="color: var(--muted); font-size: 0.85rem;">Execute este comando uma vez para cada senha que precisar gerar. Anote cada uma antes de colar no .env.</p>
+
+  <h3>Explicacao de cada variavel</h3>
+  <table>
+    <tr><th>Variavel</th><th>O que e</th></tr>
+    <tr><td><code>POSTGRES_USER/PASSWORD/DB</code></td><td>Credenciais do banco de dados que o n8n usa internamente. Nao tem relacao com seus dados de negocio.</td></tr>
+    <tr><td><code>DATA_DB_USER/PASSWORD/NAME</code></td><td>Credenciais do banco principal. Aqui ficam os dados dos clientes, faturas e cobrancas.</td></tr>
+    <tr><td><code>N8N_ENCRYPTION_KEY</code></td><td>Chave que o n8n usa para criptografar credenciais salvas. Se perder, perde acesso a todas as credenciais configuradas no n8n.</td></tr>
+    <tr><td><code>N8N_HOST</code></td><td>O dominio onde o n8n sera acessado (ex: n8n.seudominio.com).</td></tr>
+    <tr><td><code>UUBA_API_KEY</code></td><td>Chave de autenticacao para acessar a API da Uuba. Qualquer chamada precisa enviar essa chave.</td></tr>
+    <tr><td><code>EVOLUTION_API_KEY</code></td><td>Chave de autenticacao do Evolution API. Usada para gerenciar instancias WhatsApp.</td></tr>
+    <tr><td><code>REDIS_PASSWORD</code></td><td>Senha do Redis (cache). Protege contra acessos nao autorizados.</td></tr>
+  </table>
+
+  <div class="warn-box">NUNCA envie este arquivo para o GitHub ou compartilhe por email/WhatsApp. Ele contem todas as senhas do sistema. Ele deve existir APENAS na VPS.</div>
+</div>
+
+<!-- ===================== SLIDE 8 ===================== -->
+<div class="slide" id="s8">
+  <h2><span class="num">8</span> Criar o evolution.env</h2>
+  <p><strong>Por que:</strong> O Evolution API (gateway WhatsApp) tem muitas configuracoes especificas. Separamos em um arquivo proprio para ficar organizado. Aqui voce define onde salvar dados, como cachear sessoes e para onde enviar notificacoes (webhooks).</p>
+
+  <div class="cmd">nano /opt/stack/evolution.env<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <details>
+    <summary>Ver evolution.env completo (clique para expandir)</summary>
+    <div class="details-content">
+      <div class="arch"># ============================================
+# Evolution API - Configuracao
+# ============================================
+
+# URL publica onde o Evolution sera acessado
+SERVER_URL=https://wa.YOUR_DOMAIN
+
+# ============================================
+# Banco de dados (PostgreSQL)
+# ============================================
+DATABASE_ENABLED=true
+DATABASE_PROVIDER=postgresql
+DATABASE_CONNECTION_URI=postgresql://datauser:YOUR_DATA_DB_PASSWORD@postgres-data:5432/evolution
+DATABASE_SAVE_DATA_INSTANCE=true
+DATABASE_SAVE_DATA_NEW_MESSAGE=true
+DATABASE_SAVE_MESSAGE_UPDATE=true
+DATABASE_SAVE_DATA_CONTACTS=true
+DATABASE_SAVE_DATA_CHATS=true
+DATABASE_SAVE_DATA_LABELS=true
+DATABASE_SAVE_DATA_HISTORIC=true
+
+# ============================================
+# Cache (Redis)
+# ============================================
+CACHE_REDIS_ENABLED=true
+CACHE_REDIS_URI=redis://:YOUR_REDIS_PASSWORD@redis:6379/1
+CACHE_REDIS_PREFIX_KEY=evolution
+CACHE_REDIS_SAVE_INSTANCES=false
+CACHE_LOCAL_ENABLED=false
+
+# ============================================
+# Autenticacao
+# ============================================
+AUTHENTICATION_API_KEY=YOUR_EVOLUTION_API_KEY
+AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES=true
+
+# ============================================
+# Webhook Global
+# Quando alguem envia mensagem no WhatsApp,
+# o Evolution avisa o n8n nesta URL
+# ============================================
+WEBHOOK_GLOBAL_ENABLED=true
+WEBHOOK_GLOBAL_URL=http://n8n:5678/webhook/evolution-webhook
+WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS=false
+
+# Eventos: quais tipos de notificacao enviar
+WEBHOOK_EVENTS_APPLICATION_STARTUP=false
+WEBHOOK_EVENTS_QRCODE_UPDATED=true
+WEBHOOK_EVENTS_MESSAGES_SET=true
+WEBHOOK_EVENTS_MESSAGES_UPSERT=true
+WEBHOOK_EVENTS_MESSAGES_EDITED=true
+WEBHOOK_EVENTS_MESSAGES_UPDATE=true
+WEBHOOK_EVENTS_MESSAGES_DELETE=true
+WEBHOOK_EVENTS_SEND_MESSAGE=true
+WEBHOOK_EVENTS_CONTACTS_SET=true
+WEBHOOK_EVENTS_CONTACTS_UPSERT=true
+WEBHOOK_EVENTS_CONTACTS_UPDATE=true
+WEBHOOK_EVENTS_PRESENCE_UPDATE=true
+WEBHOOK_EVENTS_CHATS_SET=true
+WEBHOOK_EVENTS_CHATS_UPSERT=true
+WEBHOOK_EVENTS_CHATS_UPDATE=true
+WEBHOOK_EVENTS_CHATS_DELETE=true
+WEBHOOK_EVENTS_GROUPS_UPSERT=true
+WEBHOOK_EVENTS_GROUPS_UPDATE=true
+WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE=true
+WEBHOOK_EVENTS_CONNECTION_UPDATE=true
+WEBHOOK_EVENTS_LABELS_EDIT=true
+WEBHOOK_EVENTS_LABELS_ASSOCIATION=true
+WEBHOOK_EVENTS_CALL=true
+WEBHOOK_EVENTS_TYPEBOT_START=false
+WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS=false
+WEBHOOK_EVENTS_ERRORS=true
+WEBHOOK_EVENTS_ERRORS_WEBHOOK=true
+
+# ============================================
+# Configuracoes gerais
+# ============================================
+LOG_LEVEL=WARN
+DEL_INSTANCE=false
+CONFIG_SESSION_PHONE_CLIENT=Uuba Bot
+CONFIG_SESSION_PHONE_NAME=Chrome</div>
+    </div>
+  </details>
+
+  <h3>Webhooks - O que sao e por que importam</h3>
+  <p>Webhooks sao "avisos automaticos". Quando algo acontece no WhatsApp (alguem enviou mensagem, leu, etc.), o Evolution envia uma notificacao para o n8n. O n8n entao decide o que fazer.</p>
+
+  <table>
+    <tr><th>Evento</th><th>Quando dispara</th><th>Para que serve</th></tr>
+    <tr><td><code>MESSAGES_UPSERT</code></td><td>Nova mensagem recebida</td><td>Principal - e assim que o bot sabe que alguem mandou mensagem</td></tr>
+    <tr><td><code>MESSAGES_UPDATE</code></td><td>Mensagem lida/entregue</td><td>Saber se o cliente leu a mensagem</td></tr>
+    <tr><td><code>CONNECTION_UPDATE</code></td><td>WhatsApp conectou/desconectou</td><td>Monitorar saude da conexao</td></tr>
+    <tr><td><code>QRCODE_UPDATED</code></td><td>Novo QR code gerado</td><td>Necessario para conectar o WhatsApp</td></tr>
+    <tr><td><code>SEND_MESSAGE</code></td><td>Mensagem enviada pelo bot</td><td>Log de mensagens enviadas</td></tr>
+  </table>
+</div>
+
+<!-- ===================== SLIDE 9 ===================== -->
+<div class="slide" id="s9">
+  <h2><span class="num">9</span> Configurar Nginx</h2>
+  <p><strong>Por que:</strong> Os containers Docker rodam em portas internas (8000, 8080, 8085). Ninguem consegue acessa-los diretamente pela internet. O Nginx e um "porteiro" que recebe as requisicoes pela internet (porta 80/443) e encaminha para o container correto, dependendo do dominio usado.</p>
+
+  <h3>Passo 1: Instalar Nginx</h3>
+  <div class="cmd">apt install -y nginx<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 2: Criar vhost para API e Documentacao</h3>
+  <p>Este arquivo configura dois subdominios: <code>api.YOUR_DOMAIN</code> (API) e <code>developers.YOUR_DOMAIN</code> (documentacao).</p>
+  <div class="cmd">nano /etc/nginx/sites-available/uuba-tech<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <details>
+    <summary>Ver configuracao do vhost uuba-tech</summary>
+    <div class="details-content">
+      <div class="arch"># API - api.YOUR_DOMAIN
+server {
+    listen 80;
+    server_name api.YOUR_DOMAIN;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# Documentacao - developers.YOUR_DOMAIN
+server {
+    listen 80;
+    server_name developers.YOUR_DOMAIN;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</div>
+    </div>
+  </details>
+
+  <h3>Passo 3: Criar vhost para WhatsApp (Evolution API)</h3>
+  <div class="cmd">nano /etc/nginx/sites-available/wa-uuba-tech<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <details>
+    <summary>Ver configuracao do vhost wa-uuba-tech</summary>
+    <div class="details-content">
+      <div class="arch"># WhatsApp API - wa.YOUR_DOMAIN
+server {
+    listen 80;
+    server_name wa.YOUR_DOMAIN;
+
+    location / {
+        proxy_pass http://127.0.0.1:8085;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # WebSocket support (necessario para Evolution API)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}</div>
+    </div>
+  </details>
+
+  <h3>Passo 4: Ativar os sites e testar</h3>
+  <div class="cmd"><span class="comment"># Criar links simbolicos para ativar os sites</span>
+ln -s /etc/nginx/sites-available/uuba-tech /etc/nginx/sites-enabled/
+ln -s /etc/nginx/sites-available/wa-uuba-tech /etc/nginx/sites-enabled/
+
+<span class="comment"># Testar se a configuracao esta correta</span>
+nginx -t
+
+<span class="comment"># Recarregar nginx</span>
+systemctl reload nginx<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <div class="success-box"><code>nginx -t</code> deve mostrar "syntax is ok" e "test is successful".</div>
+
+  <div class="error-box">Se aparecer "conflicting server name", verifique se nao existe outro arquivo em <code>/etc/nginx/sites-enabled/</code> com o mesmo <code>server_name</code>. Remova o conflitante com <code>rm /etc/nginx/sites-enabled/arquivo-conflitante</code>.</div>
+</div>
+
+<!-- ===================== SLIDE 10 ===================== -->
+<div class="slide" id="s10">
+  <h2><span class="num">10</span> Configurar SSL (Let's Encrypt)</h2>
+  <p><strong>Por que:</strong> SSL (o cadeado verde no navegador) criptografa a comunicacao entre o navegador e o servidor. Sem SSL, senhas e dados trafegam "abertos" pela internet. O Let's Encrypt fornece certificados SSL gratuitos.</p>
+
+  <div class="warn-box">O DNS (passo 11) precisa estar configurado ANTES deste passo. O Let's Encrypt verifica se o dominio aponta para o seu servidor. Se nao apontar, o certificado nao sera gerado.</div>
+
+  <h3>Passo 1: Instalar Certbot</h3>
+  <div class="cmd">apt install -y certbot python3-certbot-nginx<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 2: Gerar certificados</h3>
+  <div class="cmd"><span class="comment"># Certificado para API e Documentacao</span>
+certbot --nginx -d api.YOUR_DOMAIN -d developers.YOUR_DOMAIN
+
+<span class="comment"># Certificado para WhatsApp API</span>
+certbot --nginx -d wa.YOUR_DOMAIN<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p>O certbot vai perguntar seu email (para avisos de renovacao) e pedir para aceitar os termos. Quando perguntar sobre redirecionar HTTP para HTTPS, escolha <strong>2 (Redirect)</strong>.</p>
+
+  <h3>Passo 3: Verificar renovacao automatica</h3>
+  <p>Os certificados vencem a cada 90 dias, mas o certbot renova automaticamente.</p>
+  <div class="cmd"><span class="comment"># Testar se a renovacao automatica funciona</span>
+certbot renew --dry-run<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve mostrar "Congratulations, all simulated renewals succeeded".</div>
+
+  <div class="error-box">Se falhar com "Could not automatically find a matching server block", verifique se o <code>server_name</code> no Nginx corresponde exatamente ao dominio. Verifique tambem se o DNS ja propagou (use <code>dig api.YOUR_DOMAIN</code>).</div>
+</div>
+
+<!-- ===================== SLIDE 11 ===================== -->
+<div class="slide" id="s11">
+  <h2><span class="num">11</span> Configurar DNS</h2>
+  <p><strong>Por que:</strong> DNS e o "catálogo telefonico" da internet. Ele traduz nomes como "api.suaempresa.com" para o IP do seu servidor. Sem isso, ninguem consegue acessar seus servicos pelo dominio.</p>
+
+  <h3>Registros DNS necessarios</h3>
+  <p>Acesse o painel DNS do seu provedor de dominio e crie estes registros:</p>
+  <table>
+    <tr><th>Tipo</th><th>Nome (Host)</th><th>Valor</th><th>Para que serve</th></tr>
+    <tr><td><code>A</code></td><td>api</td><td><code>YOUR_IP</code></td><td>API REST principal</td></tr>
+    <tr><td><code>A</code></td><td>developers</td><td><code>YOUR_IP</code></td><td>Documentacao da API</td></tr>
+    <tr><td><code>A</code></td><td>wa</td><td><code>YOUR_IP</code></td><td>Evolution API (WhatsApp)</td></tr>
+  </table>
+
+  <div class="flow-card">
+    <h4>Como criar um registro A (passo a passo generico)</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Acesse o painel do seu provedor de dominio (Registro.br, GoDaddy, Wix, Cloudflare, etc.)</div>
+      <div class="flow-step"><span class="step-num">2</span> Encontre a secao "DNS" ou "Gerenciar DNS"</div>
+      <div class="flow-step"><span class="step-num">3</span> Clique em "Adicionar registro" ou "Add Record"</div>
+      <div class="flow-step"><span class="step-num">4</span> Tipo: A | Nome: api | Valor: o IP da sua VPS | TTL: 3600</div>
+      <div class="flow-step"><span class="step-num">5</span> Repita para cada subdominio (developers, wa)</div>
+    </div>
+  </div>
+
+  <h3>Verificar propagacao</h3>
+  <p>Apos criar os registros, aguarde de 5 minutos a 48 horas para a propagacao. Verifique assim:</p>
+  <div class="cmd"><span class="comment"># Verificar se o DNS esta apontando para seu IP</span>
+dig +short api.YOUR_DOMAIN
+dig +short developers.YOUR_DOMAIN
+dig +short wa.YOUR_DOMAIN<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Cada comando deve retornar o IP da sua VPS (ex: <code>YOUR_IP</code>).</div>
+
+  <div class="info-box">Se voce usa Cloudflare como DNS, desative o proxy (nuvem laranja) para estes subdominios. O Nginx precisa receber as conexoes diretamente para o SSL funcionar.</div>
+</div>
+
+<!-- ===================== SLIDE 12 ===================== -->
+<div class="slide" id="s12">
+  <h2><span class="num">12</span> Subir os Servicos</h2>
+  <p><strong>Por que:</strong> Agora que todos os arquivos de configuracao estao prontos, vamos iniciar os containers. O Docker vai baixar as imagens, criar os containers e iniciar tudo automaticamente.</p>
+
+  <h3>Passo 1: Iniciar todos os servicos</h3>
+  <div class="cmd">cd /opt/stack
+docker compose up -d<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p style="color: var(--muted); font-size: 0.85rem;">O <code>-d</code> significa "detached" (em segundo plano). Na primeira vez, vai demorar alguns minutos para baixar as imagens.</p>
+
+  <h3>Passo 2: Verificar status de cada servico</h3>
+  <div class="cmd">docker compose ps<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Todos os servicos devem mostrar status <code>Up</code> ou <code>healthy</code>. Se algum mostrar <code>Restarting</code> ou <code>Exit</code>, ha um problema.</div>
+
+  <h3>Passo 3: Criar o database "evolution"</h3>
+  <p><strong>Por que:</strong> O postgres-data cria automaticamente o database padrao (<code>datastore</code>), mas a Evolution API precisa de um database chamado <code>evolution</code>. Precisamos cria-lo manualmente.</p>
+  <div class="cmd"><span class="comment"># Conectar ao PostgreSQL e criar o database evolution</span>
+docker exec -it n8n-postgres-data psql -U datauser -d datastore -c "CREATE DATABASE evolution;"<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 4: Criar o database "uuba"</h3>
+  <div class="cmd">docker exec -it n8n-postgres-data psql -U datauser -d datastore -c "CREATE DATABASE uuba;"<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 5: Reiniciar servicos que dependem dos databases</h3>
+  <div class="cmd">docker compose restart evolution-api uuba-api<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 6: Rodar migrations da API</h3>
+  <p><strong>Por que:</strong> As migrations criam as tabelas no banco de dados (clientes, faturas, cobrancas).</p>
+  <div class="cmd">docker exec uuba-api alembic upgrade head<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 7: Verificar saude dos servicos</h3>
+  <div class="cmd"><span class="comment"># API da Uuba</span>
+curl -s http://localhost:8080/health | python3 -m json.tool
+
+<span class="comment"># Evolution API</span>
+curl -s http://localhost:8085/
+
+<span class="comment"># n8n</span>
+curl -s http://localhost:5678/healthz<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <div class="error-box">Se algum servico estiver com problema, veja os logs: <code>docker logs nome-do-container --tail 50</code>. Os erros mais comuns sao: senha errada no .env, database nao existe, ou porta ja em uso.</div>
+</div>
+
+<!-- ===================== SLIDE 13 ===================== -->
+<div class="slide" id="s13">
+  <h2><span class="num">13</span> Conectar WhatsApp</h2>
+  <p><strong>Por que:</strong> Ate agora, a Evolution API esta rodando mas nao esta conectada a nenhum numero de WhatsApp. Precisamos criar uma "instancia" e escanear o QR code com o celular do bot.</p>
+
+  <h3>Passo 1: Acessar o Evolution Manager</h3>
+  <p>Abra no navegador:</p>
+  <div class="cmd">https://wa.YOUR_DOMAIN/manager<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Passo 2: Fazer login</h3>
+  <div class="flow-card">
+    <h4>Configurar acesso ao Manager</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No campo "Server URL", digite: <code>https://wa.YOUR_DOMAIN</code></div>
+      <div class="flow-step"><span class="step-num">2</span> No campo "API Key", cole a mesma chave que voce definiu em <code>EVOLUTION_API_KEY</code> no .env</div>
+      <div class="flow-step"><span class="step-num">3</span> Clique em "Connect" ou "Login"</div>
+    </div>
+  </div>
+
+  <h3>Passo 3: Criar instancia</h3>
+  <div class="flow-card">
+    <h4>Criar a instancia "uuba-bot"</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Clique em "Create Instance" ou "Nova Instancia"</div>
+      <div class="flow-step"><span class="step-num">2</span> Nome da instancia: <code>uuba-bot</code></div>
+      <div class="flow-step"><span class="step-num">3</span> Clique em "Create"</div>
+      <div class="flow-step"><span class="step-num">4</span> Um QR code vai aparecer na tela</div>
+    </div>
+  </div>
+
+  <h3>Passo 4: Escanear QR Code</h3>
+  <div class="flow-card">
+    <h4>Conectar o celular do bot</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No celular com o chip dedicado, abra o WhatsApp</div>
+      <div class="flow-step"><span class="step-num">2</span> Va em <strong>Configuracoes > Aparelhos conectados > Conectar aparelho</strong></div>
+      <div class="flow-step"><span class="step-num">3</span> Escaneie o QR code que apareceu no Manager</div>
+      <div class="flow-step"><span class="step-num">4</span> Aguarde a conexao ser estabelecida (pode levar alguns segundos)</div>
+    </div>
+  </div>
+
+  <h3>Passo 5: Verificar conexao</h3>
+  <div class="cmd"><span class="comment"># Via API (substitua YOUR_EVOLUTION_API_KEY)</span>
+curl -s -H "apikey: YOUR_EVOLUTION_API_KEY" \
+  https://wa.YOUR_DOMAIN/instance/connectionState/uuba-bot<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve retornar <code>{"instance":{"state":"open"}}</code>. "open" significa que o WhatsApp esta conectado.</div>
+
+  <div class="error-box">Se o QR code expirar (tempo limite de ~45 segundos), a pagina gera um novo automaticamente. Se a conexao cair depois, verifique se o celular esta com internet e bateria. O WhatsApp desconecta se o celular ficar muito tempo sem internet.</div>
+</div>
+
+<!-- ===================== SLIDE 14 ===================== -->
+<div class="slide" id="s14">
+  <h2><span class="num">14</span> Configurar n8n</h2>
+  <p><strong>Por que:</strong> O n8n e o "cerebro" do sistema. E onde ficam os workflows que recebem mensagens, processam com IA e respondem. Antes de importar os workflows, precisamos configurar as credenciais de acesso aos servicos externos.</p>
+
+  <h3>Passo 1: Acessar o n8n</h3>
+  <p>Na primeira vez, o n8n pede para criar uma conta de administrador:</p>
+  <div class="cmd">http://YOUR_IP:5678<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p>Preencha email, nome e senha. Esta e a conta de admin do n8n (diferente das senhas do .env).</p>
+
+  <h3>Passo 2: Criar credencial Anthropic (Claude IA)</h3>
+  <div class="flow-card">
+    <h4>Configurar acesso ao Claude</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No n8n, va em <strong>Settings > Credentials > Add Credential</strong></div>
+      <div class="flow-step"><span class="step-num">2</span> Busque por "Anthropic" e selecione</div>
+      <div class="flow-step"><span class="step-num">3</span> Cole sua API Key do Anthropic (de <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>)</div>
+      <div class="flow-step"><span class="step-num">4</span> Clique em "Save" e depois "Test" para verificar</div>
+    </div>
+  </div>
+
+  <h3>Passo 3: Gerar API Key do n8n</h3>
+  <p><strong>Por que:</strong> A API Key do n8n permite gerenciar workflows de fora (criar, atualizar, ativar) sem precisar usar a interface web.</p>
+  <div class="flow-card">
+    <h4>Gerar chave de API</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No n8n, va em <strong>Settings > API</strong></div>
+      <div class="flow-step"><span class="step-num">2</span> Clique em "Create API Key"</div>
+      <div class="flow-step"><span class="step-num">3</span> Copie e guarde a chave gerada em lugar seguro</div>
+    </div>
+  </div>
+
+  <h3>Passo 4: Criar credencial Redis (para debounce)</h3>
+  <div class="flow-card">
+    <h4>Configurar acesso ao Redis</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No n8n, va em <strong>Settings > Credentials > Add Credential</strong></div>
+      <div class="flow-step"><span class="step-num">2</span> Busque por "Redis" e selecione</div>
+      <div class="flow-step"><span class="step-num">3</span> Host: <code>redis</code> | Port: <code>6379</code> | Password: a mesma do <code>REDIS_PASSWORD</code></div>
+      <div class="flow-step"><span class="step-num">4</span> Clique em "Save" e "Test"</div>
+    </div>
+  </div>
+
+  <div class="info-box">O n8n salva credenciais de forma criptografada usando a <code>N8N_ENCRYPTION_KEY</code>. Se voce perder essa chave, todas as credenciais configuradas no n8n serao perdidas e precisarao ser reconfiguradas.</div>
+</div>
+
+<!-- ===================== SLIDE 15 ===================== -->
+<div class="slide" id="s15">
+  <h2><span class="num">15</span> Importar Workflows</h2>
+  <p><strong>Por que:</strong> Os workflows sao a logica do sistema - o que fazer quando uma mensagem chega, como processar com IA, como responder. Voce pode importa-los via interface web (JSON) ou via API.</p>
+
+  <h3>Os 3 Workflows</h3>
+  <table>
+    <tr><th>Workflow</th><th>Funcao</th><th>Status</th></tr>
+    <tr>
+      <td><strong>Uuba - WhatsApp Enviar</strong></td>
+      <td>Sub-workflow reutilizavel. Recebe um numero e uma mensagem e envia via Evolution API. Usado pelos outros workflows.</td>
+      <td><span class="tag tag-green">Ativo</span></td>
+    </tr>
+    <tr>
+      <td><strong>Uuba - WhatsApp Receber</strong></td>
+      <td>Workflow principal. Recebe mensagens do WhatsApp, identifica o cliente, usa agente IA (Claude) para gerar resposta, e envia de volta.</td>
+      <td><span class="tag tag-green">Ativo</span></td>
+    </tr>
+    <tr>
+      <td><strong>Uuba - Regua de Cobranca</strong></td>
+      <td>Prototipo. Consulta faturas vencidas e envia cobrancas automaticas. Sera expandido futuramente.</td>
+      <td><span class="tag tag-yellow">Prototipo</span></td>
+    </tr>
+  </table>
+
+  <h3>Importar via interface web</h3>
+  <div class="flow-card">
+    <h4>Passo a passo para importar</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> No n8n, clique em <strong>+ Add Workflow</strong></div>
+      <div class="flow-step"><span class="step-num">2</span> No canto superior direito, clique nos 3 pontinhos (<strong>...</strong>)</div>
+      <div class="flow-step"><span class="step-num">3</span> Selecione <strong>"Import from File"</strong></div>
+      <div class="flow-step"><span class="step-num">4</span> Selecione o arquivo JSON do workflow</div>
+      <div class="flow-step"><span class="step-num">5</span> O workflow sera carregado - configure as credenciais (Anthropic, etc.)</div>
+      <div class="flow-step"><span class="step-num">6</span> Ative o workflow clicando no toggle no canto superior direito</div>
+    </div>
+  </div>
+
+  <h3>Importar via API</h3>
+  <div class="cmd"><span class="comment"># Substitua YOUR_N8N_API_KEY e o arquivo JSON</span>
+curl -X POST http://YOUR_IP:5678/api/v1/workflows \
+  -H "X-N8N-API-KEY: YOUR_N8N_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d @workflow-whatsapp-enviar.json<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Workflow "WhatsApp Receber" - Como funciona</h3>
+  <p>Este e o workflow mais importante. Veja o que cada node (etapa) faz:</p>
+
+  <div class="flow-card">
+    <h4>Fluxo completo de uma mensagem recebida</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> <strong>Webhook:</strong> Recebe a notificacao do Evolution API quando chega uma mensagem</div>
+      <div class="flow-step"><span class="step-num">2</span> <strong>Filtro:</strong> Ignora mensagens do proprio bot, grupos, status e outros eventos irrelevantes</div>
+      <div class="flow-step"><span class="step-num">3</span> <strong>Extrair dados:</strong> Separa o numero do remetente, texto da mensagem e nome do contato</div>
+      <div class="flow-step"><span class="step-num">4</span> <strong>Redis Debounce (gravar):</strong> Salva a mensagem no Redis com TTL de 5 segundos</div>
+      <div class="flow-step"><span class="step-num">5</span> <strong>Wait:</strong> Espera 5 segundos (para acumular mensagens rapidas)</div>
+      <div class="flow-step"><span class="step-num">6</span> <strong>Redis Debounce (verificar):</strong> Verifica se esta e a ultima mensagem daquele numero nos ultimos 5 segundos</div>
+      <div class="flow-step"><span class="step-num">7</span> <strong>Buscar cliente:</strong> Consulta a API da Uuba para identificar o cliente pelo numero de telefone</div>
+      <div class="flow-step"><span class="step-num">8</span> <strong>Montar contexto:</strong> Prepara informacoes do cliente (nome, faturas, historico) para a IA</div>
+      <div class="flow-step"><span class="step-num">9</span> <strong>Agente IA:</strong> Claude analisa a mensagem e o contexto, e gera uma resposta personalizada</div>
+      <div class="flow-step"><span class="step-num">10</span> <strong>Enviar resposta:</strong> Quebra a resposta em paragrafos e envia via sub-workflow "WhatsApp Enviar"</div>
+    </div>
+  </div>
+
+  <div class="warn-box">Importe o workflow "WhatsApp Enviar" PRIMEIRO, pois o "WhatsApp Receber" depende dele. Apos importar, atualize as referencias de credenciais (Anthropic) e URLs da API nos nodes correspondentes.</div>
+</div>
+
+<!-- ===================== SLIDE 16 ===================== -->
+<div class="slide" id="s16">
+  <h2><span class="num">16</span> Configurar o Agente IA</h2>
+  <p><strong>Por que:</strong> O agente IA e o "cerebro conversacional" do bot. Ele entende o que o cliente disse, consulta dados no sistema, e responde de forma humanizada. Sem ele, o bot seria apenas um menu de opcoes.</p>
+
+  <h3>Como o agente funciona</h3>
+  <p>O agente usa o modelo <strong>Claude Sonnet 4</strong> da Anthropic. Ele recebe a mensagem do cliente junto com todo o contexto (nome, faturas, historico) e decide como responder. Ele tambem pode usar "ferramentas" para buscar informacoes e registrar acoes.</p>
+
+  <h3>Configuracao do LLM</h3>
+  <table>
+    <tr><th>Parametro</th><th>Valor</th><th>Por que</th></tr>
+    <tr><td>Modelo</td><td>Claude Sonnet 4</td><td>Melhor custo-beneficio para conversas em portugues</td></tr>
+    <tr><td>Temperatura</td><td>0.3</td><td>Baixa = respostas mais consistentes e previsiveis</td></tr>
+    <tr><td>Max tokens</td><td>1024</td><td>Limita o tamanho da resposta (evita respostas gigantes)</td></tr>
+    <tr><td>Retry</td><td>3x</td><td>Se a API da Anthropic falhar, tenta mais 2 vezes</td></tr>
+  </table>
+
+  <h3>Ferramentas do agente (Tools)</h3>
+  <p>O agente pode "chamar" estas ferramentas durante a conversa para buscar dados e registrar acoes:</p>
+  <table>
+    <tr><th>Ferramenta</th><th>O que faz</th><th>Endpoint da API</th></tr>
+    <tr>
+      <td><strong>buscar_faturas</strong></td>
+      <td>Consulta faturas pendentes de um cliente</td>
+      <td><code>GET /api/v1/faturas?cliente_id=X&amp;status=pendente</code></td>
+    </tr>
+    <tr>
+      <td><strong>buscar_metricas</strong></td>
+      <td>Busca metricas do cliente (total devido, dias de atraso, etc.)</td>
+      <td><code>GET /api/v1/clientes/{id}/metricas</code></td>
+    </tr>
+    <tr>
+      <td><strong>registrar_promessa</strong></td>
+      <td>Registra quando o cliente promete pagar em uma data</td>
+      <td><code>PATCH /api/v1/faturas/{id}</code></td>
+    </tr>
+    <tr>
+      <td><strong>registrar_cobranca</strong></td>
+      <td>Registra que uma cobranca foi feita (para historico)</td>
+      <td><code>POST /api/v1/cobrancas</code></td>
+    </tr>
+  </table>
+
+  <h3>Memoria por cliente</h3>
+  <p>O agente lembra das ultimas <strong>10 mensagens</strong> trocadas com cada cliente. Isso permite continuidade na conversa ("voce disse que ia pagar sexta...").</p>
+  <table>
+    <tr><th>Configuracao</th><th>Valor</th><th>Explicacao</th></tr>
+    <tr><td>Tipo</td><td>Buffer Window</td><td>Guarda as N mensagens mais recentes</td></tr>
+    <tr><td>Janela</td><td>10 mensagens</td><td>5 pares de pergunta/resposta</td></tr>
+    <tr><td>Chave</td><td>Numero de telefone</td><td>Cada cliente tem seu proprio historico</td></tr>
+  </table>
+
+  <h3>Debounce com Redis</h3>
+  <p><strong>O que e:</strong> Quando alguem manda varias mensagens rapidas (tipo "Oi" / "tudo bem?" / "preciso de ajuda"), o debounce espera 5 segundos e processa tudo junto como uma unica mensagem. Isso evita que o bot responda 3 vezes seguidas.</p>
+
+  <div class="flow-card">
+    <h4>Como o debounce funciona</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Mensagem chega, salva no Redis com chave <code>debounce:{telefone}</code> e TTL de 5 segundos</div>
+      <div class="flow-step"><span class="step-num">2</span> Workflow espera 5 segundos (node Wait)</div>
+      <div class="flow-step"><span class="step-num">3</span> Le o Redis novamente: se a mensagem armazenada e a mesma que disparou este fluxo, processa</div>
+      <div class="flow-step"><span class="step-num">4</span> Se outra mensagem chegou nesse tempo, esta execucao e descartada (a mais recente sera processada)</div>
+    </div>
+  </div>
+
+  <h3>Envio de respostas</h3>
+  <p>O bot nao envia a resposta inteira de uma vez. Ele quebra em paragrafos e envia com <strong>1.5 segundos de intervalo</strong>, simulando uma pessoa digitando. Alem disso, converte formatacao Markdown (usada pelo Claude) para formatacao WhatsApp:</p>
+  <table>
+    <tr><th>Markdown (Claude gera)</th><th>WhatsApp (bot envia)</th></tr>
+    <tr><td><code>**texto**</code></td><td><code>*texto*</code> (negrito)</td></tr>
+    <tr><td><code>*texto*</code></td><td><code>_texto_</code> (italico)</td></tr>
+    <tr><td><code>- item</code></td><td><code>- item</code> (mantido)</td></tr>
+  </table>
+</div>
+
+<!-- ===================== SLIDE 17 ===================== -->
+<div class="slide" id="s17">
+  <h2><span class="num">17</span> Testar Tudo</h2>
+  <p><strong>Por que:</strong> Antes de colocar em producao, precisamos verificar que cada parte do sistema funciona. Siga os testes na ordem.</p>
+
+  <h3>Teste 1: API Health</h3>
+  <div class="cmd">curl -s https://api.YOUR_DOMAIN/health<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve retornar <code>{"status": "healthy"}</code></div>
+
+  <h3>Teste 2: API com autenticacao</h3>
+  <div class="cmd">curl -s -H "X-API-Key: YOUR_UUBA_API_KEY" \
+  https://api.YOUR_DOMAIN/api/v1/clientes<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve retornar uma lista (vazia se nao tiver clientes cadastrados): <code>[]</code></div>
+
+  <h3>Teste 3: Evolution API</h3>
+  <div class="cmd">curl -s -H "apikey: YOUR_EVOLUTION_API_KEY" \
+  https://wa.YOUR_DOMAIN/instance/fetchInstances<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve listar a instancia "uuba-bot" com estado "open"</div>
+
+  <h3>Teste 4: Enviar mensagem de teste</h3>
+  <div class="cmd"><span class="comment"># Enviar uma mensagem de teste (substitua o numero)</span>
+curl -X POST https://wa.YOUR_DOMAIN/message/sendText/uuba-bot \
+  -H "apikey: YOUR_EVOLUTION_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "number": "5511999999999",
+    "text": "Ola! Esta e uma mensagem de teste do bot Uuba."
+  }'<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <p style="color: var(--muted); font-size: 0.85rem;">Substitua <code>5511999999999</code> pelo seu numero pessoal (com codigo do pais, DDD e numero, sem espacos ou tracos).</p>
+  <div class="success-box">Voce deve receber a mensagem no seu WhatsApp pessoal.</div>
+
+  <h3>Teste 5: Receber e auto-responder</h3>
+  <div class="flow-card">
+    <h4>Testar o fluxo completo</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Do seu WhatsApp pessoal, envie "Oi" para o numero do bot</div>
+      <div class="flow-step"><span class="step-num">2</span> Aguarde ~10 segundos (5s debounce + processamento)</div>
+      <div class="flow-step"><span class="step-num">3</span> O bot deve responder (se o workflow estiver ativo no n8n)</div>
+      <div class="flow-step"><span class="step-num">4</span> Se nao responder, verifique os logs no n8n: <strong>Executions</strong> no menu lateral</div>
+    </div>
+  </div>
+
+  <h3>Teste 6: Debounce (mensagens rapidas)</h3>
+  <div class="flow-card">
+    <h4>Testar acumulacao de mensagens</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Envie rapidamente 3 mensagens seguidas: "Oi" / "tudo bem?" / "preciso de ajuda"</div>
+      <div class="flow-step"><span class="step-num">2</span> O bot deve responder apenas UMA vez, considerando todas as mensagens</div>
+      <div class="flow-step"><span class="step-num">3</span> Se responder 3 vezes, o debounce nao esta funcionando - verifique a configuracao do Redis no n8n</div>
+    </div>
+  </div>
+
+  <h3>Teste 7: Documentacao da API</h3>
+  <div class="cmd"><span class="comment"># Abra no navegador</span>
+https://developers.YOUR_DOMAIN<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+  <div class="success-box">Deve abrir a pagina de documentacao interativa (Scalar) da API.</div>
+
+  <div class="error-box">Se algum teste falhar, verifique: 1) O servico esta rodando? (<code>docker compose ps</code>) 2) Veja os logs (<code>docker logs nome-container --tail 50</code>) 3) O DNS esta correto? (<code>dig subdominio.YOUR_DOMAIN</code>) 4) O SSL esta valido? (acesse pelo navegador e veja o cadeado)</div>
+</div>
+
+<!-- ===================== SLIDE 18 ===================== -->
+<div class="slide" id="s18">
+  <h2><span class="num">18</span> Manutencao</h2>
+  <p>Apos a instalacao, voce vai precisar fazer manutencao periodica. Aqui estao os comandos mais importantes.</p>
+
+  <h3>Ver logs de um servico</h3>
+  <div class="cmd"><span class="comment"># Ultimas 50 linhas do log</span>
+docker logs uuba-api --tail 50
+
+<span class="comment"># Acompanhar logs em tempo real (Ctrl+C para sair)</span>
+docker logs -f evolution-api
+
+<span class="comment"># Logs do n8n</span>
+docker logs n8n --tail 50<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Reiniciar um servico</h3>
+  <div class="cmd"><span class="comment"># Reiniciar apenas a API</span>
+cd /opt/stack && docker compose restart uuba-api
+
+<span class="comment"># Reiniciar tudo</span>
+cd /opt/stack && docker compose restart<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Atualizar imagens</h3>
+  <div class="cmd"><span class="comment"># Baixar versoes mais recentes</span>
+cd /opt/stack && docker compose pull
+
+<span class="comment"># Recriar containers com as novas imagens</span>
+docker compose up -d<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Atualizar a API (deploy)</h3>
+  <div class="cmd">cd /opt/stack && git -C uuba-tech pull && \
+docker compose build --no-cache uuba-api && \
+docker compose up -d uuba-api<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Backup dos volumes</h3>
+  <div class="cmd"><span class="comment"># Criar pasta de backup</span>
+mkdir -p /opt/backups
+
+<span class="comment"># Backup do banco de dados de negocio</span>
+docker exec n8n-postgres-data pg_dumpall -U datauser > /opt/backups/postgres-data-$(date +%Y%m%d).sql
+
+<span class="comment"># Backup do banco do n8n</span>
+docker exec n8n-postgres pg_dumpall -U n8n > /opt/backups/postgres-n8n-$(date +%Y%m%d).sql<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Adicionar novo numero WhatsApp</h3>
+  <div class="flow-card">
+    <h4>Passo a passo</h4>
+    <div class="flow-steps">
+      <div class="flow-step"><span class="step-num">1</span> Acesse <code>https://wa.YOUR_DOMAIN/manager</code></div>
+      <div class="flow-step"><span class="step-num">2</span> Clique em "Create Instance"</div>
+      <div class="flow-step"><span class="step-num">3</span> De um nome (ex: <code>uuba-bot-2</code>)</div>
+      <div class="flow-step"><span class="step-num">4</span> Escaneie o QR code com o novo celular</div>
+      <div class="flow-step"><span class="step-num">5</span> Atualize o workflow no n8n para suportar a nova instancia</div>
+    </div>
+  </div>
+
+  <h3>Renovacao SSL</h3>
+  <div class="cmd"><span class="comment"># Verificar status dos certificados</span>
+certbot certificates
+
+<span class="comment"># Renovar manualmente (se necessario)</span>
+certbot renew
+
+<span class="comment"># A renovacao automatica esta em:</span>
+systemctl status certbot.timer<button class="cmd-copy" onclick="copyCmd(this)">Copiar</button></div>
+
+  <h3>Problemas comuns e solucoes</h3>
+  <table>
+    <tr><th>Problema</th><th>Causa provavel</th><th>Solucao</th></tr>
+    <tr>
+      <td>Container reiniciando em loop</td>
+      <td>Senha errada no .env ou database nao existe</td>
+      <td>Verifique logs: <code>docker logs nome-container</code></td>
+    </tr>
+    <tr>
+      <td>WhatsApp desconectou</td>
+      <td>Celular ficou sem internet ou bateria</td>
+      <td>Reescaneie o QR code no Evolution Manager</td>
+    </tr>
+    <tr>
+      <td>Bot nao responde</td>
+      <td>Workflow desativado no n8n ou credencial expirada</td>
+      <td>Verifique Executions no n8n e re-ative o workflow</td>
+    </tr>
+    <tr>
+      <td>API retorna 502</td>
+      <td>Container da API parou</td>
+      <td><code>docker compose restart uuba-api</code></td>
+    </tr>
+    <tr>
+      <td>SSL expirado</td>
+      <td>Renovacao automatica falhou</td>
+      <td><code>certbot renew --force-renewal</code></td>
+    </tr>
+    <tr>
+      <td>Disco cheio</td>
+      <td>Logs do Docker acumularam</td>
+      <td><code>docker system prune -a --volumes</code> (cuidado: remove dados nao usados)</td>
+    </tr>
+    <tr>
+      <td>n8n lento</td>
+      <td>Muitas execucoes acumuladas</td>
+      <td>No n8n: Settings > Pruning > ativar limpeza automatica</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ===================== SLIDE 19 ===================== -->
+<div class="slide" id="s19">
+  <h2><span class="num">19</span> Checklist Final</h2>
+  <p>Marque cada item conforme for verificando. Todos devem estar verdes para o sistema estar 100% funcional.</p>
+
+  <h3>Infraestrutura</h3>
+  <ul class="checklist" id="checklist-infra">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> VPS acessivel via SSH</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Docker e Docker Compose instalados</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Firewall (ufw) configurado (SSH, HTTP, HTTPS)</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Diretorio /opt/stack/ criado com os arquivos</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Repositorio da API clonado</li>
+  </ul>
+
+  <h3>Servicos Docker</h3>
+  <ul class="checklist" id="checklist-docker">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> PostgreSQL (n8n) rodando e healthy</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> PostgreSQL (dados) rodando e healthy</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Database "evolution" criado</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Database "uuba" criado</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Redis rodando e healthy</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> n8n rodando e acessivel</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> uuba-api rodando e healthy</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Evolution API rodando</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> pgAdmin acessivel (via SSH tunnel)</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Migrations da API executadas</li>
+  </ul>
+
+  <h3>DNS e SSL</h3>
+  <ul class="checklist" id="checklist-dns">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> api.YOUR_DOMAIN aponta para o IP da VPS</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> developers.YOUR_DOMAIN aponta para o IP da VPS</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> wa.YOUR_DOMAIN aponta para o IP da VPS</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> SSL ativo em api.YOUR_DOMAIN (cadeado verde)</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> SSL ativo em developers.YOUR_DOMAIN</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> SSL ativo em wa.YOUR_DOMAIN</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Renovacao automatica SSL funcionando</li>
+  </ul>
+
+  <h3>WhatsApp</h3>
+  <ul class="checklist" id="checklist-whatsapp">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Instancia "uuba-bot" criada no Evolution</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> QR code escaneado e WhatsApp conectado</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Envio de mensagem de teste funcionou</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Recebimento de mensagem testado</li>
+  </ul>
+
+  <h3>n8n e Workflows</h3>
+  <ul class="checklist" id="checklist-n8n">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Conta admin do n8n criada</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Credencial Anthropic (Claude) configurada e testada</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Credencial Redis configurada e testada</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> API Key do n8n gerada</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Workflow "WhatsApp Enviar" importado e ativo</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Workflow "WhatsApp Receber" importado e ativo</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Workflow "Regua de Cobranca" importado</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Bot respondendo mensagens automaticamente</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Debounce funcionando (mensagens rapidas)</li>
+  </ul>
+
+  <h3>Documentacao e Acesso</h3>
+  <ul class="checklist" id="checklist-docs">
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> API Docs (Scalar) acessivel em developers.YOUR_DOMAIN</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Health check retornando "healthy"</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Todas as senhas anotadas em lugar seguro</li>
+    <li onclick="toggleCheck(this)"><span class="check-icon"></span> Backup inicial dos databases realizado</li>
+  </ul>
+
+  <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: var(--bg); border-radius: 10px; border: 1px solid var(--surface2);">
+    <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem;" id="checklist-counter">0 de 35 itens concluidos</div>
+    <div style="background: var(--surface2); border-radius: 20px; height: 8px; overflow: hidden;">
+      <div id="checklist-bar" style="height: 100%; background: linear-gradient(90deg, var(--accent), var(--green)); width: 0%; transition: width 0.3s;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /deck -->
+</div><!-- /page-wrapper -->
+
+<div class="footer">
+  Uuba Tech &copy; 2026 &mdash; Guia de Replicacao &mdash; Acesso interno
+</div>
+
+<script>
+// Copy command to clipboard
+function copyCmd(btn) {
+  const cmd = btn.parentElement;
+  const text = cmd.innerText.replace('Copiar', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copiar';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+// Toggle checklist item
+function toggleCheck(li) {
+  li.classList.toggle('checked');
+  const icon = li.querySelector('.check-icon');
+  icon.textContent = li.classList.contains('checked') ? '\u2713' : '';
+  updateChecklistCounter();
+  saveChecklist();
+}
+
+// Update counter
+function updateChecklistCounter() {
+  const total = document.querySelectorAll('.checklist li').length;
+  const checked = document.querySelectorAll('.checklist li.checked').length;
+  document.getElementById('checklist-counter').textContent = checked + ' de ' + total + ' itens concluidos';
+  document.getElementById('checklist-bar').style.width = (checked / total * 100) + '%';
+}
+
+// Save checklist to localStorage
+function saveChecklist() {
+  const items = document.querySelectorAll('.checklist li');
+  const state = Array.from(items).map(li => li.classList.contains('checked'));
+  localStorage.setItem('uuba-guide-checklist', JSON.stringify(state));
+}
+
+// Load checklist from localStorage
+function loadChecklist() {
+  const state = JSON.parse(localStorage.getItem('uuba-guide-checklist') || '[]');
+  const items = document.querySelectorAll('.checklist li');
+  state.forEach((checked, i) => {
+    if (items[i] && checked) {
+      items[i].classList.add('checked');
+      items[i].querySelector('.check-icon').textContent = '\u2713';
+    }
+  });
+  updateChecklistCounter();
+}
+
+// Progress bar
+function updateProgressBar() {
+  const winH = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = window.scrollY;
+  const pct = Math.min((scrolled / winH) * 100, 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// TOC active state
+function updateTocActive() {
+  const slides = document.querySelectorAll('.slide[id]');
+  const links = document.querySelectorAll('.toc a');
+  let current = '';
+  slides.forEach(slide => {
+    if (window.scrollY >= slide.offsetTop - 120) {
+      current = slide.id;
+    }
+  });
+  links.forEach(link => {
+    link.classList.toggle('toc-active', link.getAttribute('href') === '#' + current);
+  });
+}
+
+// Event listeners
+window.addEventListener('scroll', () => {
+  updateProgressBar();
+  updateTocActive();
+});
+
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  loadChecklist();
+  updateProgressBar();
+  updateTocActive();
+});
+</script>
+
+</body>
+</html>
