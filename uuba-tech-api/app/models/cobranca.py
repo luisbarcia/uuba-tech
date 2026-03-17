@@ -5,6 +5,8 @@ from app.models.base import Base, TimestampMixin
 
 
 class Cobranca(Base, TimestampMixin):
+    """Registro de cobrança enviada ao cliente. Pode ser pausada e retomada."""
+
     __tablename__ = "cobrancas"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)  # cob_abc123

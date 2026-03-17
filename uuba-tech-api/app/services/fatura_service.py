@@ -1,3 +1,12 @@
+"""Serviço de faturas.
+
+Máquina de estados (FATURA_TRANSITIONS):
+    pendente -> pago, vencido, cancelado
+    vencido  -> pago, cancelado
+    pago     -> (terminal)
+    cancelado -> (terminal)
+"""
+
 from datetime import datetime, timezone
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
@@ -17,6 +26,7 @@ FATURA_TRANSITIONS: dict[str, list[str]] = {
 
 
 async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
+    """Cria uma nova fatura. Levanta APIError 409 se cliente_id não existir."""
     fatura = Fatura(id=generate_id("fat"), **data.model_dump())
     db.add(fatura)
     try:
@@ -49,6 +59,11 @@ async def list_faturas(
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Fatura], int]:
+    """Lista faturas com paginação. Filtra por status (aceita múltiplos separados por vírgula) e/ou cliente_id.
+
+    Returns:
+        Tupla (lista de faturas, total de registros).
+    """
     query = _apply_fatura_filters(select(Fatura), status, cliente_id)
     count_q = _apply_fatura_filters(select(func.count(Fatura.id)), status, cliente_id)
     total = (await db.execute(count_q)).scalar() or 0
@@ -58,11 +73,17 @@ async def list_faturas(
 
 
 async def get_fatura(db: AsyncSession, fatura_id: str) -> Fatura | None:
+    """Busca fatura por ID. Retorna None se não encontrada."""
     result = await db.execute(select(Fatura).where(Fatura.id == fatura_id))
     return result.scalar_one_or_none()
 
 
 async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) -> Fatura | None:
+    """Atualiza fatura (patch parcial). Valida transições de status via FATURA_TRANSITIONS.
+
+    Raises:
+        APIError 409: Se a transição de status for inválida.
+    """
     fatura = await get_fatura(db, fatura_id)
     if not fatura:
         return None

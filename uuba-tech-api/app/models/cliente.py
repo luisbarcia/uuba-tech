@@ -4,6 +4,8 @@ from app.models.base import Base, TimestampMixin
 
 
 class Cliente(Base, TimestampMixin):
+    """Cliente da plataforma. Identificado por documento (CPF/CNPJ) único."""
+
     __tablename__ = "clientes"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)  # cli_abc123

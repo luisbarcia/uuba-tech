@@ -4,12 +4,29 @@ from pydantic import BaseModel, Field
 
 
 class CobrancaCreate(BaseModel):
-    fatura_id: str = Field(pattern=r"^fat_[a-zA-Z0-9_-]+$")
-    cliente_id: str = Field(pattern=r"^cli_[a-zA-Z0-9_-]+$")
-    tipo: Literal["lembrete", "cobranca", "follow_up", "escalacao"]
-    canal: Literal["whatsapp", "email", "sms"] = "whatsapp"
-    mensagem: str | None = Field(default=None, max_length=2000)
-    tom: Literal["amigavel", "neutro", "firme", "urgente"] | None = None
+    fatura_id: str = Field(
+        pattern=r"^fat_[a-zA-Z0-9_-]+$",
+        description="ID da fatura sendo cobrada (prefixo fat_)",
+    )
+    cliente_id: str = Field(
+        pattern=r"^cli_[a-zA-Z0-9_-]+$",
+        description="ID do cliente devedor (prefixo cli_)",
+    )
+    tipo: Literal["lembrete", "cobranca", "follow_up", "escalacao"] = Field(
+        description="Tipo da ação: lembrete, cobranca, follow_up ou escalacao",
+    )
+    canal: Literal["whatsapp", "email", "sms"] = Field(
+        default="whatsapp",
+        description="Canal de envio: whatsapp, email ou sms",
+    )
+    mensagem: str | None = Field(
+        default=None, max_length=2000,
+        description="Texto da mensagem a ser enviada ao cliente",
+    )
+    tom: Literal["amigavel", "neutro", "firme", "urgente"] | None = Field(
+        default=None,
+        description="Tom da mensagem: amigavel, neutro, firme ou urgente",
+    )
 
 
 class CobrancaResponse(BaseModel):

@@ -5,6 +5,8 @@ from app.models.base import Base, TimestampMixin
 
 
 class Fatura(Base, TimestampMixin):
+    """Fatura vinculada a um cliente. Valor em centavos, status segue máquina de estados."""
+
     __tablename__ = "faturas"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)  # fat_abc123

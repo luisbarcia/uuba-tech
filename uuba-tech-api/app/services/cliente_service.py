@@ -18,6 +18,7 @@ def _aware(dt: datetime) -> datetime:
 
 
 async def create_cliente(db: AsyncSession, data: ClienteCreate) -> Cliente:
+    """Cria um novo cliente. Levanta APIError 409 se documento já existir."""
     cliente = Cliente(id=generate_id("cli"), **data.model_dump())
     db.add(cliente)
     try:
@@ -40,6 +41,11 @@ async def list_clientes(
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Cliente], int]:
+    """Lista clientes com paginação. Filtra por telefone se informado.
+
+    Returns:
+        Tupla (lista de clientes, total de registros).
+    """
     query = select(Cliente)
     count_q = select(func.count(Cliente.id))
     if telefone:
@@ -51,11 +57,13 @@ async def list_clientes(
 
 
 async def get_cliente(db: AsyncSession, cliente_id: str) -> Cliente | None:
+    """Busca cliente por ID. Retorna None se não encontrado."""
     result = await db.execute(select(Cliente).where(Cliente.id == cliente_id))
     return result.scalar_one_or_none()
 
 
 async def update_cliente(db: AsyncSession, cliente_id: str, data: ClienteUpdate) -> Cliente | None:
+    """Atualiza campos do cliente (patch parcial). Retorna None se não encontrado."""
     cliente = await get_cliente(db, cliente_id)
     if not cliente:
         return None
@@ -68,6 +76,7 @@ async def update_cliente(db: AsyncSession, cliente_id: str, data: ClienteUpdate)
 
 
 async def get_metricas(db: AsyncSession, cliente_id: str) -> ClienteMetricas:
+    """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
     now = datetime.now(timezone.utc)
     result = await db.execute(select(Fatura).where(Fatura.cliente_id == cliente_id))
     faturas = result.scalars().all()

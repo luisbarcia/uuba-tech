@@ -11,6 +11,7 @@ from app.utils.ids import generate_id
 
 
 async def create_cobranca(db: AsyncSession, data: CobrancaCreate) -> Cobranca:
+    """Registra uma nova cobrança com timestamp de envio. Levanta APIError 409 se fatura ou cliente não existir."""
     cobranca = Cobranca(
         id=generate_id("cob"),
         enviado_em=datetime.now(timezone.utc),
@@ -39,6 +40,14 @@ async def list_cobrancas(
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Cobranca], int]:
+    """Lista cobranças com paginação. Filtra por período (ex: '7d'), cliente_id e/ou fatura_id.
+
+    Args:
+        periodo: Formato 'Nd' (ex: '7d', '30d'). Levanta APIError 422 se inválido.
+
+    Returns:
+        Tupla (lista de cobranças, total de registros).
+    """
     query = select(Cobranca)
     if periodo:
         match = re.fullmatch(r"(\d+)d", periodo)
@@ -73,6 +82,7 @@ async def list_cobrancas(
 
 
 async def get_historico(db: AsyncSession, fatura_id: str) -> list[Cobranca]:
+    """Retorna histórico de cobranças de uma fatura, ordenado da mais recente para a mais antiga."""
     result = await db.execute(
         select(Cobranca).where(Cobranca.fatura_id == fatura_id).order_by(Cobranca.created_at.desc())
     )
@@ -80,6 +90,7 @@ async def get_historico(db: AsyncSession, fatura_id: str) -> list[Cobranca]:
 
 
 async def pausar(db: AsyncSession, cobranca_id: str) -> Cobranca | None:
+    """Pausa uma cobrança (status -> 'pausado'). Retorna None se não encontrada."""
     result = await db.execute(select(Cobranca).where(Cobranca.id == cobranca_id))
     cobranca = result.scalar_one_or_none()
     if not cobranca:
@@ -92,6 +103,7 @@ async def pausar(db: AsyncSession, cobranca_id: str) -> Cobranca | None:
 
 
 async def retomar(db: AsyncSession, cobranca_id: str) -> Cobranca | None:
+    """Retoma uma cobrança pausada (status -> 'enviado'). Retorna None se não encontrada."""
     result = await db.execute(select(Cobranca).where(Cobranca.id == cobranca_id))
     cobranca = result.scalar_one_or_none()
     if not cobranca:
