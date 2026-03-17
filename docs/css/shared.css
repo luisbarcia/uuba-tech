@@ -1,0 +1,39 @@
+/* Uúba Tech — Shared Styles (docs) */
+
+:root {
+  --bg: #0f172a;
+  --surface: #1e293b;
+  --surface2: #334155;
+  --accent: #38bdf8;
+  --accent2: #818cf8;
+  --green: #4ade80;
+  --yellow: #fbbf24;
+  --red: #f87171;
+  --orange: #fb923c;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+/* Nav */
+nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+nav .links { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
+nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
+nav .links a:hover { color: var(--text); background: var(--surface2); }
+nav .links a.active { color: var(--accent); background: var(--surface2); }
+
+/* Week nav (relatórios) */
+nav .week-nav { display: flex; gap: 0.5rem; }
+nav .week-nav a { color: var(--accent); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; background: var(--surface2); transition: all 0.2s; }
+nav .week-nav a:hover, nav .week-nav a.active { background: var(--accent); color: var(--bg); }
+
+/* Links */
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* Footer */
+.footer { text-align: center; padding: 2rem; color: var(--muted); font-size: 0.8rem; }
