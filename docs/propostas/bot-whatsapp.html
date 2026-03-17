@@ -145,7 +145,7 @@
   <h1>Bot WhatsApp <span>Uúba</span></h1>
   <div class="subtitle">Assistente inteligente de cobrança via WhatsApp</div>
   <div class="date">Proposta — Março 2026</div>
-  <div class="status-badge">Aguardando Aprovação</div>
+  <div class="status-badge" style="background: rgba(74,222,128,0.2); color: #4ade80; border-color: rgba(74,222,128,0.3);">Implementado</div>
 </div>
 
 <div class="deck">
@@ -823,7 +823,22 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
     <tr>
       <td>n8n</td>
       <td><span class="tag tag-green">Rodando</span></td>
-      <td>Workflow protótipo da régua funcional</td>
+      <td>Bot WhatsApp ativo + workflow de envio + debounce Redis</td>
+    </tr>
+    <tr>
+      <td>WhatsApp</td>
+      <td><span class="tag tag-green">Conectado</span></td>
+      <td>Evolution API v2.3.7 + instância uuba-bot conectada</td>
+    </tr>
+    <tr>
+      <td>Chatwoot</td>
+      <td><span class="tag tag-green">Ativo</span></td>
+      <td>Plataforma de atendimento integrada ao WhatsApp (chat.uuba.tech)</td>
+    </tr>
+    <tr>
+      <td>Bot IA</td>
+      <td><span class="tag tag-green">Produção</span></td>
+      <td>Claude Sonnet 4 com memória, debounce e 4 tools</td>
     </tr>
     <tr>
       <td>Infraestrutura</td>
@@ -840,7 +855,7 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
   <table>
     <tr><th>Sprint</th><th>Objetivo</th><th>Entregas</th></tr>
     <tr>
-      <td><span class="tag tag-blue">Sprint 3</span></td>
+      <td><span class="tag tag-green">Sprint 3 ✓</span></td>
       <td>WhatsApp Bidirecional</td>
       <td>
         Evolution API instalada, WhatsApp conectado,<br>
@@ -848,7 +863,7 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
       </td>
     </tr>
     <tr>
-      <td><span class="tag tag-purple">Sprint 4</span></td>
+      <td><span class="tag tag-green">Sprint 4 ✓</span></td>
       <td>Agente Conversacional</td>
       <td>
         Bot com IA que entende contexto,<br>
@@ -885,12 +900,12 @@ HUMANO ─&rarr; Funcionário Uúba assume a conversa
   <table>
     <tr><th>Item</th><th>Quando</th><th>Responsável</th></tr>
     <tr>
-      <td>Número WhatsApp (chip dedicado para o bot)</td>
+      <td>Número WhatsApp (chip dedicado para o bot)<span class="tag tag-green" style="margin-left:0.5rem">✓</span></td>
       <td>Sprint 3</td>
       <td>Equipe</td>
     </tr>
     <tr>
-      <td>DNS wa.uuba.tech apontando para a VPS</td>
+      <td>DNS wa.uuba.tech apontando para a VPS<span class="tag tag-green" style="margin-left:0.5rem">✓</span></td>
       <td>Sprint 3</td>
       <td>Equipe (Wix DNS)</td>
     </tr>

@@ -116,7 +116,7 @@
   <div class="kpi-grid">
     <div class="kpi"><div class="value">4</div><div class="label">vCPUs</div></div>
     <div class="kpi"><div class="value">8 GB</div><div class="label">RAM</div></div>
-    <div class="kpi"><div class="value">145 GB</div><div class="label">Disco (9% usado)</div></div>
+    <div class="kpi"><div class="value">145 GB</div><div class="label">Disco (12% usado)</div></div>
     <div class="kpi green"><div class="value">15</div><div class="label">Containers</div></div>
   </div>
 
@@ -132,6 +132,8 @@
     <tr><td>Variáveis de ambiente</td><td><code>/opt/stack/.env</code></td></tr>
     <tr><td>Timezone</td><td>America/Sao_Paulo</td></tr>
   </table>
+
+  <p style="margin-top: 1rem; color: var(--muted); font-size: 0.85rem;">Nota: Esta VPS também hospeda serviços pessoais (GotoSocial, Matrix/Conduit, Tor, Cloudflare Tunnel) que rodam no mesmo docker-compose mas não são parte da Uúba.</p>
 
   <h3>VPS Hostinger (n8n empresa)</h3>
   <table>
@@ -446,7 +448,8 @@
       <td>
         SERVER_URL, DATABASE_CONNECTION_URI<br>
         CACHE_REDIS_URI, AUTHENTICATION_API_KEY<br>
-        WEBHOOK_GLOBAL_URL, eventos webhook
+        WEBHOOK_GLOBAL_URL, eventos webhook<br>
+        CHATWOOT_ENABLED, CHATWOOT_IMPORT_DATABASE_CONNECTION_URI
       </td>
       <td>evolution-api (env_file)</td>
     </tr>

@@ -471,7 +471,7 @@ services:
   # Armazena: clientes, faturas, cobrancas, evolution
   # ============================================
   postgres-data:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: n8n-postgres-data
     restart: unless-stopped
     environment:
