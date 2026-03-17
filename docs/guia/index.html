@@ -24,7 +24,7 @@
   body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
 
   /* Nav */
-  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 100; }
+  nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
   nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
   nav .links { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
   nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
@@ -161,11 +161,12 @@
   <a class="logo" href="../">UUBA Tech</a>
   <div class="links">
     <a href="../">Home</a>
-    <a href="../relatorios/">Relatorios</a>
+    <a href="../relatorios/">Relatórios</a>
     <a href="../propostas/">Propostas</a>
     <a href="../infra/">Infra</a>
     <a href="./" class="active">Guia</a>
     <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
     <a href="https://api.uuba.tech/health" target="_blank">Status</a>
   </div>
 </nav>

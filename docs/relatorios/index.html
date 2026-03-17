@@ -24,11 +24,11 @@
   /* Nav */
   nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
   nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
-  nav .links { display: flex; gap: 0.5rem; }
+  nav .links { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
   nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
   nav .links a:hover { color: var(--text); background: var(--surface2); }
   nav .links a.active { color: var(--accent); background: var(--surface2); }
-  nav .week-nav { margin-left: auto; display: flex; gap: 0.5rem; }
+  nav .week-nav { display: flex; gap: 0.5rem; }
   nav .week-nav a { color: var(--accent); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; background: var(--surface2); transition: all 0.2s; }
   nav .week-nav a:hover, nav .week-nav a.active { background: var(--accent); color: var(--bg); }
 
@@ -115,10 +115,11 @@
     <a href="../infra/">Infra</a>
     <a href="../guia/">Guia</a>
     <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
     <a href="https://api.uuba.tech/health" target="_blank">Status</a>
   </div>
   <div class="week-nav">
-    <a href="#" class="active">Sem 11</a>
+    <a href="#" class="active">Sem 12</a>
   </div>
 </nav>
 

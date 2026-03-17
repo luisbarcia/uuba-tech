@@ -10,7 +10,7 @@
   body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   nav { background: var(--surface); border-bottom: 1px solid var(--surface2); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; position: sticky; top: 0; z-index: 10; }
   nav .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent); text-decoration: none; }
-  nav .links { margin-left: auto; display: flex; gap: 0.5rem; }
+  nav .links { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
   nav .links a { color: var(--muted); text-decoration: none; padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.85rem; transition: all 0.2s; }
   nav .links a:hover { color: var(--text); background: var(--surface2); }
   nav .links a.active { color: var(--accent); background: var(--surface2); }
@@ -39,6 +39,7 @@
     <a href="infra/">Infra</a>
     <a href="guia/">Guia</a>
     <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
     <a href="https://api.uuba.tech/health" target="_blank">Status</a>
   </div>
 </nav>
