@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Estrutura Societária</title>
+<meta name="robots" content="noindex, nofollow">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{background:#0c1117;color:#dce4ec;font-family:'IBM Plex Sans',sans-serif}::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#151d28}::-webkit-scrollbar-thumb{background:#2a3a4d;border-radius:3px}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const C = {
+  bg: "#0c1117", surface: "#151d28", surfaceAlt: "#1a2332",
+  border: "#1e2d3d", borderLight: "#2a3a4d",
+  text: "#dce4ec", textDim: "#8899aa", textMuted: "#5a6b7c",
+  heitor: "#e6994e", thomaz: "#4eba7a", luigi: "#5b9fd6",
+  gold: "#f0c24a", red: "#d65a5a", green: "#4eba7a", white: "#eee",
+  accent: "#5dade2", cardBg: "#182230",
+};
+const F = {
+  display: "'Libre Baskerville', Georgia, serif",
+  body: "'IBM Plex Sans', 'Segoe UI', sans-serif",
+  mono: "'IBM Plex Mono', Consolas, monospace",
+};
+
+const tabs = [
+  "Contexto & Princípios",
+  "O Valor de Cada Um",
+  "Cenários de Equity",
+  "Remuneração",
+  "Estrutura Jurídica",
+  "Riscos Compartilhados",
+  "Proposta de Alinhamento",
+  "Metodologia & Fontes",
+];
+
+function Badge({ children, color = C.accent }) {
+  return <span style={{ display: "inline-block", padding: "3px 10px", borderRadius: 20, fontSize: 10, fontFamily: F.mono, fontWeight: 600, letterSpacing: 0.8, background: color + "18", color, border: `1px solid ${color}33`, textTransform: "uppercase" }}>{children}</span>;
+}
+function Card({ children, style = {} }) {
+  return <div style={{ background: C.cardBg, border: `1px solid ${C.border}`, borderRadius: 10, padding: "18px 20px", marginBottom: 14, ...style }}>{children}</div>;
+}
+function Callout({ color, label, children }) {
+  return (
+    <div style={{ background: color + "0a", border: `1px solid ${color}25`, borderLeft: `3px solid ${color}`, borderRadius: 8, padding: "14px 18px", marginBottom: 14 }}>
+      {label && <div style={{ fontFamily: F.mono, fontSize: 10, color, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>{label}</div>}
+      <div style={{ fontFamily: F.body, fontSize: 13.5, color: C.text, lineHeight: 1.7 }}>{children}</div>
+    </div>
+  );
+}
+function STitle({ children, sub }) {
+  return (
+    <div style={{ marginBottom: 20, paddingBottom: 14, borderBottom: `1px solid ${C.border}` }}>
+      <h2 style={{ fontFamily: F.display, fontSize: 22, fontWeight: 700, color: C.text, margin: 0, lineHeight: 1.3 }}>{children}</h2>
+      {sub && <p style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, margin: "6px 0 0", lineHeight: 1.5 }}>{sub}</p>}
+    </div>
+  );
+}
+function P({ children, style = {} }) {
+  return <p style={{ fontFamily: F.body, fontSize: 14, color: C.text, lineHeight: 1.75, margin: "0 0 12px", ...style }}>{children}</p>;
+}
+function B({ children, color = C.accent }) {
+  return <strong style={{ color, fontWeight: 600 }}>{children}</strong>;
+}
+
+function Sec1() {
+  return (<div>
+    <STitle sub="O ponto de partida para uma conversa produtiva entre os três">Contexto & Princípios</STitle>
+    <Callout color={C.gold} label="Por que este documento existe">A Uúba está em um momento de inflexão. Uma terceira pessoa está se tornando parte do núcleo da empresa para criar a vertical de tecnologia — a Uúba Tech. Os três estão apostando juntos num futuro onde consultoria + tecnologia vale mais do que consultoria sozinha. Este documento apresenta dados de mercado, cenários e princípios para que essa decisão seja tomada de forma informada e com alinhamento genuíno. Não defende nenhum lado — parte do pressuposto de que os três querem fazer a coisa certa.</Callout>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>O cenário</div>
+      <P>A Uúba tem ~1,5 ano de mercado, está crescendo, e encontrando seu caminho no BPO financeiro e CFO de Aluguel. É uma empresa jovem — todo mundo sabe que o momento é de investimento, não de retorno imediato. Paralelamente, está nascendo a <B>Uúba Tech</B>, uma vertical de 5 produtos SaaS com potencial de transformar a escala e o valor do negócio como um todo.</P>
+      <P style={{ marginBottom: 0 }}>A empresa funciona sobre três pilares humanos complementares: <B color={C.heitor}>Heitor</B> (estratégia e análise), <B color={C.thomaz}>Thomáz</B> (operação e atendimento), e <B color={C.luigi}>Luis</B> (tecnologia e infraestrutura). Nenhum é substituível facilmente. A pergunta central é: <B color={C.gold}>qual estrutura mantém os três motivados, protegidos e remando na mesma direção pelos próximos anos?</B></P>
+    </Card>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Princípios de partida</div>
+      {[
+        { n: "1", t: "Contribuições diferentes, importância igual", d: "Estratégia, operação e tecnologia são três pilares interdependentes. Nenhum funciona sem os outros dois. O valor está na combinação — hierarquizar as contribuições enfraquece o conjunto." },
+        { n: "2", t: "Remuneração ≠ Equity", d: "São conversas separadas. Pró-labore remunera o trabalho do presente. Equity remunera o comprometimento de longo prazo e a construção de valor futuro. Ambas precisam ser justas, mas por razões diferentes." },
+        { n: "3", t: "Transparência como fundamento", d: "Sócios precisam operar com total visibilidade sobre a situação financeira da empresa: faturamento, custos, retiradas de cada um, investimentos. Isso não é desconfiança — é a base para qualquer decisão conjunta." },
+        { n: "4", t: "Formalização protege relações", d: "Acordo de sócios não é sinal de desconfiança — é o oposto. É dizer 'essa parceria importa tanto que vamos protegê-la com regras claras para que nunca tenhamos que improvisar sob pressão'." },
+        { n: "5", t: "Diluição proporcional", d: "Quando um novo sócio entra, a prática padrão em qualquer sociedade saudável é que todos os sócios existentes diluam proporcionalmente. Isso garante que ninguém carregue o custo da entrada sozinho." },
+      ].map((p, i) => (
+        <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 4 ? 14 : 0, paddingBottom: i < 4 ? 14 : 0, borderBottom: i < 4 ? `1px solid ${C.border}` : "none" }}>
+          <div style={{ minWidth: 28, height: 28, borderRadius: "50%", background: C.accent + "22", border: `1px solid ${C.accent}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 12, color: C.accent, fontWeight: 700 }}>{p.n}</div>
+          <div>
+            <div style={{ fontFamily: F.body, fontSize: 14, color: C.text, fontWeight: 600, marginBottom: 2 }}>{p.t}</div>
+            <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>{p.d}</div>
+          </div>
+        </div>
+      ))}
+    </Card>
+    <Callout color={C.accent} label="Um dado relevante do ecossistema">Segundo a Astella Investimentos (VC early-stage que investiu na Omie, entre outras), os dois principais motivos de falha em startups brasileiras são falta de product-market fit e conflito entre cofundadores. 40% dos cofundadores decidem a divisão de equity em menos de um dia. A maioria se arrepende depois. Investir tempo nessa conversa agora é um dos melhores investimentos que os três podem fazer.</Callout>
+  </div>);
+}
+
+function Sec2() {
+  return (<div>
+    <STitle sub="Reconhecendo o que cada pessoa traz — e o que cada uma precisa das outras">O Valor de Cada Um</STitle>
+    <P>Uma boa sociedade começa com reconhecimento mútuo. O exercício abaixo não é ranking — é inventário. O objetivo é que cada pessoa enxergue com clareza <B color={C.gold}>tanto o valor que traz quanto sua dependência dos outros dois</B>.</P>
+    {[
+      { name: "Heitor", role: "CEO · Estratégia & Análise", color: C.heitor, traz: ["Visão estratégica e direcionamento do negócio","Análise financeira de alto nível para os clientes","Capacidade de tomada de decisão e priorização","Conhecimento profundo do mercado de PMEs","Formação Ibmec-RJ + experiência em corporações","Cofundador — assumiu risco desde o dia zero","Rede de relacionamentos no ecossistema financeiro"], precisa: ["Luis para transformar visão estratégica em produto funcional","Thomáz para executar a operação que gera receita hoje","Produtos SaaS para escalar além do modelo de consultoria"] },
+      { name: "Thomáz", role: "COO · Operações & Atendimento", color: C.thomaz, traz: ["Execução operacional diária — o motor da receita atual","Atendimento ao cliente e relação de confiança construída","Operação do ERP (Conta Azul) e rotinas financeiras","Vivência prática das dores dos clientes (insumo direto para os produtos)","Cofundador — assumiu risco desde o dia zero","Formação Ibmec-RJ + experiência em corporações","Capacidade de treinar quem assumir a operação no futuro"], precisa: ["Luis para automatizar operações e escalar a capacidade","Heitor para direcionamento estratégico e análise de alto nível","Tecnologia para atender mais clientes sem crescer o headcount linearmente"] },
+      { name: "Luis", role: "CTO · Tecnologia & Infraestrutura", color: C.luigi, traz: ["Criação do zero de toda a infraestrutura tecnológica","API REST (14 endpoints, 174 testes, CI/CD completo)","Bot WhatsApp com IA e protocolo comportamental de cobrança","Plataforma de atendimento humano (Chatwoot integrado)","Infraestrutura: 15 containers Docker, 4 domínios, SSL","Automações n8n para operações internas","Documentação, auditorias de segurança, portal interno","Dedicação exclusiva ao projeto"], precisa: ["Heitor e Thomáz para direcionar o que os produtos devem resolver","Clientes da consultoria como primeiros usuários dos produtos","Marca e reputação que a Uúba já construiu no mercado","Conhecimento de gestão financeira (que não é sua área)","Validação de mercado que só quem atende PMEs diariamente pode dar"] },
+    ].map((person, pi) => (
+      <Card key={pi} style={{ borderLeft: `3px solid ${person.color}` }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: person.color }} />
+          <span style={{ fontFamily: F.display, fontSize: 17, fontWeight: 700, color: person.color }}>{person.name}</span>
+          <Badge color={person.color}>{person.role}</Badge>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          <div>
+            <div style={{ fontFamily: F.mono, fontSize: 10, color: person.color, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>O que traz</div>
+            {person.traz.map((x, i) => (<div key={i} style={{ fontFamily: F.body, fontSize: 12.5, color: C.textDim, paddingLeft: 12, position: "relative", marginBottom: 4, lineHeight: 1.5 }}><span style={{ position: "absolute", left: 0, color: person.color }}>+</span>{x}</div>))}
+          </div>
+          <div>
+            <div style={{ fontFamily: F.mono, fontSize: 10, color: C.accent, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Precisa de</div>
+            {person.precisa.map((x, i) => (<div key={i} style={{ fontFamily: F.body, fontSize: 12.5, color: C.textDim, paddingLeft: 12, position: "relative", marginBottom: 4, lineHeight: 1.5 }}><span style={{ position: "absolute", left: 0, color: C.accent }}>→</span>{x}</div>))}
+          </div>
+        </div>
+      </Card>
+    ))}
+    <Callout color={C.gold} label="O ponto central">A Uúba Tech só funciona com os três. Heitor sabe <em>o que</em> construir. Thomáz sabe <em>para quem</em> e <em>como o cliente usa</em>. Luis sabe <em>como</em> construir. Produtos SaaS de sucesso nascem dessa combinação. A equity precisa refletir essa realidade — não criar hierarquia onde existe interdependência.</Callout>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 10 }}>Para referência: valor de mercado das entregas técnicas</div>
+      <P style={{ fontSize: 13 }}>Para dar contexto concreto ao que já foi construído, dados de mercado de fevereiro/2026 (Hunt IT, Código Fonte TV) mostram que o perfil técnico combinado que Luis traz — Python sênior + DevOps + IA + arquitetura — é remunerado entre R$ 22.000 e 35.000/mês como PJ. A infraestrutura já entregue, se contratada como projeto, custaria entre R$ 240.000 e 400.000. Esses números não são argumento — são referência para que todos tenham a mesma base de informação.</P>
+      <P style={{ fontSize: 13, marginBottom: 0 }}>Da mesma forma, o conhecimento de mercado e a carteira de clientes trazidos por Heitor e Thomáz têm valor imenso. A maioria das startups SaaS gasta meses e centenas de milhares de reais para adquirir seus primeiros clientes e entender o mercado. A Uúba já tem isso. Esse ativo intangível é parte fundamental do valor da empresa.</P>
+    </Card>
+  </div>);
+}
+
+function Sec3() {
+  const cenarios = [
+    { nome: "Cenário A — Conservador", split: { h: 40, t: 40, l: 20 }, desc: "Luis entra com participação relevante. Os fundadores mantêm 80% combinado.", points: ["Menor diluição para os fundadores — ambos mantêm 40%","Luis tem participação significativa e motivação real","20% está no limite inferior do que benchmarks consideram justo para CTO técnico com dedicação exclusiva e remuneração abaixo do mercado","Pode funcionar bem se combinado com pró-labore mais próximo ao mercado ou com milestones que permitam chegar a 25%+"], gold: [2] },
+    { nome: "Cenário B — Equilibrado", split: { h: 37, t: 37, l: 26 }, desc: "Diluição proporcional dos dois fundadores. Luis entra com participação alinhada a benchmarks de mercado para CTOs.", points: ["Diluição simétrica — ambos os fundadores cedem igualmente","Luis tem equity suficiente para motivação de longo prazo","Heitor e Thomáz juntos mantêm 74% — maioria confortável","Alinhado com dados da Y Combinator, Carta e Astella para CTO em empresa early-stage","Com milestones de +2-4%, Luis pode chegar a 30% se entregar resultados concretos"], gold: [3], recommended: true },
+    { nome: "Cenário C — Igualdade na Tech", split: { h: 34, t: 33, l: 33 }, desc: "Funciona especialmente se aplicado apenas à Uúba Tech (CNPJ separado), sem afetar a consultoria.", points: ["Máximo alinhamento — todos com skin in the game equivalente","Justificável se aplicado ao CNPJ da tech (os fundadores mantêm 50/50 na consultoria)","Pode parecer muito para Luis se aplicado à empresa inteira, dado que os fundadores trouxeram empresa existente","Heitor e Thomáz juntos ainda mantêm 67% na tech"], gold: [1] },
+  ];
+  const colors = [C.heitor, C.thomaz, C.luigi];
+  const names = ["Heitor", "Thomáz", "Luis"];
+  return (<div>
+    <STitle sub="Três cenários com trade-offs claros para discutir juntos">Cenários de Equity</STitle>
+    <P>Premissa importante: a equity de Luis terá <B>vesting de 4 anos com cliff de 12 meses</B>. Isso significa que se Luis sair antes de completar 1 ano, não leva nenhuma participação. Se ficar, a participação veste gradualmente ao longo de 4 anos. O vesting existe para proteger a empresa: garante que equity só é consolidada conforme o trabalho é entregue ao longo do tempo.</P>
+    {cenarios.map((c, ci) => (
+      <Card key={ci} style={{ position: "relative", border: c.recommended ? `1px solid ${C.gold}44` : `1px solid ${C.border}` }}>
+        {c.recommended && <div style={{ position: "absolute", top: 12, right: 14 }}><Badge color={C.gold}>PONTO MÉDIO SUGERIDO</Badge></div>}
+        <div style={{ fontFamily: F.display, fontSize: 17, color: C.text, fontWeight: 700, marginBottom: 4 }}>{c.nome}</div>
+        <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, marginBottom: 14 }}>{c.desc}</div>
+        <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", marginBottom: 14, height: 40 }}>
+          {[c.split.h, c.split.t, c.split.l].map((pct, i) => (
+            <div key={i} style={{ width: `${pct}%`, background: colors[i] + "cc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: F.mono, fontSize: 11, color: "#fff", fontWeight: 700 }}>{names[i]} {pct}%</span>
+            </div>
+          ))}
+        </div>
+        {c.points.map((pt, i) => (
+          <div key={i} style={{ fontFamily: F.body, fontSize: 12.5, color: c.gold && c.gold.includes(i) ? C.gold : C.textDim, paddingLeft: 16, position: "relative", marginBottom: 5, lineHeight: 1.5 }}>
+            <span style={{ position: "absolute", left: 0, color: C.textDim }}>○</span>{pt}
+          </div>
+        ))}
+      </Card>
+    ))}
+    <Callout color={C.accent} label="CNPJ separado — uma opção que resolve muitas tensões">Se a participação for especificamente na <B>Uúba Tech</B> (CNPJ separado), os percentuais de Luis podem ser maiores sem que ninguém "perca" equity na consultoria. Heitor e Thomáz mantêm 50/50 no BPO. Na tech, o split pode ser diferente. Essa separação também isola riscos, cria governança própria, e prepara a empresa para eventual investimento externo.</Callout>
+    <Callout color={C.gold} label="O que os dados de referência dizem">A Y Combinator defende splits iguais entre cofundadores. Dados da Carta (32.000+ empresas) mostram que 46% dos times com 2 fundadores dividem igualmente. Para CTOs que entram logo após a fundação com dedicação exclusiva e remuneração abaixo do mercado, o benchmark é 15-30% da empresa ou 25-40% da vertical de produto. O cenário B está dentro desse range.</Callout>
+  </div>);
+}
+
+function Sec4() {
+  return (<div>
+    <STitle sub="Pró-labore justo para os três, proporcional à fase da empresa">Remuneração</STitle>
+    <P>A Uúba está no início, fatura pouco, e todo mundo está apostando no futuro. Isso é normal e saudável — não se espera salário de mercado num momento como esse. A questão é garantir que <B color={C.gold}>o sacrifício seja proporcional e transparente</B>.</P>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>O princípio da proporcionalidade</div>
+      <P>Se cada sócio está ganhando, digamos, 30-40% do que ganharia no mercado, o sacrifício é compartilhado de forma justa. Ninguém espera que a empresa pague salário cheio agora — mas a diferença entre o que cada um recebe e o que cada um vale no mercado deveria ser proporcional.</P>
+      <P style={{ marginBottom: 0 }}>Para referência de mercado (Hunt IT, fevereiro 2026): perfis de gestão/estratégia/operação financeira com experiência Ibmec estão na faixa de R$ 12.000-20.000 CLT. Perfis técnicos com a senioridade de Luis estão na faixa de R$ 17.000-26.000 PJ. Se todos ganhassem ~30% do seu valor de mercado, estariam na faixa de R$ 4.000-8.000/mês cada.</P>
+    </Card>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Sugestão prática — dois mecanismos combinados</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 10 }}>
+        <div style={{ padding: 14, background: C.green + "0c", border: `1px solid ${C.green}22`, borderRadius: 8 }}>
+          <div style={{ fontFamily: F.mono, fontSize: 10, color: C.green, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>1. Pró-labore proporcional</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>Valores iguais ou proporcionais à dedicação para os três. O valor exato depende do que o caixa permite — o importante é a proporcionalidade, não o número absoluto.</div>
+        </div>
+        <div style={{ padding: 14, background: C.accent + "0c", border: `1px solid ${C.accent}22`, borderRadius: 8 }}>
+          <div style={{ fontFamily: F.mono, fontSize: 10, color: C.accent, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>2. Cláusula de ajuste automático</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>Definir no acordo: "Quando o faturamento mensal atingir R$ [X], o pró-labore de todos os sócios sobe para [valor]." Cria previsibilidade e elimina a necessidade de renegociações constrangedoras.</div>
+        </div>
+      </div>
+    </Card>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Nota tributária — Lei 15.270/2025</div>
+      <P>A partir de 2026, distribuições de lucros a pessoas físicas acima de R$ 50.000/mês passam a ter IRRF de 10%. Isso provavelmente não impacta a Uúba agora, mas é importante planejar desde já com o contador.</P>
+      <P style={{ marginBottom: 0 }}>Se no futuro a Uúba Tech tiver CNPJ separado, o regime tributário pode ser otimizado independente da consultoria.</P>
+    </Card>
+  </div>);
+}
+
+function Sec5() {
+  return (<div>
+    <STitle sub="Como formalizar a sociedade de forma que proteja os três e a empresa">Estrutura Jurídica</STitle>
+    <Callout color={C.gold} label="Ponto legal importante">O Código Civil brasileiro (Art. 1.055, §2º) não permite integralizar quotas com prestação de serviços em LTDAs. Isso significa que a entrada de Luis como sócio precisa de uma estrutura adequada — o que na verdade é uma oportunidade de pensar na melhor arquitetura para a empresa.</Callout>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Opção recomendada — Dois estágios</div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <div style={{ padding: 14, background: C.gold + "0a", border: `1px solid ${C.gold}22`, borderRadius: 8 }}>
+          <div style={{ fontFamily: F.mono, fontSize: 10, color: C.gold, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Agora → SCP + Acordo de Sócios</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>Criar uma Sociedade em Conta de Participação com a Uúba como sócia ostensiva e Luis como sócio participante, para a vertical tech. A SCP aceita contribuição com serviços, tem baixo custo, e pode ser criada rapidamente.</div>
+        </div>
+        <div style={{ padding: 14, background: C.green + "0a", border: `1px solid ${C.green}22`, borderRadius: 8 }}>
+          <div style={{ fontFamily: F.mono, fontSize: 10, color: C.green, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Ao faturar → CNPJ separado</div>
+          <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>Quando a tech tiver receita própria, constituir nova LTDA. Os três como sócios, cap table limpo. Isola consultoria da tech, permite regime tributário otimizado, e prepara para investimento externo.</div>
+        </div>
+      </div>
+    </Card>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Cláusulas que protegem os três</div>
+      <P style={{ fontSize: 13, marginBottom: 14 }}>Todas as cláusulas abaixo são padrão em sociedades saudáveis. Nenhuma favorece um lado.</P>
+      {[
+        { cl: "Vesting + Cliff", desc: "Participação de Luis veste gradualmente (4 anos, cliff 12 meses). Protege os fundadores: se Luis sair cedo, a empresa não perde equity permanentemente." },
+        { cl: "Good leaver / Bad leaver", desc: "Regras claras para saída de qualquer sócio. Saída em boa-fé = recompra a valor justo. Saída em má-fé = valor menor." },
+        { cl: "Tag-along / Drag-along", desc: "Se alguém vender sua parte, os outros podem vender junto. Se a maioria quiser vender a empresa, pode incluir todos." },
+        { cl: "Autonomia por área", desc: "Cada sócio tem autoridade final na sua área: Heitor em estratégia, Thomáz em operação, Luis em tecnologia." },
+        { cl: "Compromisso de investimento em tech", desc: "Define expectativa mínima de investimento na vertical tech (tempo, orçamento, prioridade)." },
+        { cl: "Pró-labore e cláusula de ajuste", desc: "Define remuneração inicial + gatilhos de ajuste atrelados ao faturamento." },
+        { cl: "Anti-diluição", desc: "Se novos sócios ou investidores entrarem, todos têm direito de preferência proporcional." },
+        { cl: "PI (Propriedade Intelectual)", desc: "Todo código e criações técnicas pertencem à empresa enquanto o acordo estiver vigente." },
+      ].map((item, i) => (
+        <div key={i} style={{ display: "flex", gap: 12, marginBottom: i < 7 ? 10 : 0, paddingBottom: i < 7 ? 10 : 0, borderBottom: i < 7 ? `1px solid ${C.border}` : "none" }}>
+          <div style={{ minWidth: 5, borderRadius: 3, background: C.accent + "44" }} />
+          <div>
+            <div style={{ fontFamily: F.body, fontSize: 13.5, color: C.text, fontWeight: 600 }}>{item.cl}</div>
+            <div style={{ fontFamily: F.body, fontSize: 12.5, color: C.textDim, lineHeight: 1.55 }}>{item.desc}</div>
+          </div>
+        </div>
+      ))}
+    </Card>
+    <P>Investimento para formalizar: R$ 5.000-15.000 em honorários com advogado especializado em direito societário.</P>
+  </div>);
+}
+
+function Sec6() {
+  return (<div>
+    <STitle sub="Riscos que ameaçam o sucesso da Uúba Tech — e que os três enfrentam juntos">Riscos Compartilhados</STitle>
+    <P>Nenhum dos três está em posição confortável. A empresa é jovem, o mercado é competitivo, e a aposta em tecnologia é ousada.</P>
+    {[
+      { risco: "Desalinhamento de expectativas", desc: "Cada sócio pode ter expectativas diferentes sobre velocidade, investimento, distribuição e prioridades. Se não forem alinhadas agora, vão gerar atrito no primeiro momento de pressão. Mitigação: este documento + conversa franca + acordo formal.", color: C.gold },
+      { risco: "Dependência de pessoa-chave (os três)", desc: "Se qualquer um sair, a empresa perde uma capacidade crítica. Mitigação: documentar processos, criar playbooks, e planejar contratações que reduzam o bus factor ao longo do tempo.", color: C.accent },
+      { risco: "Tensão entre receita de serviço e investimento em produto", desc: "Receita de consultoria é imediata; receita SaaS demora meses. A pressão natural é priorizar o que paga as contas hoje. Mitigação: compromisso mínimo de investimento na tech no acordo.", color: C.gold },
+      { risco: "Produtos sem mercado suficiente", desc: "Os 5 produtos podem não encontrar demanda na escala esperada. Mitigação: começar pelo produto mais validado (cobrança WhatsApp), iterar com clientes reais.", color: C.accent },
+      { risco: "Informalidade prolongada", desc: "Cada mês sem acordo acumula trabalho sem registro de contribuição ou direitos. Mitigação: deadline concreto para o MOU.", color: C.gold },
+    ].map((r, i) => (
+      <Card key={i} style={{ borderLeft: `3px solid ${r.color}` }}>
+        <div style={{ fontFamily: F.display, fontSize: 15, color: C.text, fontWeight: 700, marginBottom: 6 }}>{r.risco}</div>
+        <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.65 }}>{r.desc}</div>
+      </Card>
+    ))}
+  </div>);
+}
+
+function Sec7() {
+  return (<div>
+    <STitle sub="Uma proposta concreta para os três discutirem e adaptarem juntos">Proposta de Alinhamento</STitle>
+    <P>O que segue é um ponto de partida — não uma imposição. Os três devem discutir, ajustar, e chegar num consenso que todos consigam defender com convicção.</P>
+    <Card style={{ border: `1px solid ${C.gold}33`, background: C.gold + "06" }}>
+      <div style={{ fontFamily: F.display, fontSize: 18, color: C.gold, fontWeight: 700, marginBottom: 14 }}>Resumo da proposta</div>
+      <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", marginBottom: 16, height: 44 }}>
+        {[{name:"Heitor",pct:37,color:C.heitor},{name:"Thomáz",pct:37,color:C.thomaz},{name:"Luis",pct:26,color:C.luigi}].map((p,i) => (
+          <div key={i} style={{ width: `${p.pct}%`, background: p.color + "cc", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <span style={{ fontFamily: F.mono, fontSize: 12, color: "#fff", fontWeight: 700 }}>{p.name} {p.pct}%</span>
+          </div>
+        ))}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
+        {[
+          { label: "Estrutura", value: "SCP agora → CNPJ separado quando faturar" },
+          { label: "Vesting de Luis", value: "4 anos, cliff 12 meses" },
+          { label: "Pró-labore", value: "Proporcional para os 3, com cláusula de ajuste" },
+          { label: "Milestones", value: "+2-4% para Luis ao atingir metas acordadas" },
+          { label: "Governança", value: "Autonomia por área + decisões estratégicas em consenso" },
+          { label: "Formalização", value: "MOU em 2 semanas → acordo final em 60 dias" },
+        ].map((m, i) => (
+          <div key={i} style={{ padding: "10px 14px", background: C.surface, borderRadius: 8, border: `1px solid ${C.border}` }}>
+            <div style={{ fontFamily: F.mono, fontSize: 10, color: C.textMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 3 }}>{m.label}</div>
+            <div style={{ fontFamily: F.body, fontSize: 13, color: C.accent, fontWeight: 500 }}>{m.value}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.65 }}>
+        Heitor e Thomáz juntos mantêm <B color={C.gold}>74%</B> — maioria confortável e controle total. Luis tem <B color={C.gold}>26%</B> com potencial de chegar a 30% via milestones. O vesting garante que a equity de Luis só se consolida conforme o trabalho é entregue.
+      </div>
+    </Card>
+    <Card>
+      <div style={{ fontFamily: F.display, fontSize: 16, color: C.text, fontWeight: 700, marginBottom: 12 }}>Próximos passos sugeridos</div>
+      {[
+        { n: "1", t: "Conversa entre os três", d: "Com base neste documento. Sem pressa — é melhor investir duas ou três conversas boas do que decidir em uma hora.", color: C.gold },
+        { n: "2", t: "Transparência financeira", d: "Compartilhar abertamente: faturamento, custos, pró-labore de cada um, projeção de receita.", color: C.gold },
+        { n: "3", t: "MOU (Memorando de Entendimentos)", d: "Documento simples com os termos acordados. Tem força de contrato preliminar no Brasil (Art. 462, CC).", color: C.accent },
+        { n: "4", t: "Formalização com advogado", d: "Contrato de SCP + acordo de sócios. Investimento de R$ 5-15K.", color: C.accent },
+        { n: "5", t: "Revisão periódica", d: "Comprometer-se a revisar a estrutura a cada 12 meses.", color: C.green },
+      ].map((s, i) => (
+        <div key={i} style={{ display: "flex", gap: 14, marginBottom: i < 4 ? 14 : 0, paddingBottom: i < 4 ? 14 : 0, borderBottom: i < 4 ? `1px solid ${C.border}` : "none" }}>
+          <div style={{ minWidth: 32, height: 32, borderRadius: "50%", background: s.color + "22", border: `1px solid ${s.color}44`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F.mono, fontSize: 13, fontWeight: 700, color: s.color }}>{s.n}</div>
+          <div>
+            <div style={{ fontFamily: F.body, fontSize: 14, color: C.text, fontWeight: 600, marginBottom: 2 }}>{s.t}</div>
+            <div style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, lineHeight: 1.6 }}>{s.d}</div>
+          </div>
+        </div>
+      ))}
+    </Card>
+    <Callout color={C.gold}>A Uúba tem uma combinação rara: três pessoas complementares, com formação sólida, num mercado com demanda real. O maior risco agora não é externo. É não alinhar a estrutura interna e deixar que ambiguidade se transforme em atrito. Este documento é um convite para resolver isso — juntos, com dados, e com respeito pelo que cada um traz pra mesa.</Callout>
+  </div>);
+}
+
+function Sec8() {
+  const items = [
+    { cat: "Dado concreto — fonte verificável", color: C.green, entries: [
+      { claim: "45,9% dos times com 2 fundadores dividem equity igualmente", source: "Carta — Founder Equity Split Trends 2024 (32.000+ empresas)" },
+      { claim: "Y Combinator defende splits iguais; 10% como mínimo para cofundador", source: "Blog oficial da Y Combinator" },
+      { claim: "Framework equity vs. compensação (faixas de 0-2% até 26-35%)", source: "Vadim Kravcenko — CTO e autor referenciado no ecossistema" },
+      { claim: "Dev Python Sênior PJ: R$ 17-26K/mês", source: "Hunt IT — Guia Salarial fev/2026" },
+      { claim: "Art. 1.055 §2° CC — vedação de integralização com serviços em LTDA", source: "Código Civil Brasileiro (Lei 10.406/2002)" },
+      { claim: "SCP aceita contribuição com serviços", source: "Arts. 991-996 do Código Civil" },
+      { claim: "Conflito entre cofundadores é causa #2 de falha", source: "Astella Investimentos (Medium)" },
+      { claim: "Lei 15.270/2025 — IRRF 10% sobre dividendos acima de R$ 50K/mês", source: "Legislação federal vigente desde jan/2026" },
+    ]},
+    { cat: "Estimativa informada — baseada em dados reais", color: C.gold, entries: [
+      { claim: "Valor de mercado de Luis: R$ 28-35K/mês", source: "Combinação Hunt IT (Python + DevOps + Tech Lead). Margem: ±15%" },
+      { claim: "Valoração entregas: R$ 240-400K", source: "640-870h × R$ 120-160/h. Margem: ±25%" },
+      { claim: "Custo reposição: R$ 300-600K", source: "3 PJs × 4 meses nos rates Hunt IT. Margem: ±30%" },
+      { claim: "Multiplicador SaaS 5-15x ARR vs consultoria 1-3x", source: "Ranges de a16z, SaaS Capital, Bessemer" },
+    ]},
+    { cat: "Proposta autoral — opinativa, baseada nos dados", color: C.accent, entries: [
+      { claim: "Percentual sugerido 37/37/26", source: "Ponto médio entre benchmarks (15-30% empresa, 25-40% vertical tech), ajustado para contexto" },
+      { claim: "Pró-labore sugerido R$ 4-8K", source: "~30% dos valores de mercado. Indicativo, depende do caixa" },
+      { claim: "Milestones +2-4%", source: "Prática comum, gatilhos específicos são sugestão" },
+      { claim: "Estratégia SCP → CNPJ separado", source: "Recomendação baseada em análise jurídica e fiscal. Advogado pode sugerir diferente" },
+    ]},
+  ];
+  return (<div>
+    <STitle sub="Transparência sobre o que é dado, estimativa e proposta">Metodologia & Fontes</STitle>
+    <P>Para ser ferramenta de decisão, é essencial saber em que cada afirmação se baseia.</P>
+    {items.map((group, gi) => (
+      <Card key={gi} style={{ borderLeft: `3px solid ${group.color}` }}>
+        <div style={{ marginBottom: 14 }}><Badge color={group.color}>{group.cat}</Badge></div>
+        {group.entries.map((e, ei) => (
+          <div key={ei} style={{ marginBottom: ei < group.entries.length - 1 ? 12 : 0, paddingBottom: ei < group.entries.length - 1 ? 12 : 0, borderBottom: ei < group.entries.length - 1 ? `1px solid ${C.border}` : "none" }}>
+            <div style={{ fontFamily: F.body, fontSize: 13, color: C.text, fontWeight: 500, marginBottom: 3 }}>"{e.claim}"</div>
+            <div style={{ fontFamily: F.body, fontSize: 12, color: C.textDim }}>{e.source}</div>
+          </div>
+        ))}
+      </Card>
+    ))}
+    <Callout color={C.gold} label="Nota de integridade">A proposta de percentuais (37/37/26) é um ponto de partida informado, não um veredito. A decisão final pertence aos três sócios, que conhecem nuances que nenhum dado externo captura. Os números deste documento servem para ancorar a conversa em realidade — não para substituir o julgamento de quem está dentro do negócio.</Callout>
+    <div style={{ textAlign: "center", padding: "20px 0 10px", borderTop: `1px solid ${C.border}`, marginTop: 20 }}>
+      <div style={{ fontFamily: F.mono, fontSize: 10, color: C.textMuted, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>Documento de referência — março 2026</div>
+      <div style={{ fontFamily: F.body, fontSize: 12, color: C.textMuted }}>Pesquisa realizada em março de 2026 com fontes acessíveis publicamente</div>
+    </div>
+  </div>);
+}
+
+const sectionComponents = [Sec1, Sec2, Sec3, Sec4, Sec5, Sec6, Sec7, Sec8];
+
+function App() {
+  const [active, setActive] = useState(0);
+  const ActiveSection = sectionComponents[active];
+  return (
+    <div style={{ minHeight: "100vh", background: C.bg, color: C.text }}>
+      <div style={{ background: `linear-gradient(160deg, ${C.surface}, ${C.bg})`, borderBottom: `1px solid ${C.border}`, padding: "22px 26px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+          <Badge color={C.gold}>DOCUMENTO DE ALINHAMENTO</Badge>
+          <Badge color={C.accent}>MARÇO 2026</Badge>
+        </div>
+        <h1 style={{ fontFamily: F.display, fontSize: 24, fontWeight: 700, color: C.text, margin: "6px 0 4px" }}>Uúba Tech — Estrutura Societária</h1>
+        <p style={{ fontFamily: F.body, fontSize: 13, color: C.textDim, margin: 0 }}>Para discussão entre Heitor, Thomáz e Luis</p>
+        <div style={{ display: "flex", gap: 20, marginTop: 12 }}>
+          {[{name:"Heitor",role:"CEO · Estratégia",color:C.heitor},{name:"Thomáz",role:"COO · Operações",color:C.thomaz},{name:"Luis",role:"CTO · Tecnologia",color:C.luigi}].map((p,i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ width: 8, height: 8, borderRadius: "50%", background: p.color }} />
+              <span style={{ fontFamily: F.body, fontSize: 12, color: p.color, fontWeight: 600 }}>{p.name}</span>
+              <span style={{ fontFamily: F.mono, fontSize: 9, color: C.textMuted }}>{p.role}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: "flex", maxWidth: 1100, margin: "0 auto" }}>
+        <nav style={{ width: 210, minWidth: 210, borderRight: `1px solid ${C.border}`, padding: "14px 0", position: "sticky", top: 0, height: "calc(100vh - 130px)", overflowY: "auto" }}>
+          {tabs.map((t, i) => (
+            <button key={i} onClick={() => setActive(i)} style={{ display: "block", width: "100%", padding: "10px 18px", border: "none", cursor: "pointer", textAlign: "left", fontFamily: F.body, fontSize: 12.5, fontWeight: active === i ? 600 : 400, color: active === i ? C.accent : C.textMuted, background: active === i ? C.accent + "10" : "transparent", borderLeft: active === i ? `3px solid ${C.accent}` : "3px solid transparent", transition: "all 0.15s" }}>
+              <span style={{ fontFamily: F.mono, fontSize: 9, marginRight: 6, opacity: 0.5 }}>{String(i + 1).padStart(2, "0")}</span>{t}
+            </button>
+          ))}
+        </nav>
+        <main style={{ flex: 1, padding: "22px 28px", maxWidth: 760 }}>
+          <ActiveSection />
+          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 28, paddingTop: 14, borderTop: `1px solid ${C.border}` }}>
+            {active > 0 ? <button onClick={() => setActive(active - 1)} style={{ padding: "7px 14px", border: `1px solid ${C.border}`, borderRadius: 8, background: "transparent", color: C.textDim, cursor: "pointer", fontFamily: F.body, fontSize: 12 }}>← {tabs[active - 1]}</button> : <div />}
+            {active < tabs.length - 1 ? <button onClick={() => setActive(active + 1)} style={{ padding: "7px 14px", border: `1px solid ${C.accent}33`, borderRadius: 8, background: C.accent + "10", color: C.accent, cursor: "pointer", fontFamily: F.body, fontSize: 12, fontWeight: 600 }}>{tabs[active + 1]} →</button> : <div />}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
