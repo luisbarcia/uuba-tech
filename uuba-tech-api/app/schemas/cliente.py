@@ -4,34 +4,43 @@ from pydantic import BaseModel, Field
 
 class ClienteCreate(BaseModel):
     nome: str = Field(
-        min_length=1, max_length=255,
+        min_length=1,
+        max_length=255,
         description="Nome completo ou razão social do cliente",
     )
     documento: str = Field(
-        min_length=11, max_length=14, pattern=r"^\d{11,14}$",
+        min_length=11,
+        max_length=14,
+        pattern=r"^\d{11,14}$",
         description="CPF (11 dígitos) ou CNPJ (14 dígitos), apenas números",
     )
     email: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="E-mail de contato do cliente",
     )
     telefone: str | None = Field(
-        default=None, max_length=20,
+        default=None,
+        max_length=20,
         description="Telefone com DDD, ex: 11999998888",
     )
 
 
 class ClienteUpdate(BaseModel):
     nome: str | None = Field(
-        default=None, min_length=1, max_length=255,
+        default=None,
+        min_length=1,
+        max_length=255,
         description="Nome completo ou razão social do cliente",
     )
     email: str | None = Field(
-        default=None, max_length=255,
+        default=None,
+        max_length=255,
         description="E-mail de contato do cliente",
     )
     telefone: str | None = Field(
-        default=None, max_length=20,
+        default=None,
+        max_length=20,
         description="Telefone com DDD, ex: 11999998888",
     )
 

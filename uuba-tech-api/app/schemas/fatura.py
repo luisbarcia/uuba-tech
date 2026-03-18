@@ -16,11 +16,13 @@ class FaturaCreate(BaseModel):
         description="Data de vencimento da fatura (ISO 8601)",
     )
     descricao: str | None = Field(
-        default=None, max_length=500,
+        default=None,
+        max_length=500,
         description="Descrição livre da fatura, ex: serviço prestado",
     )
     numero_nf: str | None = Field(
-        default=None, max_length=50,
+        default=None,
+        max_length=50,
         description="Número da nota fiscal vinculada",
     )
 

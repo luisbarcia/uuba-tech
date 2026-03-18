@@ -20,7 +20,8 @@ class CobrancaCreate(BaseModel):
         description="Canal de envio: whatsapp, email ou sms",
     )
     mensagem: str | None = Field(
-        default=None, max_length=2000,
+        default=None,
+        max_length=2000,
         description="Texto da mensagem a ser enviada ao cliente",
     )
     tom: Literal["amigavel", "neutro", "firme", "urgente"] | None = Field(
