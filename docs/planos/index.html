@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<script src="../js/auth.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Migração WhatsApp Oficial</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  html { scroll-behavior: smooth; }
+
+  .page-wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
+  .deck { flex: 1; min-width: 0; padding: 2rem 1.5rem; }
+
+  .toc { width: 260px; flex-shrink: 0; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; padding: 1.5rem 1rem; border-right: 1px solid var(--surface2); }
+  .toc h3 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .toc a { display: block; color: var(--muted); text-decoration: none; font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 4px; margin-bottom: 0.15rem; border-left: 2px solid transparent; transition: all 0.2s; }
+  .toc a:hover { color: var(--text); background: var(--surface); border-left-color: var(--accent); }
+  .toc a.toc-active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+
+  .progress-bar { position: fixed; top: 56px; left: 0; height: 3px; background: linear-gradient(90deg, var(--green), var(--accent)); z-index: 99; transition: width 0.2s; }
+
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+  .slide p, .slide li { margin-bottom: 0.5rem; font-size: 0.9rem; }
+
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.2rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--green); }
+  .hero .subtitle { color: var(--muted); font-size: 1rem; }
+  .hero .badges { display: flex; gap: 0.5rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  .hero .badge-item { padding: 0.35rem 1rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; }
+
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.5rem 0.6rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  .tag { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 20px; font-size: 0.7rem; font-weight: 600; margin: 0.1rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+
+  .callout { border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; border: 1px solid; }
+  .callout-green { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.2); border-left: 3px solid var(--green); }
+  .callout-yellow { background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.2); border-left: 3px solid var(--yellow); }
+  .callout-blue { background: rgba(56,189,248,0.06); border-color: rgba(56,189,248,0.2); border-left: 3px solid var(--accent); }
+  .callout-red { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.2); border-left: 3px solid var(--red); }
+  .callout .callout-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-blue .callout-label { color: var(--accent); }
+  .callout-red .callout-label { color: var(--red); }
+
+  .arch { background: var(--bg); border-radius: 10px; padding: 1.25rem; margin: 0.75rem 0; font-family: 'Fira Code', monospace; font-size: 0.75rem; line-height: 1.8; white-space: pre; overflow-x: auto; border: 1px solid var(--surface2); color: var(--accent); }
+
+  code { background: var(--surface2); padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.8rem; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 0.4rem 0 0.4rem 2rem; position: relative; font-size: 0.85rem; border-bottom: 1px solid var(--surface2); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "☐"; position: absolute; left: 0.25rem; color: var(--accent); font-size: 1rem; }
+
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.25rem 0; }
+  li::marker { color: var(--accent); }
+
+  .compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .compare-card { background: var(--bg); border: 1px solid var(--surface2); border-radius: 10px; padding: 1.25rem; }
+  .compare-card h4 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+  .compare-card .mono { font-family: monospace; font-size: 0.8rem; color: var(--accent2); background: var(--surface); padding: 0.6rem; border-radius: 6px; margin: 0.5rem 0; white-space: pre-line; line-height: 1.5; }
+
+  @media (max-width: 768px) {
+    .toc { display: none; }
+    .compare-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.6rem; }
+    .slide { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="../propostas/">Propostas</a>
+    <a href="../infra/">Infra</a>
+    <a href="../guia/">Guia</a>
+    <a href="../produtos/">Produtos</a>
+    <a href="../pitch/">Pitch</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
+    <a href="https://api.uuba.tech/health" target="_blank">Status</a>
+  </div>
+</nav>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="hero">
+  <h1>Evolution → <span>Meta Cloud API</span></h1>
+  <div class="subtitle">Plano de migração para WhatsApp Business oficial</div>
+  <div class="badges">
+    <span class="badge-item" style="background:rgba(251,191,36,0.15);color:#fbbf24;">Planejado</span>
+    <span class="badge-item" style="background:rgba(248,113,113,0.15);color:#f87171;">Prioridade Alta</span>
+    <span class="badge-item" style="background:rgba(74,222,128,0.15);color:#4ade80;">~6-8 dias úteis</span>
+  </div>
+</div>
+
+<div class="page-wrapper">
+
+<aside class="toc" id="toc">
+  <h3>Navegação</h3>
+  <a href="#contexto">1. Contexto</a>
+  <a href="#arquitetura">2. Arquitetura</a>
+  <a href="#prereqs">3. Pré-requisitos</a>
+  <a href="#fases">4. Fases</a>
+  <a href="#endpoints">5. Endpoints</a>
+  <a href="#n8n">6. Mudanças n8n</a>
+  <a href="#api">7. Mudanças API</a>
+  <a href="#chatwoot">8. Chatwoot</a>
+  <a href="#custos">9. Custos</a>
+  <a href="#riscos">10. Riscos</a>
+  <a href="#cronograma">11. Cronograma</a>
+  <a href="#checklist">12. Checklist</a>
+</aside>
+
+<div class="deck">
+
+<!-- 1 -->
+<section class="slide" id="contexto">
+  <h2><span class="num">1</span> Contexto</h2>
+  <p>A Evolution API emula o WhatsApp Web (não oficial). Empresas médias e grandes não aceitam:</p>
+  <ul>
+    <li>Sem contrato com Meta</li>
+    <li>Risco de ban a qualquer momento</li>
+    <li>Sem SLA</li>
+    <li>Não passa por compliance/jurídico</li>
+  </ul>
+
+  <h3>Solução: Dual Gateway</h3>
+  <p>Adicionar suporte à <strong>WhatsApp Business API (Meta Cloud API)</strong> como canal oficial. Manter Evolution como opção para operações menores ou desenvolvimento.</p>
+
+  <div class="arch">                    ┌─────────────────────┐
+                    │     n8n Workflow     │
+                    │  (lógica de negócio) │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │   Gateway Adapter    │
+                    │  (sub-workflow n8n)  │
+                    └───┬─────────────┬───┘
+                        │             │
+              ┌─────────▼───┐   ┌─────▼─────────┐
+              │  Evolution  │   │ Meta Cloud API │
+              │  (dev/PME)  │   │  (enterprise)  │
+              └─────────────┘   └────────────────┘</div>
+</section>
+
+<!-- 2 -->
+<section class="slide" id="arquitetura">
+  <h2><span class="num">2</span> Arquitetura</h2>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--yellow);">Hoje (Evolution)</h4>
+      <div class="mono">Cliente WhatsApp
+    │
+    ▼
+Evolution API (wa.uuba.tech)
+    │ webhook
+    ▼
+n8n — WhatsApp Receber
+    │ IA + lógica
+    ▼
+n8n — WhatsApp Enviar
+    │ POST evolution-api
+    ▼
+Cliente WhatsApp</div>
+    </div>
+    <div class="compare-card">
+      <h4 style="color:var(--green);">Futuro (dual gateway)</h4>
+      <div class="mono">Cliente WhatsApp
+    │
+    ├───────────────┐
+    ▼               ▼
+Evolution    Meta Cloud API
+    │               │
+    ▼               ▼
+n8n — Normalizer (novo)
+    │ formato interno padrão
+    ▼
+n8n — WhatsApp Receber
+    │ sem mudança na lógica
+    ▼
+n8n — Gateway Router (novo)
+    │ escolhe gateway
+    ├───────────────┐
+    ▼               ▼
+Evolution    Meta Cloud API</div>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-label">Ponto-chave</div>
+    <p>A lógica de cobrança, IA e integração <strong>não muda</strong>. Apenas 2 novos sub-workflows: Normalizer (entrada) e Gateway Router (saída).</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide" id="prereqs">
+  <h2><span class="num">3</span> Pré-requisitos Meta</h2>
+
+  <h3>Conta e aprovação</h3>
+  <table>
+    <tr><td><strong>Meta Business Account</strong></td><td>Criar em business.facebook.com (grátis)</td></tr>
+    <tr><td><strong>Meta Developer Account</strong></td><td>Criar em developers.facebook.com (grátis)</td></tr>
+    <tr><td><strong>App Meta for Developers</strong></td><td>Criar app tipo "Business" + adicionar produto "WhatsApp"</td></tr>
+    <tr><td><strong>Número de telefone</strong></td><td>Número novo exclusivo (não pode estar no WhatsApp pessoal)</td></tr>
+    <tr><td><strong>Verificação do negócio</strong></td><td>CNPJ, site, documentos — 3-7 dias úteis</td></tr>
+  </table>
+
+  <h3>Credenciais</h3>
+  <table>
+    <thead><tr><th>Credencial</th><th>Onde obter</th></tr></thead>
+    <tr><td>Phone Number ID</td><td>Dashboard → WhatsApp → Getting Started</td></tr>
+    <tr><td>WABA ID</td><td>Dashboard → WhatsApp → Configuration</td></tr>
+    <tr><td>Access Token (permanente)</td><td>System User no Business Manager</td></tr>
+    <tr><td>App Secret</td><td>Dashboard → Settings → Basic</td></tr>
+    <tr><td>Verify Token</td><td>Definido por você (webhook handshake)</td></tr>
+  </table>
+
+  <h3>Templates de mensagem (HSM)</h3>
+  <p>Para cobrança proativa, é obrigatório usar templates pré-aprovados pela Meta:</p>
+  <div class="arch">Nome: cobranca_lembrete
+Categoria: Utility
+Idioma: pt_BR
+Corpo: Olá {{1}}, identificamos uma pendência
+       no valor de R$ {{2}} com vencimento em {{3}}.
+       Podemos ajudar a resolver?</div>
+  <div class="callout callout-blue">
+    <div class="callout-label">Importante</div>
+    <p>Respostas dentro da janela de 24h (cliente iniciou) <strong>não precisam de template</strong>. O bot responde livremente.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" id="fases">
+  <h2><span class="num">4</span> Fases de implementação</h2>
+
+  <h3>Fase 1 — Setup Meta <span class="tag tag-yellow">1-2 dias + 3-7 dias verificação</span></h3>
+  <ul>
+    <li>Criar Meta Business Account com CNPJ</li>
+    <li>Criar app, adicionar WhatsApp</li>
+    <li>Verificar o negócio</li>
+    <li>Obter número, gerar token permanente</li>
+    <li>Configurar webhook → n8n</li>
+  </ul>
+
+  <h3>Fase 2 — Normalizer de entrada <span class="tag tag-blue">1 dia</span></h3>
+  <p>Sub-workflow que converte webhooks de ambos os formatos para formato interno padrão:</p>
+  <div class="arch">{
+  "source": "meta" | "evolution",
+  "phone": "5521999999999",
+  "name": "Nome do contato",
+  "message": "Texto da mensagem",
+  "messageId": "wamid.xxx",
+  "timestamp": 1679000000,
+  "type": "text" | "image" | "audio" | "document"
+}</div>
+
+  <h3>Fase 3 — Gateway Router de saída <span class="tag tag-blue">1 dia</span></h3>
+  <p>Substitui o "WhatsApp Enviar" atual. Verifica config e envia pelo gateway correto.</p>
+
+  <h3>Fase 4 — Templates de cobrança <span class="tag tag-blue">1 dia</span></h3>
+  <ul>
+    <li>Criar 3-5 templates na Meta, aguardar aprovação</li>
+    <li>Implementar envio de template no Gateway Router</li>
+    <li>Manter envio livre para respostas na janela de 24h</li>
+  </ul>
+
+  <h3>Fase 5 — Chatwoot <span class="tag tag-green">0.5 dia</span></h3>
+  <p>Configurar inbox oficial WhatsApp Business no Chatwoot (integração nativa v3.x).</p>
+
+  <h3>Fase 6 — Testes <span class="tag tag-purple">1-2 dias</span></h3>
+  <ul>
+    <li>Recebimento e resposta via Meta Cloud API</li>
+    <li>Cobrança proativa com template</li>
+    <li>Escalação para Chatwoot</li>
+    <li>Teste com número real de cliente</li>
+  </ul>
+
+  <h3>Fase 7 — Go-live <span class="tag tag-green">0.5 dia</span></h3>
+  <p>Documentação + go-live gradual (1 cliente → 10 → todos).</p>
+</section>
+
+<!-- 5 -->
+<section class="slide" id="endpoints">
+  <h2><span class="num">5</span> Mapeamento de endpoints</h2>
+
+  <h3>Receber mensagem (webhook)</h3>
+  <table>
+    <thead><tr><th></th><th>Evolution</th><th>Meta Cloud API</th></tr></thead>
+    <tr><td><strong>Payload</strong></td><td><code>body.data.message</code></td><td><code>body.entry[0].changes[0].value.messages[0]</code></td></tr>
+    <tr><td><strong>Telefone</strong></td><td><code>data.key.remoteJid</code><br>(5521...@s.whatsapp.net)</td><td><code>messages[0].from</code><br>(5521999999999)</td></tr>
+    <tr><td><strong>Texto</strong></td><td><code>data.message.conversation</code></td><td><code>messages[0].text.body</code></td></tr>
+    <tr><td><strong>Nome</strong></td><td><code>data.pushName</code></td><td><code>contacts[0].profile.name</code></td></tr>
+  </table>
+
+  <h3>Enviar mensagem</h3>
+  <table>
+    <thead><tr><th></th><th>Evolution</th><th>Meta Cloud API</th></tr></thead>
+    <tr><td><strong>Endpoint</strong></td><td><code>POST /message/sendText/{instance}</code></td><td><code>POST graph.facebook.com/v21.0/{phone-id}/messages</code></td></tr>
+    <tr><td><strong>Auth</strong></td><td>Header <code>apikey</code></td><td>Header <code>Bearer token</code></td></tr>
+    <tr><td><strong>Body texto</strong></td><td><code>{"number": "...", "text": "msg"}</code></td><td><code>{"messaging_product": "whatsapp", "to": "...", "type": "text", "text": {"body": "msg"}}</code></td></tr>
+    <tr><td><strong>Template</strong></td><td>N/A</td><td>Body com <code>"type": "template"</code> + nome + parâmetros</td></tr>
+  </table>
+</section>
+
+<!-- 6 -->
+<section class="slide" id="n8n">
+  <h2><span class="num">6</span> Mudanças no n8n</h2>
+
+  <h3>Workflows afetados</h3>
+  <table>
+    <thead><tr><th>Workflow</th><th>ID</th><th>Mudança</th></tr></thead>
+    <tr><td>WhatsApp Receber</td><td><code>O2Qu40lBWFLBqedq</code></td><td>Adicionar Normalizer no início</td></tr>
+    <tr><td>WhatsApp Enviar</td><td><code>x7YyAt9NgQ1w9UpM</code></td><td>Substituir por Gateway Router</td></tr>
+    <tr><td>Régua de Cobrança</td><td><code>PLmFT4LDMHCJO543</code></td><td>Usar Gateway Router + templates</td></tr>
+  </table>
+
+  <h3>Webhook Meta — verificação</h3>
+  <p>A Meta faz um <code>GET</code> com <code>hub.verify_token</code> + <code>hub.challenge</code>. Retornar o challenge em plain text.</p>
+
+  <h3>Validação de assinatura</h3>
+  <p>Todo POST da Meta vem com header <code>X-Hub-Signature-256</code>. Validar com HMAC-SHA256 usando o App Secret.</p>
+
+  <div class="callout callout-green">
+    <div class="callout-label">Node nativo do n8n</div>
+    <p>O n8n tem node <strong>"WhatsApp Business Cloud"</strong> que suporta envio de texto, template, mídia e mensagens interativas. Pode substituir o HTTP Request node no Gateway Router.</p>
+  </div>
+
+  <h3>Variáveis de ambiente novas</h3>
+  <div class="arch">META_PHONE_NUMBER_ID=
+META_ACCESS_TOKEN=
+META_APP_SECRET=
+META_VERIFY_TOKEN=
+META_WABA_ID=
+WHATSAPP_GATEWAY=evolution|meta</div>
+</section>
+
+<!-- 7 -->
+<section class="slide" id="api">
+  <h2><span class="num">7</span> Mudanças na API</h2>
+  <p>A API não fala diretamente com WhatsApp — o n8n é o intermediário. Mudanças mínimas:</p>
+  <table>
+    <thead><tr><th>Mudança</th><th>Necessidade</th><th>Descrição</th></tr></thead>
+    <tr><td>Campo <code>canal_gateway</code></td><td><span class="tag tag-yellow">Desejável</span></td><td>Registrar se cobrança foi via Evolution ou Meta</td></tr>
+    <tr><td>Config por cliente</td><td><span class="tag tag-blue">Futuro</span></td><td>Permitir gateway diferente por cliente</td></tr>
+  </table>
+</section>
+
+<!-- 8 -->
+<section class="slide" id="chatwoot">
+  <h2><span class="num">8</span> Chatwoot</h2>
+
+  <div class="compare-grid">
+    <div class="compare-card">
+      <h4 style="color:var(--muted);">Opção A — API Inbox</h4>
+      <p style="font-size:0.85rem;color:var(--muted);">n8n encaminha para Chatwoot quando escala (mesmo modelo atual)</p>
+    </div>
+    <div class="compare-card" style="border-color:var(--green);">
+      <h4 style="color:var(--green);">Opção B — Nativo ✓</h4>
+      <p style="font-size:0.85rem;color:var(--muted);">Chatwoot tem integração nativa com WhatsApp Cloud API desde v3.x. Configurar direto no painel.</p>
+    </div>
+  </div>
+  <p><strong>Recomendação:</strong> Opção B para canal oficial + Opção A para Evolution.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" id="custos">
+  <h2><span class="num">9</span> Custos</h2>
+
+  <h3>Preços por conversa (Brasil)</h3>
+  <table>
+    <thead><tr><th>Categoria</th><th>Custo</th><th>Quem inicia</th><th>Uso na UÚBA</th></tr></thead>
+    <tr><td><strong>Service</strong></td><td><span class="tag tag-green">Grátis (1000/mês)</span>, depois ~R$ 0,16</td><td>Cliente</td><td>Cliente responde cobrança</td></tr>
+    <tr><td><strong>Utility</strong></td><td>~R$ 0,19</td><td>Empresa (template)</td><td>Cobrança proativa, lembretes</td></tr>
+    <tr><td><strong>Marketing</strong></td><td>~R$ 0,35</td><td>Empresa (template)</td><td>Campanhas (não usamos)</td></tr>
+    <tr><td><strong>Authentication</strong></td><td>~R$ 0,17</td><td>Empresa (template)</td><td>2FA (não usamos)</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <div class="callout-label">Regra importante (nov/2024)</div>
+    <p>Templates de Utility enviados <strong>dentro</strong> de uma janela de Service existente são <strong>gratuitos</strong>. Se o cliente mandou msg e você cobra dentro de 24h, custo zero.</p>
+  </div>
+
+  <h3>Estimativa mensal</h3>
+  <table>
+    <thead><tr><th>Volume</th><th>Evolution</th><th>Meta Cloud API</th></tr></thead>
+    <tr><td>100 cobranças/mês</td><td>R$ 0</td><td>~R$ 19</td></tr>
+    <tr><td>500 cobranças/mês</td><td>R$ 0</td><td>~R$ 95</td></tr>
+    <tr><td>1.000 cobranças/mês</td><td>R$ 0</td><td>~R$ 190</td></tr>
+    <tr><td>5.000 cobranças/mês</td><td>R$ 0</td><td>~R$ 950</td></tr>
+  </table>
+  <p>Custo pode ser repassado ao cliente na assinatura ou cobrado por mensagem.</p>
+</section>
+
+<!-- 10 -->
+<section class="slide" id="riscos">
+  <h2><span class="num">10</span> Riscos e mitigações</h2>
+  <table>
+    <thead><tr><th>Risco</th><th>Impacto</th><th>Mitigação</th></tr></thead>
+    <tr><td>Verificação demora >7 dias</td><td><span class="tag tag-yellow">Médio</span></td><td>Iniciar processo antes de começar dev</td></tr>
+    <tr><td>Template rejeitado</td><td><span class="tag tag-red">Alto</span></td><td>Criar templates simples e neutros. Ter 3-5 variantes</td></tr>
+    <tr><td>Janela de 24h expira</td><td><span class="tag tag-yellow">Médio</span></td><td>Re-engagement com template automático</td></tr>
+    <tr><td>Custo Meta sobe</td><td><span class="tag tag-yellow">Médio</span></td><td>Monitorar custo/conversa. Manter Evolution como opção</td></tr>
+    <tr><td>Webhook Meta instável</td><td><span class="tag tag-red">Alto</span></td><td>Retry + dead letter queue no n8n</td></tr>
+    <tr><td>Mudança na API Meta</td><td><span class="tag tag-yellow">Médio</span></td><td>Usar versão fixa (v21.0), monitorar deprecation</td></tr>
+  </table>
+
+  <div class="callout callout-blue">
+    <div class="callout-label">BSP alternativo: 360dialog</div>
+    <p>Se a verificação direta com a Meta for complicada, o <strong>360dialog</strong> repassa preços sem markup ($0/mês free tier) e simplifica o onboarding.</p>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" id="cronograma">
+  <h2><span class="num">11</span> Cronograma</h2>
+  <table>
+    <thead><tr><th>Fase</th><th>Duração</th><th>Dependência</th></tr></thead>
+    <tr><td>1. Setup Meta</td><td>1-2 dias + 3-7 dias verificação</td><td><strong>Iniciar primeiro</strong></td></tr>
+    <tr><td>2. Normalizer entrada</td><td>1 dia</td><td>Fase 1</td></tr>
+    <tr><td>3. Gateway Router saída</td><td>1 dia</td><td>Fase 1</td></tr>
+    <tr><td>4. Templates de cobrança</td><td>1 dia</td><td>Fase 1</td></tr>
+    <tr><td>5. Chatwoot</td><td>0.5 dia</td><td>Fases 2-3</td></tr>
+    <tr><td>6. Testes</td><td>1-2 dias</td><td>Fases 2-5</td></tr>
+    <tr><td>7. Docs + go-live</td><td>0.5 dia</td><td>Fase 6</td></tr>
+  </table>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">Caminho crítico</div>
+    <p>A verificação do negócio pela Meta (3-7 dias). Iniciar fase 1 imediatamente — dev pode começar em paralelo usando o número de teste do Meta sandbox.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide" id="checklist">
+  <h2><span class="num">12</span> Checklist de go-live</h2>
+
+  <h3>Antes de ativar</h3>
+  <ul class="checklist">
+    <li>Meta Business Account verificada</li>
+    <li>Número de telefone aprovado e ativo</li>
+    <li>Access Token permanente gerado (System User)</li>
+    <li>Webhook configurado e respondendo (GET + POST)</li>
+    <li>Assinatura HMAC validada em todos os webhooks</li>
+    <li>Templates de cobrança aprovados (mínimo 3)</li>
+    <li>Normalizer testado com payloads reais</li>
+    <li>Gateway Router testado para envio</li>
+    <li>Chatwoot recebendo conversas do canal oficial</li>
+    <li>Escalação bot → humano funcionando</li>
+    <li>Monitoramento de custos configurado</li>
+  </ul>
+
+  <h3>Primeiro dia</h3>
+  <ul class="checklist">
+    <li>Enviar 5-10 cobranças pelo canal oficial</li>
+    <li>Monitorar taxa de entrega e leitura</li>
+    <li>Verificar bot responde dentro da janela de 24h</li>
+    <li>Confirmar Evolution funcionando em paralelo</li>
+  </ul>
+
+  <h3>Primeira semana</h3>
+  <ul class="checklist">
+    <li>Expandir para todos os clientes enterprise</li>
+    <li>Monitorar custos reais vs estimativa</li>
+    <li>Ajustar templates se taxa de resposta baixa</li>
+    <li>Documentar issues encontrados</li>
+  </ul>
+
+  <div class="callout callout-blue" style="margin-top:2rem;">
+    <div class="callout-label">Resumo para holdings/clientes</div>
+    <p><em>"A UÚBA suporta dois canais de WhatsApp: a API oficial da Meta (WhatsApp Business Platform) para clientes que exigem compliance e SLA, e um canal alternativo para operações menores. A arquitetura é agnóstica ao gateway — toda a lógica de cobrança, IA e integração funciona independentemente do canal."</em></p>
+  </div>
+</section>
+
+</div><!-- deck -->
+</div><!-- page-wrapper -->
+
+<div class="footer">Uúba Tech © 2026 — Plano de Migração WhatsApp</div>
+
+<script>
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progressBar').style.width = (window.scrollY / h) * 100 + '%';
+});
+const sections = document.querySelectorAll('.slide[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('toc-active'));
+      const a = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+      if (a) a.classList.add('toc-active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
