@@ -285,6 +285,21 @@ Toda requisicao POST da Meta vem com header `X-Hub-Signature-256`. Validar com H
 
 No n8n: Code Node no inicio do workflow que valida a assinatura.
 
+### Node nativo do n8n
+
+O n8n tem node nativo **"WhatsApp Business Cloud"** que suporta:
+- Enviar texto, template, midia e mensagens interativas (botoes, listas)
+- Credential tipo "WhatsApp Business Cloud API" com Access Token + WABA ID + Phone Number ID
+
+Pode ser usado no lugar do HTTP Request node para simplificar o Gateway Router.
+
+### BSP alternativo: 360dialog
+
+Se a verificacao direta com a Meta for complicada, o **360dialog** e um BSP que:
+- Repassa precos da Meta sem markup significativo ($0/mes no free tier)
+- Simplifica o onboarding (nao precisa de Business Verification completa pra comecar)
+- Ideal para devs que querem API direta sem overhead
+
 ### Variaveis de ambiente novas
 
 ```
@@ -331,19 +346,23 @@ Recomendacao: **Opcao B** — menos trabalho, mais confiavel para o canal oficia
 
 | Categoria | Custo por conversa | Quem inicia | Uso na UUBA |
 |-----------|-------------------|-------------|-------------|
-| **Service** | Gratis (1000/mes) | Cliente | Cliente responde cobranca |
-| **Utility** | ~R$ 0,25 | Empresa (com template) | Cobranca proativa, lembretes |
-| **Marketing** | ~R$ 0,80 | Empresa (com template) | Campanhas (nao usamos) |
-| **Authentication** | ~R$ 0,15 | Empresa (com template) | 2FA (nao usamos) |
+| **Service** | Gratis (1000/mes), depois ~R$ 0,16 | Cliente | Cliente responde cobranca |
+| **Utility** | ~R$ 0,19 | Empresa (com template) | Cobranca proativa, lembretes |
+| **Marketing** | ~R$ 0,35 | Empresa (com template) | Campanhas (nao usamos) |
+| **Authentication** | ~R$ 0,17 | Empresa (com template) | 2FA (nao usamos) |
+
+> **Importante (desde nov/2024):** Templates de Utility enviados **dentro** de uma janela de Service
+> existente sao **gratuitos**. Ou seja, se o cliente mandou mensagem primeiro e voce responde com
+> template de cobranca dentro de 24h, nao paga nada.
 
 ### Estimativa mensal
 
 | Volume | Custo Evolution | Custo Meta Cloud API |
 |--------|----------------|---------------------|
-| 100 cobrancas/mes | R$ 0 | ~R$ 25 (utility) + gratis (service) |
-| 500 cobrancas/mes | R$ 0 | ~R$ 125 |
-| 1.000 cobrancas/mes | R$ 0 | ~R$ 250 |
-| 5.000 cobrancas/mes | R$ 0 | ~R$ 1.250 |
+| 100 cobrancas/mes | R$ 0 | ~R$ 19 (utility) + gratis (service) |
+| 500 cobrancas/mes | R$ 0 | ~R$ 95 |
+| 1.000 cobrancas/mes | R$ 0 | ~R$ 190 |
+| 5.000 cobrancas/mes | R$ 0 | ~R$ 950 |
 
 > **Nota:** Conversas de service (cliente inicia) sao gratis ate 1000/mes. Apos isso, ~R$ 0,15 cada.
 
