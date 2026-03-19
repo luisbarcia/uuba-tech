@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uúba Tech — Playbook para Holdings</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="../css/shared.css">
+<style>
+  html { scroll-behavior: smooth; }
+
+  .page-wrapper { display: flex; max-width: 1200px; margin: 0 auto; }
+  .deck { flex: 1; min-width: 0; padding: 2rem 1.5rem; }
+
+  /* TOC Sidebar */
+  .toc { width: 260px; flex-shrink: 0; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; padding: 1.5rem 1rem; border-right: 1px solid var(--surface2); }
+  .toc h3 { color: var(--accent); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 1rem; }
+  .toc a { display: block; color: var(--muted); text-decoration: none; font-size: 0.8rem; padding: 0.3rem 0.6rem; border-radius: 4px; margin-bottom: 0.15rem; border-left: 2px solid transparent; transition: all 0.2s; }
+  .toc a:hover { color: var(--text); background: var(--surface); border-left-color: var(--accent); }
+  .toc a.toc-active { color: var(--accent); background: var(--surface); border-left-color: var(--accent); }
+
+  /* Progress bar */
+  .progress-bar { position: fixed; top: 56px; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); z-index: 99; transition: width 0.2s; }
+
+  /* Sections */
+  .slide { background: var(--surface); border-radius: var(--radius); padding: 2.5rem; margin-bottom: 2rem; border: 1px solid var(--surface2); }
+  .slide h2 { color: var(--accent); font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.75rem; }
+  .slide h2 .num { background: var(--accent); color: var(--bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; flex-shrink: 0; }
+  .slide h3 { color: var(--accent2); margin: 1.25rem 0 0.5rem; font-size: 1.1rem; }
+  .slide p { margin-bottom: 0.75rem; }
+
+  /* Hero */
+  .hero { text-align: center; padding: 3rem 2rem; background: linear-gradient(135deg, var(--surface) 0%, #1a2744 100%); }
+  .hero h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+  .hero h1 span { color: var(--accent); }
+  .hero .subtitle { color: var(--muted); font-size: 1.1rem; }
+  .hero .confidential { display: inline-block; margin-top: 1rem; padding: 0.4rem 1.2rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; }
+  th { text-align: left; color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.6rem 0.75rem; border-bottom: 2px solid var(--surface2); }
+  td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--surface2); }
+  tr:last-child td { border-bottom: none; }
+
+  /* Tags */
+  .tag { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin: 0.15rem; }
+  .tag-green { background: rgba(74,222,128,0.15); color: var(--green); }
+  .tag-blue { background: rgba(56,189,248,0.15); color: var(--accent); }
+  .tag-red { background: rgba(248,113,113,0.15); color: var(--red); }
+  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); }
+  .tag-purple { background: rgba(129,140,248,0.15); color: var(--accent2); }
+
+  /* Callouts */
+  .callout { border-radius: 10px; padding: 1.25rem 1.5rem; margin: 1rem 0; border: 1px solid; }
+  .callout-red { background: rgba(248,113,113,0.06); border-color: rgba(248,113,113,0.2); border-left: 3px solid var(--red); }
+  .callout-yellow { background: rgba(251,191,36,0.06); border-color: rgba(251,191,36,0.2); border-left: 3px solid var(--yellow); }
+  .callout-green { background: rgba(74,222,128,0.06); border-color: rgba(74,222,128,0.2); border-left: 3px solid var(--green); }
+  .callout-blue { background: rgba(56,189,248,0.06); border-color: rgba(56,189,248,0.2); border-left: 3px solid var(--accent); }
+  .callout .callout-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .callout-red .callout-label { color: var(--red); }
+  .callout-yellow .callout-label { color: var(--yellow); }
+  .callout-green .callout-label { color: var(--green); }
+  .callout-blue .callout-label { color: var(--accent); }
+
+  /* Quote blocks */
+  blockquote { border-left: 3px solid var(--accent2); padding: 0.75rem 1.25rem; margin: 0.75rem 0; background: rgba(129,140,248,0.06); border-radius: 0 8px 8px 0; font-style: italic; color: var(--text); }
+
+  /* Structure cards */
+  .structure-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+  .structure-card { background: var(--bg); border: 1px solid var(--surface2); border-radius: 10px; padding: 1.25rem; }
+  .structure-card h4 { color: var(--accent); font-size: 1rem; margin-bottom: 0.5rem; }
+  .structure-card .mono { font-family: monospace; font-size: 0.85rem; color: var(--accent2); background: var(--surface); padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0; white-space: pre-line; line-height: 1.6; }
+  .structure-card ul { padding-left: 1.25rem; margin: 0.5rem 0; }
+  .structure-card li { font-size: 0.85rem; color: var(--muted); margin: 0.2rem 0; }
+  .structure-card li::marker { color: var(--accent); }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 0.5rem 0 0.5rem 2rem; position: relative; font-size: 0.9rem; border-bottom: 1px solid var(--surface2); }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist li::before { content: "☐"; position: absolute; left: 0.25rem; color: var(--accent); font-size: 1.1rem; }
+
+  /* FAQ */
+  .faq-q { color: var(--accent); font-weight: 700; font-size: 0.95rem; margin-top: 1.25rem; margin-bottom: 0.25rem; }
+  .faq-a { color: var(--muted); font-size: 0.9rem; padding-left: 1rem; border-left: 2px solid var(--surface2); margin-bottom: 0.75rem; }
+
+  /* Lists */
+  ul { padding-left: 1.25rem; }
+  li { margin: 0.3rem 0; }
+  li::marker { color: var(--accent); }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .toc { display: none; }
+    .structure-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 1.75rem; }
+    .slide { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="../">UUBA Tech</a>
+  <div class="links">
+    <a href="../">Home</a>
+    <a href="../relatorios/">Relatórios</a>
+    <a href="../propostas/">Propostas</a>
+    <a href="../infra/">Infra</a>
+    <a href="../guia/">Guia</a>
+    <a href="../produtos/">Produtos</a>
+    <a href="./" class="active">Pitch</a>
+    <a href="https://developers.uuba.tech" target="_blank">API Docs</a>
+    <a href="https://chat.uuba.tech" target="_blank">Chatwoot</a>
+    <a href="https://api.uuba.tech/health" target="_blank">Status</a>
+  </div>
+</nav>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<div class="hero">
+  <h1>Playbook para <span>Holdings</span></h1>
+  <div class="subtitle">Material estratégico para negociações com holdings interessadas na UÚBA Tech</div>
+  <div class="confidential">CONFIDENCIAL — Uso interno dos cofundadores</div>
+</div>
+
+<div class="page-wrapper">
+
+<aside class="toc" id="toc">
+  <h3>Navegação</h3>
+  <a href="#resumo">1. Resumo Executivo</a>
+  <a href="#por-que">2. Por que nos querem</a>
+  <a href="#sinergias">3. Sinergias reais</a>
+  <a href="#riscos">4. Riscos ocultos</a>
+  <a href="#estruturas">5. Estruturas de Deal</a>
+  <a href="#valuation">6. Framework de Valuation</a>
+  <a href="#proteger">7. O que proteger</a>
+  <a href="#red-flags">8. Red Flags</a>
+  <a href="#roteiro">9. Roteiro da conversa</a>
+  <a href="#faq">10. FAQ</a>
+  <a href="#checklist">11. Checklist</a>
+  <a href="#referencias">12. Referências</a>
+</aside>
+
+<div class="deck">
+
+<!-- 1. Resumo Executivo -->
+<section class="slide" id="resumo">
+  <h2><span class="num">1</span> Resumo Executivo</h2>
+
+  <h3>O que é a UÚBA Tech</h3>
+  <p>Plataforma de gestão financeira e operacional para PMEs brasileiras. Cinco produtos integrados que combinam automação, IA e profissionais especializados para entregar a operação financeira completa.</p>
+
+  <h3>Estágio atual</h3>
+  <table>
+    <tr><td><span class="tag tag-green">Produção</span></td><td>UÚBA Recebe — bot WhatsApp com IA cobrando clientes</td></tr>
+    <tr><td><span class="tag tag-green">Produção</span></td><td>API REST — 14 endpoints, 174 testes, CI/CD completo</td></tr>
+    <tr><td><span class="tag tag-green">Produção</span></td><td>Infra self-hosted — Docker, PostgreSQL, Redis, nginx, SSL</td></tr>
+    <tr><td><span class="tag tag-blue">Ativo</span></td><td>Consultoria (BPO + CFO de Aluguel) com ~1,5 ano e clientes ativos</td></tr>
+    <tr><td><span class="tag tag-purple">Time</span></td><td>3 cofundadores: estratégia + operação + tecnologia</td></tr>
+  </table>
+
+  <div class="callout callout-green">
+    <div class="callout-label">Stack própria = margem própria</div>
+    <p>Não paga por mensagem WhatsApp. Não paga por transação. Não depende de plataforma de terceiro. Custo de infra: 1 VPS.</p>
+  </div>
+</section>
+
+<!-- 2. Por que uma Holding quer a UÚBA -->
+<section class="slide" id="por-que">
+  <h2><span class="num">2</span> Por que uma Holding quer a UÚBA</h2>
+  <p>Entender a motivação do comprador é a arma mais importante da negociação.</p>
+
+  <h3>O que a holding provavelmente viu</h3>
+  <table>
+    <thead><tr><th>Ativo</th><th>Por que tem valor</th></tr></thead>
+    <tr><td><strong>Canal WhatsApp + IA</strong></td><td>Taxa de abertura >90%. Pouquíssimas empresas têm agente IA funcional cobrando em produção</td></tr>
+    <tr><td><strong>Vertical fintech PMEs</strong></td><td>Brasil tem 20M+ PMEs. Gestão financeira é dor universal e recorrente</td></tr>
+    <tr><td><strong>Stack própria</strong></td><td>Sem dependência de APIs = margens altas e controle total</td></tr>
+    <tr><td><strong>BPO + SaaS</strong></td><td>Modelo híbrido raro: software + serviço. Receita recorrente + relacionamento profundo</td></tr>
+    <tr><td><strong>Modelo Parceiros</strong></td><td>White-label escala via contabilidades (cada uma = 50-200 empresas)</td></tr>
+    <tr><td><strong>Time técnico</strong></td><td>CTO dedicação exclusiva, infra pronta, 19 seções de documentação</td></tr>
+  </table>
+
+  <h3>O que a holding realmente quer</h3>
+  <ol>
+    <li><strong>Cross-sell:</strong> Oferecer cobrança/financeiro pros clientes que ela já tem</li>
+    <li><strong>Tecnologia:</strong> Absorver a stack pra usar internamente</li>
+    <li><strong>Acqui-hire:</strong> Contratar o time técnico via aquisição</li>
+    <li><strong>Tese de mercado:</strong> Montar ecossistema financeiro para PMEs</li>
+  </ol>
+
+  <div class="callout callout-blue">
+    <div class="callout-label">Pergunta-chave</div>
+    <p><em>"Qual das suas empresas seria a primeira a usar os nossos produtos?"</em> — a resposta revela a motivação real.</p>
+  </div>
+</section>
+
+<!-- 3. Sinergias -->
+<section class="slide" id="sinergias">
+  <h2><span class="num">3</span> O que a Holding oferece</h2>
+
+  <table>
+    <thead><tr><th>Sinergia prometida</th><th>Valor real</th><th>Cuidado</th></tr></thead>
+    <tr><td>Base de clientes</td><td><span class="tag tag-green">Alto</span></td><td>Verificar se o perfil de cliente é PME</td></tr>
+    <tr><td>Capital para crescimento</td><td><span class="tag tag-green">Alto</span></td><td>Capital com muitas condições pode ser pior que bootstrapping</td></tr>
+    <tr><td>Infra compartilhada</td><td><span class="tag tag-yellow">Médio</span></td><td>Pode tirar agilidade e criar dependência</td></tr>
+    <tr><td>Credibilidade/marca</td><td><span class="tag tag-yellow">Médio</span></td><td>Pode ajudar em B2B enterprise, confundir em PME</td></tr>
+    <tr><td>Rede de vendas</td><td><span class="tag tag-yellow">Médio</span></td><td>Vendedores generalistas raramente vendem bem produto técnico</td></tr>
+    <tr><td>P&amp;D compartilhado</td><td><span class="tag tag-yellow">Baixo-Médio</span></td><td>Prioridades de P&amp;D podem conflitar</td></tr>
+  </table>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">A pergunta que importa</div>
+    <p><em>"Quantos clientes novos vocês projetam que o deal traria nos primeiros 12 meses?"</em> — se não tem número, não tem sinergia. Tem promessa.</p>
+  </div>
+</section>
+
+<!-- 4. Riscos -->
+<section class="slide" id="riscos">
+  <h2><span class="num">4</span> O que a Holding NÃO te conta</h2>
+
+  <div class="callout callout-red">
+    <div class="callout-label">Perda de velocidade</div>
+    <p>Decisões de 5 minutos passam a ter 3 níveis de aprovação. Sprints de 1 semana viram ciclos de 1 mês. "Alinhamento com a holding" vira a pauta principal.</p>
+  </div>
+
+  <div class="callout callout-red">
+    <div class="callout-label">Perda de autonomia</div>
+    <p>A holding define prioridades. Seu roadmap de produto pode ser sequestrado pra atender demandas internas. Fundadores viram "heads de unidade" — perdem poder de decisão estratégica.</p>
+  </div>
+
+  <div class="callout callout-red">
+    <div class="callout-label">Conflito de interesses</div>
+    <p>Se a holding tem outra empresa que faz algo parecido, a UÚBA pode virar "feature" e não "produto". Orçamento redirecionado pra unidade mais rentável.</p>
+  </div>
+
+  <div class="callout callout-red">
+    <div class="callout-label">Brain drain</div>
+    <p>67% dos fundadores que vendem para holdings saem em até 2 anos. A holding fica com a casca e perde a essência.</p>
+  </div>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">Sinergias superestimadas</div>
+    <p>Em M&amp;A, sinergias são consistentemente superestimadas. Custos de integração (migração de sistemas, reestruturação legal) são consistentemente subestimados.</p>
+  </div>
+</section>
+
+<!-- 5. Estruturas -->
+<section class="slide" id="estruturas">
+  <h2><span class="num">5</span> Estruturas de Deal possíveis</h2>
+
+  <div class="structure-grid">
+    <div class="structure-card">
+      <h4>A. Investimento minoritário</h4>
+      <div class="mono">Holding compra 10-25%
+Fundadores mantêm controle (75-90%)
+Capital entra no caixa</div>
+      <ul>
+        <li>Capital sem perda de controle</li>
+        <li>Sinergia comercial sem subordinação</li>
+        <li>Holding pode querer board seat + veto</li>
+      </ul>
+    </div>
+
+    <div class="structure-card">
+      <h4>B. Aquisição majoritária</h4>
+      <div class="mono">Holding compra 51-70%
+Fundadores ficam com 30-49%
+Lock-up de 2-4 anos + earnout</div>
+      <ul>
+        <li>Liquidez parcial para fundadores</li>
+        <li>Perda de controle</li>
+        <li>Faz sentido se distribuição multiplica 5x+</li>
+      </ul>
+    </div>
+
+    <div class="structure-card">
+      <h4>C. Aquisição total (exit)</h4>
+      <div class="mono">Holding compra 100%
+Cash + earnout
+Lock-up de 2-3 anos</div>
+      <ul>
+        <li>Liquidez total, risco zerado</li>
+        <li>Você vira funcionário</li>
+        <li>Só se valor > 10x o que faria sozinho</li>
+      </ul>
+    </div>
+
+    <div class="structure-card">
+      <h4>D. Joint Venture</h4>
+      <div class="mono">Empresa nova (50/50 ou similar)
+UÚBA: tecnologia + operação
+Holding: clientes + capital</div>
+      <ul>
+        <li>Ambos com skin in the game</li>
+        <li>Governança pode ser complexa</li>
+        <li>Ideal quando valor está na combinação</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="structure-card" style="margin-top:1rem; border-color: var(--green);">
+    <h4 style="color: var(--green);">E. Acordo comercial (sem equity) — Comece por aqui</h4>
+    <div class="mono">Parceria comercial ou licenciamento
+Holding distribui/revende produtos UÚBA
+Revenue share ou fee fixo</div>
+    <ul>
+      <li>Zero diluição. Testa a sinergia antes de casar</li>
+      <li>Menos comprometimento, mas menor risco</li>
+      <li><strong>Sempre válido como primeiro passo</strong></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 6. Valuation -->
+<section class="slide" id="valuation">
+  <h2><span class="num">6</span> Framework de Valuation</h2>
+
+  <h3>Referências de mercado (Brasil, 2024-2026)</h3>
+  <table>
+    <thead><tr><th>Métrica</th><th>Range</th></tr></thead>
+    <tr><td>Valuation Seed BR (pré-money)</td><td>R$ 14M – R$ 67M</td></tr>
+    <tr><td>Múltiplos SaaS privado</td><td>4,7x – 6,1x receita</td></tr>
+    <tr><td>Múltiplos Fintech privado</td><td>3,7x – 7,4x receita</td></tr>
+    <tr><td>Desconto LATAM vs EUA</td><td>30-50%</td></tr>
+  </table>
+
+  <h3>Método 1 — Custo de replicação</h3>
+  <table>
+    <thead><tr><th>Ativo</th><th>Valor estimado</th></tr></thead>
+    <tr><td>API REST (14 endpoints, 174 testes, CI/CD)</td><td>R$ 150k – R$ 250k</td></tr>
+    <tr><td>Bot WhatsApp com IA + protocolo comportamental</td><td>R$ 100k – R$ 180k</td></tr>
+    <tr><td>Infra completa (Docker, nginx, SSL, 4 domínios)</td><td>R$ 80k – R$ 120k</td></tr>
+    <tr><td>Portal de documentação (19 seções)</td><td>R$ 30k – R$ 50k</td></tr>
+    <tr><td>Automações n8n + integrações</td><td>R$ 40k – R$ 70k</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>R$ 400k – R$ 670k</strong></td></tr>
+  </table>
+
+  <h3>Método 2 — Valor do time + ativo</h3>
+  <table>
+    <thead><tr><th>Componente</th><th>Valor</th></tr></thead>
+    <tr><td>3 cofundadores (valor de mercado anual)</td><td>R$ 720k – R$ 1.2M/ano</td></tr>
+    <tr><td>Carteira de clientes consultoria (~1,5 ano)</td><td>R$ 200k – R$ 500k</td></tr>
+    <tr><td>Marca + domínios + presença digital</td><td>R$ 50k – R$ 100k</td></tr>
+    <tr><td>Propriedade intelectual (protocolo + prompts)</td><td>R$ 100k – R$ 200k</td></tr>
+  </table>
+
+  <h3>Método 3 — Projeção de receita</h3>
+  <p>Se projetar R$ X/mês de MRR em 12 meses → aplique múltiplo de 4-6x ARR.</p>
+  <p>Exemplo: R$ 50k MRR → R$ 600k ARR → Valuation de <strong>R$ 2,4M – R$ 3,6M</strong></p>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">Regra de ouro</div>
+    <p>Nunca aceite proposta sem saber o valuation implícito. Se oferecem X por Y%, calcule: <strong>X ÷ Y% = valuation</strong>. Compare com os benchmarks acima.</p>
+  </div>
+</section>
+
+<!-- 7. O que proteger -->
+<section class="slide" id="proteger">
+  <h2><span class="num">7</span> O que proteger na negociação</h2>
+
+  <h3>Cláusulas inegociáveis</h3>
+  <table>
+    <thead><tr><th>Proteção</th><th>Por quê</th><th>Como</th></tr></thead>
+    <tr><td><strong>Autonomia operacional</strong></td><td>Sem isso, vira gerente de projeto</td><td>Cláusula de "reserved matters"</td></tr>
+    <tr><td><strong>Vesting acceleration</strong></td><td>Se te demitirem pós-aquisição</td><td>Double-trigger: change of control + demissão = 100% vesting</td></tr>
+    <tr><td><strong>Anti-diluição</strong></td><td>Rodada futura não pode diluir sem compensação</td><td>Weighted average. NUNCA full ratchet</td></tr>
+    <tr><td><strong>Board seat</strong></td><td>Voz nas decisões estratégicas</td><td>Mínimo 1 seat dos fundadores</td></tr>
+    <tr><td><strong>Tag-along</strong></td><td>Se a holding vender, você vende junto</td><td>Cláusula padrão</td></tr>
+    <tr><td><strong>Piso de investimento</strong></td><td>Garantir que a holding investe de fato</td><td>"Mínimo de R$ X em 24 meses"</td></tr>
+    <tr><td><strong>Non-compete razoável</strong></td><td>Não travar sua carreira</td><td>12 meses máx, geograficamente limitado</td></tr>
+  </table>
+
+  <h3>Sobre earnout</h3>
+  <p>Se tiver earnout, métricas devem ser claras, mensuráveis e <strong>dentro do seu controle</strong> (MRR, clientes ativos) — nunca EBITDA (a holding controla os custos). <span class="tag tag-red">Apenas 21% do earnout máximo é efetivamente pago</span></p>
+</section>
+
+<!-- 8. Red Flags -->
+<section class="slide" id="red-flags">
+  <h2><span class="num">8</span> Red Flags — Quando sair da mesa</h2>
+
+  <h3>Saia imediatamente se:</h3>
+  <table>
+    <thead><tr><th>Red Flag</th><th>Por quê</th></tr></thead>
+    <tr><td><span class="tag tag-red">Full ratchet anti-dilution</span></td><td>Prática predatória. 95% do mercado usa weighted average</td></tr>
+    <tr><td><span class="tag tag-red">Liquidation preference > 1x</span></td><td>98% dos deals em 2025 usam 1x. Mais que isso é ganância</td></tr>
+    <tr><td><span class="tag tag-red">Participating preferred</span></td><td>Double-dip: investidor recebe preferência E participa do rateio</td></tr>
+    <tr><td><span class="tag tag-red">Earnout > 50% do preço</span></td><td>Risco é todo seu. Média do mercado: 21% é efetivamente pago</td></tr>
+    <tr><td><span class="tag tag-red">Non-compete 3+ anos</span></td><td>Desproporcional. Pode bloquear sua carreira</td></tr>
+    <tr><td><span class="tag tag-red">Papel dos fundadores indefinido</span></td><td>Ambiguidade = subordinação sem contrato</td></tr>
+    <tr><td><span class="tag tag-red">Pressa para fechar</span></td><td>Pressão sem due diligence = algo a esconder</td></tr>
+  </table>
+
+  <h3>Yellow flags — investigue mais:</h3>
+  <ul>
+    <li>Exclusividade de negociação por >30 dias</li>
+    <li>Não quer colocar termos no papel antes de due diligence</li>
+    <li>Fala muito em "sinergia" mas não apresenta números</li>
+    <li>O interlocutor não é quem decide</li>
+  </ul>
+
+  <div class="callout callout-blue">
+    <div class="callout-label">Sempre perguntar</div>
+    <p><em>"Posso conversar com fundadores de empresas que vocês já adquiriram?"</em> — se disserem não, é red flag.</p>
+  </div>
+</section>
+
+<!-- 9. Roteiro -->
+<section class="slide" id="roteiro">
+  <h2><span class="num">9</span> Roteiro da conversa (15 min)</h2>
+
+  <h3>Fase 1 — Escutar (5 min)</h3>
+  <p>Antes de apresentar qualquer coisa, entenda o que a holding quer:</p>
+  <ol>
+    <li><em>"O que motivou o interesse na UÚBA?"</em></li>
+    <li><em>"Como vocês enxergam a UÚBA dentro do portfólio?"</em></li>
+    <li><em>"Quais empresas do grupo seriam as primeiras a usar nossos produtos?"</em></li>
+    <li><em>"Como funcionaram aquisições anteriores? Os fundadores ainda estão?"</em></li>
+  </ol>
+  <blockquote>Quem fala mais, revela mais. Deixe a holding falar.</blockquote>
+
+  <h3>Fase 2 — Apresentar (5 min)</h3>
+  <p>Use o <a href="roteiro-investidor.md">roteiro de 5 min</a>, enfatizando:</p>
+  <ul>
+    <li>Modelo de <strong>Parceiros</strong> — a holding pode ser o primeiro grande parceiro</li>
+    <li><strong>Stack própria</strong> — não dependem de ninguém, margem alta</li>
+    <li><strong>Time</strong> — 3 cofundadores, dedicação exclusiva do CTO</li>
+    <li>Demo ao vivo do bot se possível</li>
+  </ul>
+
+  <h3>Fase 3 — Explorar (5 min)</h3>
+  <ol>
+    <li><em>"Que tipo de estrutura vocês pensam? Investimento, aquisição, parceria?"</em></li>
+    <li><em>"Qual o horizonte de tempo?"</em></li>
+    <li><em>"Como funciona a autonomia das empresas dentro do grupo?"</em></li>
+    <li><em>"Têm interesse em distribuir nossos produtos para a base de vocês?"</em></li>
+  </ol>
+
+  <div class="callout callout-yellow">
+    <div class="callout-label">Regra de ouro</div>
+    <p><strong>Nunca fale número primeiro.</strong> Se perguntarem "quanto vale?", responda: <em>"Depende da estrutura. Uma coisa é investimento minoritário, outra é aquisição. O que faz mais sentido pra vocês?"</em></p>
+  </div>
+
+  <h3>Encerramento</h3>
+  <blockquote>"Ótima conversa. Vamos marcar uma segunda reunião com mais detalhes? Podemos trazer um overview técnico e financeiro mais completo."</blockquote>
+  <p><strong>Nunca feche nada na primeira reunião. Sempre peça tempo.</strong></p>
+</section>
+
+<!-- 10. FAQ -->
+<section class="slide" id="faq">
+  <h2><span class="num">10</span> FAQ — Respostas prontas</h2>
+
+  <h3>Sobre a empresa</h3>
+
+  <div class="faq-q">"Qual o faturamento?"</div>
+  <div class="faq-a">A Uúba consultoria tem receita recorrente com BPO financeiro e CFO de Aluguel. A Uúba Tech (produto) está em fase de lançamento — o Recebe já está em produção. <em>(Ter números exatos prontos)</em></div>
+
+  <div class="faq-q">"Quantos clientes têm?"</div>
+  <div class="faq-a"><em>(Ter número exato pronto)</em> — Clientes ativos de consultoria serão os primeiros usuários dos produtos Tech.</div>
+
+  <div class="faq-q">"Qual o burn rate?"</div>
+  <div class="faq-a">Baixíssimo. Infra custa uma VPS. Time são os 3 cofundadores com pró-labore mínimo. Não estamos queimando caixa — estamos construindo.</div>
+
+  <div class="faq-q">"Vocês têm concorrente direto?"</div>
+  <div class="faq-a">Ferramentas de cobrança existem (Asaas, Vindi, Neofin), mas nenhuma combina IA conversacional + protocolo comportamental + BPO. O diferencial não é só software — é a operação.</div>
+
+  <h3>Sobre o deal</h3>
+
+  <div class="faq-q">"Quanto vocês estão pedindo?"</div>
+  <div class="faq-a"><em>"Depende da estrutura. Estamos abertos a investimento, parceria ou algo mais estratégico. O que faz mais sentido pra vocês?"</em> — devolva a pergunta.</div>
+
+  <div class="faq-q">"Vocês venderiam 100%?"</div>
+  <div class="faq-a"><em>"Não estamos buscando venda nesse momento. Estamos buscando parceiros estratégicos que multipliquem o que já construímos."</em></div>
+
+  <div class="faq-q">"Topam exclusividade para negociar?"</div>
+  <div class="faq-a"><em>"Podemos discutir uma janela de 15 a 30 dias após termos os principais pontos alinhados em um term sheet."</em></div>
+
+  <div class="faq-q">"Quanto vale a empresa?"</div>
+  <div class="faq-a"><em>"O custo de replicar o que construímos está na faixa de R$ 400k a R$ 670k — mas valor de empresa não é custo de replicação. É potencial de mercado + time + traction. Vamos explorar juntos."</em></div>
+
+  <h3>Sobre os fundadores</h3>
+
+  <div class="faq-q">"Os fundadores ficariam após o deal?"</div>
+  <div class="faq-a"><em>"A UÚBA funciona por causa das pessoas. Qualquer estrutura precisa manter os três motivados e com autonomia."</em></div>
+
+  <div class="faq-q">"Quem decide o que?"</div>
+  <div class="faq-a">Heitor: estratégia e análise. Thomáz: operação e atendimento. Luis: tecnologia e produto. Decisões estratégicas são consensuais.</div>
+
+  <h3>Perguntas que VOCÊS devem fazer</h3>
+  <ol>
+    <li>Quantas aquisições/investimentos a holding já fez?</li>
+    <li>Posso conversar com fundadores de empresas que vocês já incorporaram?</li>
+    <li>Qual a tese de investimento do grupo? Onde a UÚBA se encaixa?</li>
+    <li>Como funciona a governança? Quem aprova orçamento, contratação, roadmap?</li>
+    <li>Qual o horizonte de retorno? (3 anos? 5? 10?)</li>
+    <li>Se o deal não andar, teriam interesse numa parceria comercial?</li>
+  </ol>
+</section>
+
+<!-- 11. Checklist -->
+<section class="slide" id="checklist">
+  <h2><span class="num">11</span> Checklist</h2>
+
+  <h3>Antes da reunião</h3>
+  <ul class="checklist">
+    <li>Números atualizados: receita mensal, nº de clientes, custo de infra</li>
+    <li>Bot WhatsApp funcionando e pronto pra demo ao vivo</li>
+    <li>Portal interno no ar com páginas de produtos</li>
+    <li>API respondendo (api.uuba.tech/health)</li>
+    <li>Este documento lido e discutido entre os 3 cofundadores</li>
+    <li>Alinhamento interno: qual estrutura preferida?</li>
+    <li>Alinhamento interno: qual o mínimo aceitável? (%, autonomia, pró-labore)</li>
+    <li>Pesquisar a holding: empresas, sócios, histórico de M&amp;A</li>
+  </ul>
+
+  <h3>Na reunião</h3>
+  <ul class="checklist">
+    <li>Celular com WhatsApp do bot</li>
+    <li>Não falar número primeiro</li>
+    <li>Escutar mais do que falar nos primeiros 5 minutos</li>
+    <li>Anotar tudo (ou gravar com permissão)</li>
+    <li>Não fechar nada na primeira reunião</li>
+    <li>Pedir follow-up por escrito</li>
+  </ul>
+
+  <h3>Após a reunião</h3>
+  <ul class="checklist">
+    <li>Registrar tudo por escrito (enviar email de recap)</li>
+    <li>Avaliar internamente: os 3 cofundadores alinhados?</li>
+    <li>Se avançar: pedir term sheet antes de qualquer compromisso</li>
+    <li>Consultar advogado societário antes de assinar qualquer coisa</li>
+  </ul>
+</section>
+
+<!-- 12. Referências -->
+<section class="slide" id="referencias">
+  <h2><span class="num">12</span> Referências de mercado</h2>
+
+  <h3>Holdings brasileiras que adquirem tech</h3>
+  <table>
+    <thead><tr><th>Holding</th><th>Perfil</th><th>Deals notáveis</th></tr></thead>
+    <tr><td><strong>TOTVS</strong></td><td>Ecossistema ERP</td><td>RD Station (R$ 1,86B), 30+ aquisições. Fundo CVC de R$ 300M</td></tr>
+    <tr><td><strong>Locaweb</strong></td><td>E-commerce</td><td>MelhorEnvio, Vindi, Bling. R$ 393M+ pós-IPO</td></tr>
+    <tr><td><strong>Magalu</strong></td><td>Super-app</td><td>KaBuM (R$ 3,5B), AiQFome. 25 aquisições</td></tr>
+    <tr><td><strong>Movile</strong></td><td>Holding tech</td><td>iFood, Sympla. Modelo descentralizado</td></tr>
+    <tr><td><strong>Stone/PagSeguro</strong></td><td>Fintech</td><td>Aquisições em pagamentos + gestão PMEs</td></tr>
+  </table>
+
+  <h3>Padrões comuns em deals BR</h3>
+  <ul>
+    <li>Cash + earnout é o mais frequente (R$ 10M – R$ 200M)</li>
+    <li>Fundadores retêm 5-15% com vesting de 2-3 anos</li>
+    <li>Lock-up: 2-4 anos</li>
+    <li>Apenas <strong>21% do earnout máximo</strong> é efetivamente pago</li>
+    <li>Conversão Seed → Series A no Brasil: 1 em cada 10</li>
+  </ul>
+
+  <div class="callout callout-blue" style="margin-top: 2rem;">
+    <div class="callout-label">Lembrete final</div>
+    <p>A melhor negociação é aquela em que você pode levantar e ir embora. Ter opções (bootstrapping, outro investidor, parceria comercial sem equity) é a maior fonte de poder numa mesa de negociação. <strong>Nunca negocie como se precisasse do deal — mesmo que precise.</strong></p>
+  </div>
+</section>
+
+</div><!-- deck -->
+</div><!-- page-wrapper -->
+
+<div class="footer">Uúba Tech © 2026 — Material confidencial para uso interno</div>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const p = (window.scrollY / h) * 100;
+  document.getElementById('progressBar').style.width = p + '%';
+});
+
+// TOC active state
+const sections = document.querySelectorAll('.slide[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('toc-active'));
+      const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('toc-active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
