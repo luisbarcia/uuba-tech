@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUBA — Pitch Feedback</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f0a0a;
+  --bg-elevated:#1a1212;
+  --bg-surface:#231919;
+  --bg-hover:#2e2020;
+  --accent:#BA3017;
+  --accent-dim:rgba(186,48,23,.15);
+  --accent-glow:rgba(186,48,23,.3);
+  --gold:#A5852B;
+  --gold-dim:rgba(165,133,43,.12);
+  --text:#F4F4F4;
+  --text-secondary:rgba(244,244,244,.7);
+  --text-muted:rgba(244,244,244,.4);
+  --border:rgba(244,244,244,.08);
+  --border-hover:rgba(244,244,244,.15);
+  --success:#2ecc71;
+  --warning:#e67e22;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* === LAYOUT === */
+.layout{display:flex;min-height:100vh}
+
+/* === SIDEBAR NAV === */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:280px;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--border);
+  padding:2rem 0;
+  z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-header{padding:0 1.5rem 2rem;border-bottom:1px solid var(--border)}
+.sidebar-logo{
+  font-family:var(--font-display);font-size:1.6rem;
+  color:var(--text);letter-spacing:.02em;
+}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-sub{font-size:.75rem;color:var(--text-muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.15em}
+.sidebar-meta{font-size:.8rem;color:var(--text-muted);padding:0 1.5rem;margin-top:1rem}
+.sidebar-meta strong{color:var(--text-secondary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1.5rem 0}
+.sidebar-nav a{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.5rem;
+  color:var(--text-secondary);
+  text-decoration:none;font-size:.85rem;font-weight:400;
+  border-left:3px solid transparent;
+  transition:all .2s;
+}
+.sidebar-nav a:hover{color:var(--text);background:var(--bg-hover);border-left-color:var(--border-hover)}
+.sidebar-nav a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);font-weight:500}
+.sidebar-nav .nav-num{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--text-muted);min-width:1.5rem;
+}
+
+/* === MAIN CONTENT === */
+.main{margin-left:280px;flex:1;max-width:820px;padding:3rem 4rem 6rem}
+
+/* === MOBILE NAV === */
+.mobile-header{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--bg-elevated);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;z-index:200;
+  justify-content:space-between;align-items:center;
+}
+.mobile-header .sidebar-logo{font-size:1.2rem}
+.burger{background:none;border:none;cursor:pointer;padding:.5rem}
+.burger span{display:block;width:22px;height:2px;background:var(--text);margin:5px 0;transition:all .3s}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+
+/* === HERO === */
+.hero{margin-bottom:4rem;padding-bottom:3rem;border-bottom:1px solid var(--border)}
+.hero-label{
+  display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--accent);font-weight:600;margin-bottom:1rem;
+  padding:.35rem .75rem;border:1px solid var(--accent);border-radius:2px;
+}
+.hero h1{
+  font-family:var(--font-display);font-size:3rem;line-height:1.15;
+  margin-bottom:1rem;font-weight:400;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-intro{font-size:1.05rem;color:var(--text-secondary);max-width:600px;line-height:1.8}
+
+/* === SECTIONS === */
+section{margin-bottom:4rem}
+section h2{
+  font-family:var(--font-display);font-size:1.8rem;font-weight:400;
+  margin-bottom:1.5rem;padding-bottom:.75rem;
+  border-bottom:1px solid var(--border);
+}
+section h3{font-size:1rem;font-weight:600;margin:2rem 0 .75rem;color:var(--text)}
+section p{color:var(--text-secondary);margin-bottom:1rem}
+section ul,section ol{color:var(--text-secondary);padding-left:1.25rem;margin-bottom:1rem}
+section li{margin-bottom:.5rem}
+section li strong{color:var(--text)}
+
+/* === CARDS === */
+.card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.card:hover{border-color:var(--border-hover)}
+.card-accent{border-left:3px solid var(--accent)}
+.card-gold{border-left:3px solid var(--gold)}
+.card-warning{border-left:3px solid var(--warning);background:rgba(230,126,34,.04)}
+.card h4{font-size:.95rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.9rem;margin-bottom:.5rem}
+.card p:last-child{margin-bottom:0}
+
+/* === NUMBERED ITEMS === */
+.numbered{counter-reset:item}
+.numbered .card{counter-increment:item;position:relative;padding-left:3.5rem}
+.numbered .card::before{
+  content:counter(item);position:absolute;left:1.25rem;top:1.5rem;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--accent);font-weight:600;
+}
+
+/* === PITCH BLOCK === */
+.pitch-block{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;
+}
+.pitch-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+}
+.pitch-label{
+  font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.15em;color:var(--gold);margin-bottom:1rem;
+}
+.pitch-text{
+  font-size:1.05rem;line-height:1.9;color:var(--text);
+  font-family:var(--font-body);
+}
+.pitch-text p{color:var(--text);margin-bottom:1rem}
+.pitch-text p:last-child{margin-bottom:0}
+
+/* === TABLE === */
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{
+  text-align:left;padding:.75rem 1rem;
+  background:var(--bg-surface);color:var(--text-muted);
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:top;
+}
+td:first-child{color:var(--text);font-weight:500}
+tr:hover td{background:var(--bg-hover)}
+
+/* === BLOCKQUOTE === */
+blockquote{
+  border-left:3px solid var(--gold);padding:.75rem 1.25rem;
+  margin:1.5rem 0;background:var(--gold-dim);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);
+}
+blockquote p{margin-bottom:0}
+
+/* === BADGE === */
+.badge{
+  display:inline-block;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:.2rem .5rem;border-radius:3px;font-weight:600;
+}
+.badge-red{background:var(--accent-dim);color:var(--accent)}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-green{background:rgba(46,204,113,.12);color:var(--success)}
+
+/* === MAP === */
+.position-map{
+  font-family:var(--font-mono);font-size:.75rem;line-height:1.6;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;overflow-x:auto;white-space:pre;color:var(--text-muted);
+  margin:1.5rem 0;
+}
+.position-map .highlight{color:var(--accent);font-weight:600}
+
+/* === FOOTER === */
+.doc-footer{
+  margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--text-muted);
+}
+
+/* === RESPONSIVE === */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay.open{display:block}
+  .mobile-header{display:flex}
+  .main{margin-left:0;padding:5rem 1.5rem 4rem}
+  .hero h1{font-size:2.2rem}
+  section h2{font-size:1.4rem}
+}
+
+/* === SCROLL SPY ANIMATION === */
+.fade-in{opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.4,0,.2,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Mobile Header -->
+<div class="mobile-header">
+  <div class="sidebar-logo">U<span>U</span>BA</div>
+  <button class="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</div>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">U<span>U</span>BA</div>
+    <div class="sidebar-sub">Pitch Feedback</div>
+  </div>
+  <div class="sidebar-meta">
+    <strong>De:</strong> Luis (CTO)<br>
+    <strong>Para:</strong> Heitor (CEO)<br>
+    <strong>Data:</strong> 22/03/2026
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#resumo"><span class="nav-num">00</span> Resumo</a>
+    <a href="#funciona"><span class="nav-num">01</span> O que funciona</a>
+    <a href="#ajustar"><span class="nav-num">02</span> O que ajustar</a>
+    <a href="#posicionamento"><span class="nav-num">03</span> Posicionamento</a>
+    <a href="#bench"><span class="nav-num">04</span> Caso Bench</a>
+    <a href="#pitches"><span class="nav-num">05</span> 3 Versoes do Pitch</a>
+    <a href="#taglines"><span class="nav-num">06</span> Taglines</a>
+    <a href="#delivery"><span class="nav-num">07</span> Dicas de Delivery</a>
+    <a href="#proximos"><span class="nav-num">08</span> Proximos Passos</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- Hero -->
+  <div class="hero fade-in" id="resumo">
+    <span class="hero-label">Documento Interno</span>
+    <h1>Feedback sobre<br>o <em>Pitch</em></h1>
+    <p class="hero-intro">
+      Analise completa do pitch de 1 minuto e da tagline candidata.
+      Baseado em 8 metodologias, 15+ cases globais, e pesquisa de posicionamento
+      de fintechs BR e internacionais.
+    </p>
+  </div>
+
+  <!-- 01 O que funciona -->
+  <section id="funciona" class="fade-in">
+    <h2>O que funciona no seu pitch</h2>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>A abertura com os dois extremos</h4>
+        <p>"Simples demais" vs "caro demais" — cria identificacao imediata. O empresario se reconhece num dos lados.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>"O problema nao e falta de gente capacitada, e a estrutura em si"</h4>
+        <p>Melhor frase do pitch. Reposiciona o problema e abre caminho pra solucao. Mantem essa.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>A divisao Tech + Consultoria</h4>
+        <p>Esta clara e mostra que a gente ataca de forma completa. Os dois bracos se complementam.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 O que ajustar -->
+  <section id="ajustar" class="fade-in">
+    <h2>O que precisa ajustar</h2>
+
+    <h3><span class="badge badge-red">Critico</span> A tagline</h3>
+    <div class="card card-warning">
+      <p>"Seu financeiro acompanhando as mudancas da nossa epoca" — a ideia por tras e boa, mas como tagline comercial nao funciona. <strong>"Mudancas da nossa epoca" e abstrato demais</strong>, pode servir pra qualquer empresa de qualquer setor.</p>
+      <p>A UUBA fala concreto. A tagline precisa falar concreto.</p>
+    </div>
+    <p><strong>Onde ela funciona:</strong> como manifesto. Na pagina "Sobre", no LinkedIn, em apresentacoes institucionais:</p>
+    <blockquote>
+      <p>"O financeiro das empresas parou no tempo. Planilha, boleto manual, cobranca por telefone. Enquanto tudo ao redor evoluiu, o financeiro ficou pra tras. A UUBA existe pra mudar isso."</p>
+    </blockquote>
+
+    <h3><span class="badge badge-red">Critico</span> Falta um numero</h3>
+    <div class="card">
+      <p>Sem numero ou case, o pitch morre na memoria do empresario antes dele chegar no carro. A neurociencia confirma (Peak-End Rule, Kahneman): as pessoas lembram do <strong>pico emocional</strong> e do <strong>final</strong>. O pico precisa ser um dado concreto.</p>
+      <ul>
+        <li>"76% das PMEs brasileiras nao tem financeiro estruturado" <span class="badge badge-gold">Sebrae</span></li>
+        <li>"8,9 milhoes de empresas negativadas no Brasil" <span class="badge badge-gold">Serasa</span></li>
+        <li>"Montar equipe financeira interna sai R$ 15 a 20 mil por mes" (ancora de custo)</li>
+        <li>Quando tivermos: "Recuperamos R$ X em Y dias pro cliente Z"</li>
+      </ul>
+    </div>
+
+    <h3><span class="badge badge-red">Critico</span> Falta CTA</h3>
+    <div class="card">
+      <p>O pitch acaba e o empresario nao sabe o que fazer. Precisa fechar com acao clara e de baixo risco:</p>
+      <blockquote><p>"Diagnostico gratuito em 48 horas. Sem compromisso. Me chama no WhatsApp."</p></blockquote>
+      <p>Concreto, tem tempo definido, e gratis, e coloca a decisao na mao dele.</p>
+    </div>
+
+    <h3><span class="badge badge-gold">Importante</span> O pitch explica muito, prova pouco</h3>
+    <div class="card">
+      <p>"Metodos validados pelo mercado, ajustados a cultura da sua empresa" — qualquer consultoria fala isso. Nao diferencia. O empresario quer saber: funciona pra quem? Qual resultado?</p>
+      <p><strong>Quando tivermos o primeiro case real, o pitch fica 10x mais forte.</strong></p>
+    </div>
+  </section>
+
+  <!-- 03 Posicionamento -->
+  <section id="posicionamento" class="fade-in">
+    <h2>Posicionamento</h2>
+    <p>Pesquisei como os melhores do mundo se posicionam (Bench, Pilot, Gusto, Xero, Spendesk, Float) e como as fintechs BR se posicionam (Nubank, Stone, Conta Azul, Omie, Nibo).</p>
+
+    <h3>Categoria sugerida: "Financeiro Inteligente"</h3>
+    <div class="card card-gold">
+      <ul>
+        <li>Nao e BPO — soa terceirizacao barata</li>
+        <li>Nao e SaaS — soa ferramenta que ninguem usa</li>
+        <li>Nao e consultoria — soa caro e pontual</li>
+        <li><strong>E um financeiro de verdade, melhor do que o cliente montaria internamente</strong></li>
+      </ul>
+    </div>
+
+    <p>Quando perguntarem "o que a UUBA faz?":</p>
+    <blockquote><p>"Cuida do financeiro da sua empresa com tecnologia e gente especializada, pra voce focar no que faz crescer."</p></blockquote>
+
+    <h3>Mapa de posicionamento</h3>
+    <div class="position-map">              ESTRATEGICO / INTELIGENTE
+                        |
+                  Nibo   |         <span class="highlight">UUBA</span>
+                        |    (tech + operacao
+                        |     + inteligencia)
+                        |
+                        |         FinDrive
+                        |      (dashboard)
+SOFTWARE  --------------|---------------- OPERACAO
+  PURO                  |                 COMPLETA
+                        |
+        Conta Azul      |     Assessorias
+          Omie          |     tradicionais
+       (ERP generico)   |
+                        |
+              BASICO / OPERACIONAL</div>
+    <p>A UUBA ocupa sozinha o canto superior-direito. Nenhum concorrente combina tecnologia proprietaria com execucao operacional completa.</p>
+  </section>
+
+  <!-- 04 Caso Bench -->
+  <section id="bench" class="fade-in">
+    <h2>Caso Bench <span class="badge badge-red">Urgente</span></h2>
+    <div class="card card-warning">
+      <h4>O Bench fazia exatamente o que a gente faz</h4>
+      <p>Tecnologia + pessoas operando o financeiro de PMEs. Levantou <strong>US$ 113 milhoes</strong>, tinha <strong>35 mil clientes</strong>. Faliu em dezembro de 2024.</p>
+    </div>
+
+    <h3>Por que faliu</h3>
+    <div class="numbered">
+      <div class="card">
+        <h4>Pricing subsidiado por investidor</h4>
+        <p>Cobrava US$ 249/mes, custava mais pra operar. Margem negativa em cada cliente.</p>
+      </div>
+      <div class="card">
+        <h4>Camada humana nao escalava</h4>
+        <p>Cada cliente exigia horas fixas de gente. Mais clientes = mais custo linear.</p>
+      </div>
+      <div class="card">
+        <h4>Software proprietario fechado</h4>
+        <p>Clientes ficaram presos. Quando fechou, muitos perderam acesso aos dados.</p>
+      </div>
+      <div class="card">
+        <h4>IA foi afterthought, nao core</h4>
+        <p>Tentou automatizar depois de crescer. Tarde demais.</p>
+      </div>
+    </div>
+
+    <h3>O que a gente precisa fazer diferente</h3>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Pricing com margem real desde o dia 1</h4>
+        <p>Nada de subsidiar. Cada cliente precisa se pagar.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>IA como core, humano como escalacao</h4>
+        <p>Automacao faz 80% do trabalho. Humano entra nos 20% que exigem julgamento.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Ferramentas abertas</h4>
+        <p>n8n, Conta Azul, APIs abertas. Cliente nunca fica refem.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Automacao que reduz horas humanas por cliente</h4>
+        <p>Cada cliente novo custa MENOS horas, nao mais. Escala real.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 Pitches -->
+  <section id="pitches" class="fade-in">
+    <h2>3 Versoes do Pitch</h2>
+    <p>60 segundos cada. Prontas pra testar.</p>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao A — Storytelling</div>
+      <div class="pitch-text">
+        <p>Sexta-feira, 23h. O telefone tocou. Era o dono de uma oficina mecanica em BH. Faturava R$ 80 mil por mes, mas tinha R$ 90 mil em dividas que ninguem cobrava. Tava a um mes de fechar as portas. A gente entrou no fim de semana. Montou a regua de cobranca automatica, ligou pro WhatsApp, organizou cada boleto vencido. Em 60 dias ele recuperou R$ 38 mil. Hoje a inadimplencia dele e zero e ele para de trabalhar as seis.</p>
+        <p>E isso que a UUBA faz: cuida de todo o financeiro da sua empresa — cobranca, controle de caixa, acompanhamento — com tecnologia e um especialista dedicado. Tudo por menos do que custa um assistente CLT. Uma equipe interna sairia R$ 15 mil por mes. Com a gente, e uma fracao disso.</p>
+        <p>Se a historia desse cara lembrou a sua, a gente faz um diagnostico gratuito do seu financeiro em 48 horas. Sem compromisso. Me manda um oi no WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao B — Provocador</div>
+      <div class="pitch-text">
+        <p>Me diz uma coisa: quanto dinheiro ta parado nos seus boletos vencidos agora? Se voce nao sabe responder, seu financeiro nao ta funcionando. E voce nao ta sozinho — 76% das PMEs brasileiras nao tem controle nenhum. O resultado: 8,9 milhoes de empresas negativadas e 60% fechando em cinco anos.</p>
+        <p>O caminho que o mercado oferece e ruim. Contratar equipe? Sai R$ 15 a 20 mil por mes com encargos. Comprar software? Mostra grafico bonito mas nao opera nada. A UUBA faz os dois: tecnologia que cobra no automatico via WhatsApp e Pix, mais um especialista financeiro que acompanha seu caixa todo dia. Dinheiro que tava parado volta pro caixa.</p>
+        <p>Um dos nossos clientes recuperou R$ 38 mil em 60 dias. Inadimplencia foi pra zero.</p>
+        <p>Quer saber quanto a sua empresa ta deixando na mesa? Diagnostico gratuito, 48 horas, sem compromisso. E so chamar no WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao C — Diagnosticador</div>
+      <div class="pitch-text">
+        <p>Vou te fazer tres perguntas rapidas. Quanto tempo voce leva pra fechar o mes? Voce sabe hoje, agora, quanto vai receber nos proximos 90 dias? E quantos boletos vencidos voce tem que ninguem ta cobrando? Se travou em alguma, seu financeiro ta com os mesmos sintomas de 60% das empresas que fecham no Brasil.</p>
+        <p>O diagnostico e simples: nao falta gente capacitada, falta estrutura. O financeiro de PME foi montado pra pagar conta e emitir boleto, nao pra gerar inteligencia. E montar isso internamente sai R$ 15 a 20 mil por mes.</p>
+        <p>A UUBA e o tratamento: tecnologia que automatiza cobranca e controle de caixa, mais um especialista que cuida da operacao. Um cliente nosso do setor de servicos reduziu inadimplencia a zero e recuperou R$ 38 mil em dois meses.</p>
+        <p>O primeiro passo e um diagnostico financeiro gratuito. Em 48 horas eu te entrego um raio-x completo do seu financeiro. Sem custo, sem compromisso. Me chama no WhatsApp.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Taglines -->
+  <section id="taglines" class="fade-in">
+    <h2>Taglines — Top 5</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Tagline</th><th>Onde usar</th></tr></thead>
+        <tbody>
+          <tr><td>"Financeiro que funciona, nao so aparece."</td><td>Hero do site, cartao, assinatura de email</td></tr>
+          <tr><td>"A gente nao mostra o problema. A gente resolve."</td><td>Apresentacoes, LinkedIn, videos</td></tr>
+          <tr><td>"Seu financeiro. De verdade."</td><td>Branding, rodape, bio de redes</td></tr>
+          <tr><td>"Decisao com dado, nao com achismo."</td><td>Conteudo LinkedIn, palestras</td></tr>
+          <tr><td>"Dinheiro parado volta pro caixa."</td><td>Anuncios, mensagens de venda, CTA</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p><strong>Manter:</strong> "Gente de negocios, como voce" — continua forte pra identidade (footer, assinatura, material institucional).</p>
+  </section>
+
+  <!-- 07 Delivery -->
+  <section id="delivery" class="fade-in">
+    <h2>Dicas de Delivery</h2>
+    <div class="numbered">
+      <div class="card">
+        <h4>Tom de medico, nao de vendedor</h4>
+        <p>Diagnostica com seguranca, nao convence com entusiasmo.</p>
+      </div>
+      <div class="card">
+        <h4>Nao listar os 5 produtos</h4>
+        <p>Pitch nao e cardapio. Fala da solucao como um todo. Os produtos aparecem quando a pessoa perguntar.</p>
+      </div>
+      <div class="card">
+        <h4>Pausa de 2 segundos depois da primeira pergunta</h4>
+        <p>Deixa a pessoa pensar. O silencio e poderoso.</p>
+      </div>
+      <div class="card">
+        <h4>Nao terminar com "alguma duvida?"</h4>
+        <p>Termina com a frase de impacto e fica em silencio. Quem se interessou pergunta sozinho.</p>
+      </div>
+      <div class="card">
+        <h4>Grava no celular e assiste</h4>
+        <p>Nao pelo conteudo — pelo rosto. Se parecer que ta recitando, reescreve ate soar natural.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 Proximos Passos -->
+  <section id="proximos" class="fade-in">
+    <h2>Proximos Passos</h2>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Escolher a versao do pitch</h4>
+        <p>Ou misturar elementos das 3. Testar com alguem de fora e pedir: "me explica o que voce entendeu". Se a pessoa nao conseguir dizer "eles montam o financeiro da empresa com tecnologia e gente", precisa ajustar.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Definir tagline</h4>
+        <p>Escolher uma e usar em tudo — site, cartao, LinkedIn, assinatura.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Discutir o caso Bench</h4>
+        <p>A gente precisa garantir que nao ta repetindo os erros deles. Principalmente no pricing e na dependencia de horas humanas.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Primeiro case real</h4>
+        <p>Assim que tivermos, o pitch fica 10x mais forte. Priorizar pegar um cliente e documentar o antes/depois com numeros.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Alinhar a landing page</h4>
+        <p>O site atual diz "Gestao financeira que ja nasce funcionando" que e bom, mas precisa refletir o pitch que a gente escolher.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="doc-footer">
+    Documento gerado em 22/03/2026 — Baseado em pesquisa com 8 agentes especializados<br>
+    Frameworks: Cialdini, Kahneman, StoryBrand, Oren Klaff, Andy Raskin, April Dunford<br>
+    Cases: Airbnb, Nubank, Stone, Dollar Shave Club, Bench, Pilot, Gusto, Xero, Spendesk<br>
+    <br>
+    Documentacao completa disponivel sob demanda.
+  </div>
+
+</main>
+</div>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.overlay').classList.toggle('open');
+  document.querySelector('.burger').classList.toggle('open');
+}
+
+// Scroll spy
+const sections=document.querySelectorAll('section, .hero');
+const navLinks=document.querySelectorAll('.sidebar-nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id=e.target.id;
+      const link=document.querySelector(`.sidebar-nav a[href="#${id}"]`);
+      if(link)link.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// Fade in on scroll
+const fadeObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target)}});
+},{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>fadeObserver.observe(el));
+
+// Close mobile menu on nav click
+document.querySelectorAll('.sidebar-nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    if(window.innerWidth<=960)toggleMenu();
+  });
+});
+</script>
+</body>
+</html>
