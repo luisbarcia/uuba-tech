@@ -237,7 +237,72 @@ async def atualizar_dre(payload: dict):
 
 ---
 
-## 6. Multi-tenancy
+## 6. Camada de Dominio (DDD Tactical Patterns)
+
+Ver ADR-006 para detalhes completos.
+
+Cada modulo possui uma camada de dominio (`domain/`) com Value Objects, Aggregates, Repositories e Domain Events. Essa camada encapsula regras de negocio e e independente de framework (nao depende de FastAPI, SQLAlchemy ou Pydantic).
+
+### Estrutura atual (modulo Recebe)
+
+```
+app/domain/
+  value_objects/
+    fatura_status.py       # Enum com maquina de estados embutida
+    cobranca_enums.py      # Tipo, Canal, Tom, Status tipados
+    documento.py           # CPF/CNPJ imutavel com validacao de digitos
+    money.py               # Centavos + moeda, aritmetica segura
+  aggregates/              # (planejado) Fatura como aggregate root
+  repositories/            # (planejado) Protocol + implementacoes SQLAlchemy
+  events/                  # (planejado) Domain Events para EventBus
+```
+
+### Exemplo: transicao de status
+
+Antes (dict solto no service):
+```python
+FATURA_TRANSITIONS = {"pendente": ["pago", "vencido", "cancelado"], ...}
+if new_status not in FATURA_TRANSITIONS.get(fatura.status, []):
+    raise APIError(409, ...)
+```
+
+Depois (Value Object com logica embutida):
+```python
+from app.domain.value_objects.fatura_status import FaturaStatus
+
+current = FaturaStatus(fatura.status)
+novo = FaturaStatus(new_status)
+if not current.pode_transicionar_para(novo):
+    raise APIError(409, ...)
+```
+
+### Exemplo: validacao de documento
+
+```python
+from app.domain.value_objects.documento import Documento
+
+doc = Documento("529.982.247-25")  # aceita com pontuacao
+doc.valor       # "52998224725" (so digitos)
+doc.tipo        # "cpf"
+doc.formatado   # "529.982.247-25"
+Documento("00000000000")  # ValueError: CPF invalido
+```
+
+### Exemplo: operacoes monetarias
+
+```python
+from app.domain.value_objects.money import Money
+
+total = Money(250000)                    # R$ 2.500,00
+parcela = Money(50000)                   # R$ 500,00
+restante = total - parcela               # Money(200000, "BRL")
+restante.formatado                       # "R$ 2.000,00"
+Money(100, "BRL") + Money(100, "USD")    # ValueError: moedas diferentes
+```
+
+---
+
+## 7. Multi-tenancy
 
 Ver ADR-002 para detalhes completos.
 
@@ -296,7 +361,7 @@ A mudanca de v1 para v2/v3 afeta apenas `shared/tenancy/` — os modulos nao sab
 
 ---
 
-## 7. Workers e Background Jobs
+## 8. Workers e Background Jobs
 
 | Worker | Trigger | Frequencia | Modulo |
 |--------|---------|------------|--------|
@@ -311,7 +376,7 @@ A mudanca de v1 para v2/v3 afeta apenas `shared/tenancy/` — os modulos nao sab
 
 ---
 
-## 8. Stack Tecnologico
+## 9. Stack Tecnologico
 
 | Camada | Tecnologia | Justificativa |
 |--------|------------|--------------|
@@ -331,7 +396,7 @@ A mudanca de v1 para v2/v3 afeta apenas `shared/tenancy/` — os modulos nao sab
 
 ---
 
-## 9. Fluxo de Dados Principal (Cobranca)
+## 10. Fluxo de Dados Principal (Cobranca)
 
 ```
 1. Empresa importa CSV
@@ -363,7 +428,7 @@ A mudanca de v1 para v2/v3 afeta apenas `shared/tenancy/` — os modulos nao sab
 
 ---
 
-## 10. Seguranca
+## 11. Seguranca
 
 | Camada | Mecanismo |
 |--------|-----------|
@@ -379,7 +444,7 @@ A mudanca de v1 para v2/v3 afeta apenas `shared/tenancy/` — os modulos nao sab
 
 ---
 
-## 11. Deploy
+## 12. Deploy
 
 ### Pipeline (GitHub Actions)
 
@@ -440,7 +505,7 @@ volumes:
 
 ---
 
-## 12. Monitoramento
+## 13. Monitoramento
 
 | O que | Como | Alerta |
 |-------|------|--------|
@@ -456,7 +521,7 @@ volumes:
 
 ---
 
-## 13. Caminho Evolutivo
+## 14. Caminho Evolutivo
 
 ```
 AGORA (1 dev, 1 VPS)           6 MESES (2-3 devs)          12+ MESES (time)
