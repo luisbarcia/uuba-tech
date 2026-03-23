@@ -1,10 +1,6 @@
 """Serviço de faturas.
 
-Máquina de estados (FATURA_TRANSITIONS):
-    pendente -> pago, vencido, cancelado
-    vencido  -> pago, cancelado
-    pago     -> (terminal)
-    cancelado -> (terminal)
+Transições de status delegadas ao Value Object FaturaStatus (DP-01).
 """
 
 import logging
@@ -18,15 +14,9 @@ from app.models.fatura import Fatura
 from app.schemas.fatura import FaturaCreate, FaturaUpdate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
+from app.domain.value_objects.fatura_status import FaturaStatus
 
 logger = logging.getLogger("uuba")
-
-FATURA_TRANSITIONS: dict[str, list[str]] = {
-    "pendente": ["pago", "vencido", "cancelado"],
-    "vencido": ["pago", "cancelado"],
-    "pago": [],
-    "cancelado": [],
-}
 
 
 async def create_fatura(db: AsyncSession, data: FaturaCreate) -> Fatura:
@@ -83,7 +73,7 @@ async def get_fatura(db: AsyncSession, fatura_id: str) -> Fatura | None:
 
 
 async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) -> Fatura | None:
-    """Atualiza fatura (patch parcial). Valida transições de status via FATURA_TRANSITIONS.
+    """Atualiza fatura (patch parcial). Valida transições via FaturaStatus Value Object.
 
     Raises:
         APIError 409: Se a transição de status for inválida.
@@ -93,16 +83,18 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
         return None
     update_data = data.model_dump(exclude_unset=True)
     if "status" in update_data:
-        new_status = update_data["status"]
-        allowed = FATURA_TRANSITIONS.get(fatura.status, [])
-        if new_status not in allowed:
+        current = FaturaStatus(fatura.status)
+        novo = FaturaStatus(update_data["status"])
+        if not current.pode_transicionar_para(novo):
+            allowed = [s.value for s in current.transicoes_validas]
             raise APIError(
                 409,
                 "transicao-invalida",
                 "Transição de status inválida",
-                f"Não é possível mudar de '{fatura.status}' para '{new_status}'. Transições permitidas: {allowed or 'nenhuma (status terminal)'}.",
+                f"Não é possível mudar de '{current.value}' para '{novo.value}'. "
+                f"Transições permitidas: {allowed or 'nenhuma (status terminal)'}.",
             )
-        if new_status == "pago":
+        if novo == FaturaStatus.PAGO:
             update_data["pago_em"] = datetime.now(timezone.utc)
     for key, value in update_data.items():
         setattr(fatura, key, value)
@@ -124,9 +116,9 @@ async def transicionar_faturas_vencidas(db: AsyncSession) -> int:
     now = datetime.now(timezone.utc)
     stmt = (
         update(Fatura)
-        .where(Fatura.status == "pendente")
+        .where(Fatura.status == FaturaStatus.PENDENTE.value)
         .where(Fatura.vencimento < now)
-        .values(status="vencido", updated_at=now)
+        .values(status=FaturaStatus.VENCIDO.value, updated_at=now)
     )
     result = await db.execute(stmt)
     await db.commit()
