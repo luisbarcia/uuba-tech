@@ -111,9 +111,7 @@ async def test_nao_transiciona_fatura_cancelada(client):
     cli = await create_test_cliente(client)
     ontem = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
     fat = await create_test_fatura(client, cli["id"], vencimento=ontem)
-    await client.patch(
-        f"/api/v1/faturas/{fat['id']}", json={"status": "cancelado"}, headers=AUTH
-    )
+    await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "cancelado"}, headers=AUTH)
 
     resp = await client.post("/api/v1/jobs/transicionar-vencidas", headers=AUTH)
     assert resp.json()["transicionadas"] == 0
@@ -126,9 +124,7 @@ async def test_nao_transiciona_fatura_ja_vencida(client):
     fat = await create_test_fatura(client, cli["id"], vencimento=ontem)
 
     # Transiciona manualmente para vencido via PATCH
-    await client.patch(
-        f"/api/v1/faturas/{fat['id']}", json={"status": "vencido"}, headers=AUTH
-    )
+    await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "vencido"}, headers=AUTH)
 
     resp = await client.post("/api/v1/jobs/transicionar-vencidas", headers=AUTH)
     assert resp.json()["transicionadas"] == 0
