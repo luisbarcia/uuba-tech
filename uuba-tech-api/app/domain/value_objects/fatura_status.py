@@ -16,11 +16,20 @@ from __future__ import annotations
 from enum import Enum
 
 
+_FATURA_TRANSITIONS: dict[str, list[str]] = {
+    "pendente": ["pago", "vencido", "cancelado"],
+    "vencido": ["pago", "cancelado"],
+    "pago": [],
+    "cancelado": [],
+}
+
+
 class FaturaStatus(Enum):
     """Status de uma fatura com máquina de estados embutida.
 
     Cada membro do enum representa um estado possível. As transições válidas
-    são definidas internamente, eliminando a necessidade de dicts externos.
+    são definidas no módulo (``_FATURA_TRANSITIONS``), fora do Enum para
+    não contaminar ``list(FaturaStatus)`` com membros espúrios.
 
     Attributes:
         PENDENTE: Fatura criada, aguardando vencimento ou pagamento.
@@ -39,21 +48,14 @@ class FaturaStatus(Enum):
         >>> current = FaturaStatus.PENDENTE
         >>> current.pode_transicionar_para(FaturaStatus.VENCIDO)
         True
-        >>> current.transicoes_validas
-        [<FaturaStatus.PAGO: 'pago'>, <FaturaStatus.VENCIDO: 'vencido'>, <FaturaStatus.CANCELADO: 'cancelado'>]
+        >>> list(FaturaStatus)  # apenas 4 membros, sem contaminação
+        [<FaturaStatus.PENDENTE: 'pendente'>, ...]
     """
 
     PENDENTE = "pendente"
     VENCIDO = "vencido"
     PAGO = "pago"
     CANCELADO = "cancelado"
-
-    _TRANSITIONS: dict[str, list[str]] = {  # type: ignore[assignment]
-        "pendente": ["pago", "vencido", "cancelado"],
-        "vencido": ["pago", "cancelado"],
-        "pago": [],
-        "cancelado": [],
-    }
 
     def pode_transicionar_para(self, novo: FaturaStatus) -> bool:
         """Verifica se a transição para o novo status é permitida.
@@ -70,7 +72,7 @@ class FaturaStatus(Enum):
             >>> FaturaStatus.PAGO.pode_transicionar_para(FaturaStatus.PENDENTE)
             False
         """
-        allowed = self._TRANSITIONS.value.get(self.value, [])
+        allowed = _FATURA_TRANSITIONS.get(self.value, [])
         return novo.value in allowed
 
     @property
@@ -85,7 +87,7 @@ class FaturaStatus(Enum):
             >>> FaturaStatus.PENDENTE.is_terminal
             False
         """
-        return len(self._TRANSITIONS.value.get(self.value, [])) == 0
+        return len(_FATURA_TRANSITIONS.get(self.value, [])) == 0
 
     @property
     def transicoes_validas(self) -> list[FaturaStatus]:
@@ -98,4 +100,4 @@ class FaturaStatus(Enum):
             >>> FaturaStatus.VENCIDO.transicoes_validas
             [<FaturaStatus.PAGO: 'pago'>, <FaturaStatus.CANCELADO: 'cancelado'>]
         """
-        return [FaturaStatus(v) for v in self._TRANSITIONS.value.get(self.value, [])]
+        return [FaturaStatus(v) for v in _FATURA_TRANSITIONS.get(self.value, [])]

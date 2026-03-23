@@ -107,6 +107,14 @@ class TestFaturaStatus:
         assert FaturaStatus.PAGO.transicoes_validas == []
         assert FaturaStatus.CANCELADO.transicoes_validas == []
 
+    def test_enum_tem_exatamente_4_membros(self):
+        """Garante que _TRANSITIONS não contamina os membros do enum."""
+        from app.domain.value_objects.fatura_status import FaturaStatus
+
+        membros = list(FaturaStatus)
+        assert len(membros) == 4
+        assert set(m.value for m in membros) == {"pendente", "vencido", "pago", "cancelado"}
+
 
 # ── Phase 2: Enums de Cobrança ─────────────────────────────────────
 
@@ -259,6 +267,31 @@ class TestDocumento:
         doc = Documento("52998224725")
         assert str(doc) == "52998224725"
 
+    def test_cpf_com_espacos_eh_limpo(self):
+        from app.domain.value_objects.documento import Documento
+
+        doc = Documento("529 982 247 25")
+        assert doc.valor == "52998224725"
+        assert doc.tipo == "cpf"
+
+    def test_cnpj_com_digitos_repetidos_levanta_erro(self):
+        from app.domain.value_objects.documento import Documento
+
+        with pytest.raises(ValueError, match="CNPJ inválido"):
+            Documento("11111111111111")
+
+    def test_documento_vazio_levanta_erro(self):
+        from app.domain.value_objects.documento import Documento
+
+        with pytest.raises(ValueError, match="deve ter 11 ou 14 dígitos"):
+            Documento("")
+
+    def test_documento_com_letras_extrai_digitos(self):
+        from app.domain.value_objects.documento import Documento
+
+        doc = Documento("CPF: 529.982.247-25")
+        assert doc.valor == "52998224725"
+
 
 # ── Phase 4: Money ──────────────────────────────────────────────────
 
@@ -385,6 +418,18 @@ class TestMoney:
         from app.domain.value_objects.money import Money
 
         assert Money(500) < Money(1000)
+
+    def test_subtracao_negativa_levanta_erro(self):
+        from app.domain.value_objects.money import Money
+
+        with pytest.raises(ValueError, match="não pode ser negativo"):
+            Money(5000) - Money(10000)
+
+    def test_comparacao_moedas_diferentes_levanta_erro(self):
+        from app.domain.value_objects.money import Money
+
+        with pytest.raises(ValueError, match="Não é possível operar"):
+            Money(100, "BRL") > Money(100, "USD")
 
     def test_str(self):
         from app.domain.value_objects.money import Money

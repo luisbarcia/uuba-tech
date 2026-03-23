@@ -106,7 +106,7 @@ class Documento:
             ValueError: Se o número de dígitos não é 11 (CPF) nem 14 (CNPJ),
                         ou se os dígitos verificadores são inválidos.
         """
-        digitos = re.sub(r"[.\-/]", "", raw)
+        digitos = re.sub(r"\D", "", raw)
         if len(digitos) == 11:
             if not _validar_cpf(digitos):
                 raise ValueError(f"CPF inválido: {raw}")
