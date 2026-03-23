@@ -7,8 +7,10 @@ Máquina de estados (FATURA_TRANSITIONS):
     cancelado -> (terminal)
 """
 
+import logging
 from datetime import datetime, timezone
-from sqlalchemy import select, func
+
+from sqlalchemy import select, func, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +18,8 @@ from app.models.fatura import Fatura
 from app.schemas.fatura import FaturaCreate, FaturaUpdate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
+
+logger = logging.getLogger("uuba")
 
 FATURA_TRANSITIONS: dict[str, list[str]] = {
     "pendente": ["pago", "vencido", "cancelado"],
@@ -105,3 +109,27 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
     await db.commit()
     await db.refresh(fatura)
     return fatura
+
+
+async def transicionar_faturas_vencidas(db: AsyncSession) -> int:
+    """Transiciona faturas pendentes com vencimento ultrapassado para 'vencido'.
+
+    Job idempotente (FR-015): só atua em status='pendente', então rodar múltiplas
+    vezes no mesmo dia não gera efeitos colaterais. Faturas em 'em_negociacao'
+    ou outros status não são afetadas (AC-020).
+
+    Returns:
+        Quantidade de faturas transicionadas.
+    """
+    now = datetime.now(timezone.utc)
+    stmt = (
+        update(Fatura)
+        .where(Fatura.status == "pendente")
+        .where(Fatura.vencimento < now)
+        .values(status="vencido", updated_at=now)
+    )
+    result = await db.execute(stmt)
+    await db.commit()
+    count = result.rowcount
+    logger.info(f"transicionar_faturas_vencidas: {count} fatura(s) pendente→vencido")
+    return count
