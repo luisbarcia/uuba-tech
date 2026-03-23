@@ -56,12 +56,29 @@ def _random_documento() -> str:
 def _random_nome() -> str:
     """Gera nome aleatorio para cliente."""
     prefixos = [
-        "Maria", "Joao", "Ana", "Pedro", "Carlos", "Fernanda",
-        "Lucas", "Julia", "Rafael", "Beatriz", "Empresa",
+        "Maria",
+        "Joao",
+        "Ana",
+        "Pedro",
+        "Carlos",
+        "Fernanda",
+        "Lucas",
+        "Julia",
+        "Rafael",
+        "Beatriz",
+        "Empresa",
     ]
     sufixos = [
-        "Silva", "Santos", "Oliveira", "Souza", "Ferreira",
-        "Costa", "Almeida", "Ltda", "SA", "ME",
+        "Silva",
+        "Santos",
+        "Oliveira",
+        "Souza",
+        "Ferreira",
+        "Costa",
+        "Almeida",
+        "Ltda",
+        "SA",
+        "ME",
     ]
     return f"{random.choice(prefixos)} {random.choice(sufixos)} {random.randint(1, 9999)}"
 
@@ -73,7 +90,7 @@ def _random_telefone() -> str:
 
 
 def _random_email(nome: str) -> str:
-    slug = nome.lower().replace(" ", ".")[: 20]
+    slug = nome.lower().replace(" ", ".")[:20]
     return f"{slug}+{random.randint(1, 99999)}@teste.com"
 
 

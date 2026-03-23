@@ -81,10 +81,14 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
     fatura = await get_fatura(db, fatura_id)
     if not fatura:
         return None
-    update_data = data.model_dump(exclude_unset=True)
+    update_data = data.model_dump(exclude_unset=True, mode="python")
     if "status" in update_data:
+        novo = (
+            update_data["status"]
+            if isinstance(update_data["status"], FaturaStatus)
+            else FaturaStatus(update_data["status"])
+        )
         current = FaturaStatus(fatura.status)
-        novo = FaturaStatus(update_data["status"])
         if not current.pode_transicionar_para(novo):
             allowed = [s.value for s in current.transicoes_validas]
             raise APIError(
@@ -96,6 +100,7 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
             )
         if novo == FaturaStatus.PAGO:
             update_data["pago_em"] = datetime.now(timezone.utc)
+        update_data["status"] = novo.value
     for key, value in update_data.items():
         setattr(fatura, key, value)
     await db.commit()

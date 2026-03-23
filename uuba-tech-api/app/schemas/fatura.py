@@ -1,6 +1,7 @@
 from datetime import datetime
-from typing import Literal
 from pydantic import BaseModel, Field
+
+from app.domain.value_objects.fatura_status import FaturaStatus
 
 
 class FaturaCreate(BaseModel):
@@ -28,7 +29,7 @@ class FaturaCreate(BaseModel):
 
 
 class FaturaUpdate(BaseModel):
-    status: Literal["pendente", "pago", "vencido", "cancelado"] | None = Field(
+    status: FaturaStatus | None = Field(
         default=None,
         description="Status atual: pendente, pago, vencido ou cancelado",
     )

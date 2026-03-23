@@ -99,9 +99,11 @@ def test_fatura_create_missing_vencimento():
 
 
 def test_fatura_update_valid_status():
-    for status in ("pendente", "pago", "vencido", "cancelado"):
-        u = FaturaUpdate(status=status)
-        assert u.status == status
+    from app.domain.value_objects.fatura_status import FaturaStatus
+
+    for status_str in ("pendente", "pago", "vencido", "cancelado"):
+        u = FaturaUpdate(status=status_str)
+        assert u.status == FaturaStatus(status_str)
 
 
 def test_fatura_update_invalid_status():

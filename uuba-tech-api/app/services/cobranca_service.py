@@ -8,6 +8,7 @@ from app.models.cobranca import Cobranca
 from app.schemas.cobranca import CobrancaCreate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
+from app.domain.value_objects.cobranca_enums import CobrancaStatus
 
 
 async def create_cobranca(db: AsyncSession, data: CobrancaCreate) -> Cobranca:
@@ -96,7 +97,7 @@ async def pausar(db: AsyncSession, cobranca_id: str) -> Cobranca | None:
     if not cobranca:
         return None
     cobranca.pausado = True
-    cobranca.status = "pausado"
+    cobranca.status = CobrancaStatus.PAUSADO.value
     await db.commit()
     await db.refresh(cobranca)
     return cobranca
@@ -109,7 +110,7 @@ async def retomar(db: AsyncSession, cobranca_id: str) -> Cobranca | None:
     if not cobranca:
         return None
     cobranca.pausado = False
-    cobranca.status = "enviado"
+    cobranca.status = CobrancaStatus.ENVIADO.value
     await db.commit()
     await db.refresh(cobranca)
     return cobranca

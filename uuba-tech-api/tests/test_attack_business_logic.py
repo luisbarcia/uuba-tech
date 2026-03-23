@@ -8,6 +8,7 @@ from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create
 
 
 async def test_cancel_already_cancelled_fatura(client):
+    """Cancelado é terminal — transicionar de cancelado→cancelado deve ser 409."""
     cli = await create_test_cliente(client)
     fat = await create_test_fatura(client, cli["id"])
     await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "cancelado"}, headers=AUTH)
@@ -16,11 +17,11 @@ async def test_cancel_already_cancelled_fatura(client):
         json={"status": "cancelado"},
         headers=AUTH,
     )
-    # Should succeed (idempotent) or reject invalid transition
-    assert resp.status_code in (200, 409, 422)
+    assert resp.status_code == 409
 
 
 async def test_pay_already_paid_fatura(client):
+    """Pago é terminal — transicionar de pago→pago deve ser 409."""
     cli = await create_test_cliente(client, documento="11111111000112")
     fat = await create_test_fatura(client, cli["id"])
     await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "pago"}, headers=AUTH)
@@ -30,12 +31,11 @@ async def test_pay_already_paid_fatura(client):
         json={"status": "pago"},
         headers=AUTH,
     )
-    # Should succeed (idempotent) or reject
-    assert resp.status_code in (200, 409, 422)
+    assert resp.status_code == 409
 
 
 async def test_revert_paid_to_pendente(client):
-    """Going from pago back to pendente — is this allowed?"""
+    """Pago é terminal — reverter para pendente deve ser 409."""
     cli = await create_test_cliente(client, documento="11111111000113")
     fat = await create_test_fatura(client, cli["id"])
     await client.patch(f"/api/v1/faturas/{fat['id']}", json={"status": "pago"}, headers=AUTH)
@@ -44,8 +44,7 @@ async def test_revert_paid_to_pendente(client):
         json={"status": "pendente"},
         headers=AUTH,
     )
-    # This is a policy decision — document the actual behavior
-    assert resp.status_code in (200, 409, 422)
+    assert resp.status_code == 409
 
 
 # --- Cobranca state attacks ---
@@ -103,7 +102,7 @@ async def test_fatura_valor_one_centavo(client):
 
 
 async def test_cliente_nome_very_long(client):
-    """255 char limit on nome column."""
+    """Schema has max_length=255 — 300 chars must be rejected with 422."""
     resp = await client.post(
         "/api/v1/clientes",
         json={
@@ -112,12 +111,11 @@ async def test_cliente_nome_very_long(client):
         },
         headers=AUTH,
     )
-    # Should either truncate, succeed, or 422 — should NOT crash
-    assert resp.status_code in (201, 422, 500)
+    assert resp.status_code == 422
 
 
 async def test_fatura_descricao_very_long(client):
-    """500 char limit on descricao."""
+    """Schema has max_length=500 — 1000 chars must be rejected with 422."""
     cli = await create_test_cliente(client, documento="33333333000137")
     resp = await client.post(
         "/api/v1/faturas",
@@ -129,14 +127,14 @@ async def test_fatura_descricao_very_long(client):
         },
         headers=AUTH,
     )
-    assert resp.status_code in (201, 422, 500)
+    assert resp.status_code == 422
 
 
 # --- Date edge cases ---
 
 
 async def test_fatura_vencimento_in_the_past(client):
-    """Creating a fatura with past vencimento — should this be allowed?"""
+    """Faturas com vencimento no passado são permitidas (import de títulos vencidos)."""
     cli = await create_test_cliente(client, documento="44444444000145")
     resp = await client.post(
         "/api/v1/faturas",
@@ -147,8 +145,7 @@ async def test_fatura_vencimento_in_the_past(client):
         },
         headers=AUTH,
     )
-    # Currently allowed — document the behavior
-    assert resp.status_code in (201, 422)
+    assert resp.status_code == 201
 
 
 async def test_fatura_vencimento_far_future(client):
@@ -179,9 +176,9 @@ async def test_pagination_negative_limit(client):
 
 
 async def test_pagination_zero_limit(client):
+    """Router has ge=1 on limit — 0 must be rejected."""
     resp = await client.get("/api/v1/clientes?limit=0", headers=AUTH)
-    # limit=0 with le=100 and no ge — FastAPI may allow 0 or reject
-    assert resp.status_code in (200, 422)
+    assert resp.status_code == 422
 
 
 async def test_pagination_over_max_limit(client):
@@ -243,12 +240,13 @@ async def test_empty_json_body(client):
 
 
 async def test_no_content_type(client):
+    """Without Content-Type: application/json, FastAPI rejects the body."""
     resp = await client.post(
         "/api/v1/clientes",
         content=b'{"nome":"test","documento":"99999999000100"}',
         headers={"X-API-Key": AUTH["X-API-Key"]},
     )
-    assert resp.status_code in (201, 422)
+    assert resp.status_code == 422
 
 
 async def test_array_instead_of_object(client):
