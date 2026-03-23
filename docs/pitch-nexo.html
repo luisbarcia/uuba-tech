@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUBA Nexo — Pitch de Produto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#090b10;
+  --bg-elevated:#111520;
+  --bg-surface:#171c2a;
+  --bg-hover:#1e2438;
+  --accent:#3B82F6;
+  --accent-dim:rgba(59,130,246,.12);
+  --accent-glow:rgba(59,130,246,.25);
+  --gold:#A5852B;
+  --gold-dim:rgba(165,133,43,.12);
+  --text:#F4F4F4;
+  --text-secondary:rgba(244,244,244,.7);
+  --text-muted:rgba(244,244,244,.4);
+  --border:rgba(244,244,244,.08);
+  --border-hover:rgba(244,244,244,.15);
+  --success:#2ecc71;
+  --warning:#e67e22;
+  --danger:#ef4444;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* === LAYOUT === */
+.layout{display:flex;min-height:100vh}
+
+/* === SIDEBAR NAV === */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:280px;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--border);
+  padding:2rem 0;
+  z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-header{padding:0 1.5rem 2rem;border-bottom:1px solid var(--border)}
+.sidebar-logo{
+  font-family:var(--font-display);font-size:1.6rem;
+  color:var(--text);letter-spacing:.02em;
+}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-sub{font-size:.75rem;color:var(--text-muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.15em}
+.sidebar-meta{font-size:.8rem;color:var(--text-muted);padding:0 1.5rem;margin-top:1rem}
+.sidebar-meta strong{color:var(--text-secondary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1.5rem 0}
+.sidebar-nav a{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.5rem;
+  color:var(--text-secondary);
+  text-decoration:none;font-size:.85rem;font-weight:400;
+  border-left:3px solid transparent;
+  transition:all .2s;
+}
+.sidebar-nav a:hover{color:var(--text);background:var(--bg-hover);border-left-color:var(--border-hover)}
+.sidebar-nav a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);font-weight:500}
+.sidebar-nav .nav-num{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--text-muted);min-width:1.5rem;
+}
+
+/* === MAIN CONTENT === */
+.main{margin-left:280px;flex:1;max-width:820px;padding:3rem 4rem 6rem}
+
+/* === MOBILE NAV === */
+.mobile-header{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--bg-elevated);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;z-index:200;
+  justify-content:space-between;align-items:center;
+}
+.mobile-header .sidebar-logo{font-size:1.2rem}
+.burger{background:none;border:none;cursor:pointer;padding:.5rem}
+.burger span{display:block;width:22px;height:2px;background:var(--text);margin:5px 0;transition:all .3s}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+
+/* === HERO === */
+.hero{margin-bottom:4rem;padding-bottom:3rem;border-bottom:1px solid var(--border)}
+.hero-label{
+  display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--accent);font-weight:600;margin-bottom:1rem;
+  padding:.35rem .75rem;border:1px solid var(--accent);border-radius:2px;
+}
+.hero h1{
+  font-family:var(--font-display);font-size:3rem;line-height:1.15;
+  margin-bottom:1rem;font-weight:400;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-intro{font-size:1.05rem;color:var(--text-secondary);max-width:600px;line-height:1.8}
+
+/* === STATS ROW === */
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+  margin-top:2rem;
+}
+.stat-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem;text-align:center;
+}
+.stat-card .stat-num{
+  font-family:var(--font-display);font-size:2rem;color:var(--accent);
+  line-height:1.2;margin-bottom:.25rem;
+}
+.stat-card .stat-label{
+  font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;
+}
+
+/* === SECTIONS === */
+section{margin-bottom:4rem}
+section h2{
+  font-family:var(--font-display);font-size:1.8rem;font-weight:400;
+  margin-bottom:1.5rem;padding-bottom:.75rem;
+  border-bottom:1px solid var(--border);
+}
+section h3{font-size:1rem;font-weight:600;margin:2rem 0 .75rem;color:var(--text)}
+section p{color:var(--text-secondary);margin-bottom:1rem}
+section ul,section ol{color:var(--text-secondary);padding-left:1.25rem;margin-bottom:1rem}
+section li{margin-bottom:.5rem}
+section li strong{color:var(--text)}
+
+/* === CARDS === */
+.card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.card:hover{border-color:var(--border-hover)}
+.card-accent{border-left:3px solid var(--accent)}
+.card-gold{border-left:3px solid var(--gold)}
+.card-warning{border-left:3px solid var(--warning);background:rgba(230,126,34,.04)}
+.card-success{border-left:3px solid var(--success);background:rgba(46,204,113,.04)}
+.card-danger{border-left:3px solid var(--danger);background:rgba(239,68,68,.04)}
+.card h4{font-size:.95rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.9rem;margin-bottom:.5rem}
+.card p:last-child{margin-bottom:0}
+
+/* === NUMBERED ITEMS === */
+.numbered{counter-reset:item}
+.numbered .card{counter-increment:item;position:relative;padding-left:3.5rem}
+.numbered .card::before{
+  content:counter(item);position:absolute;left:1.25rem;top:1.5rem;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--accent);font-weight:600;
+}
+
+/* === PITCH BLOCK === */
+.pitch-block{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;
+}
+.pitch-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+}
+.pitch-label{
+  font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.15em;color:var(--gold);margin-bottom:1rem;
+}
+.pitch-text{
+  font-size:1.05rem;line-height:1.9;color:var(--text);
+  font-family:var(--font-body);
+}
+.pitch-text p{color:var(--text);margin-bottom:1rem}
+.pitch-text p:last-child{margin-bottom:0}
+
+/* === TABLE === */
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{
+  text-align:left;padding:.75rem 1rem;
+  background:var(--bg-surface);color:var(--text-muted);
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:top;
+}
+td:first-child{color:var(--text);font-weight:500}
+tr:hover td{background:var(--bg-hover)}
+
+/* === BLOCKQUOTE === */
+blockquote{
+  border-left:3px solid var(--gold);padding:.75rem 1.25rem;
+  margin:1.5rem 0;background:var(--gold-dim);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);
+}
+blockquote p{margin-bottom:0}
+
+/* === BADGE === */
+.badge{
+  display:inline-block;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:.2rem .5rem;border-radius:3px;font-weight:600;
+}
+.badge-blue{background:var(--accent-dim);color:var(--accent)}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-green{background:rgba(46,204,113,.12);color:var(--success)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--danger)}
+
+/* === COMPARISON GRID === */
+.compare-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;
+  margin:1.5rem 0;
+}
+.compare-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem;
+}
+.compare-card h4{font-size:.85rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
+.compare-card ul{list-style:none;padding:0;margin:0}
+.compare-card li{font-size:.85rem;padding:.35rem 0;color:var(--text-secondary);border-bottom:1px solid var(--border)}
+.compare-card li:last-child{border-bottom:none}
+.compare-card.highlight{border-color:var(--accent);border-width:2px}
+.compare-card.highlight h4{color:var(--accent)}
+
+/* === CTA BLOCK === */
+.cta-block{
+  background:linear-gradient(135deg,rgba(59,130,246,.10),rgba(165,133,43,.06));
+  border:1px solid var(--accent);border-radius:12px;
+  padding:2.5rem;text-align:center;margin:2rem 0;
+}
+.cta-block h3{
+  font-family:var(--font-display);font-size:1.6rem;font-weight:400;
+  margin-bottom:1rem;color:var(--text);
+}
+.cta-block p{color:var(--text-secondary);font-size:1rem;margin-bottom:0}
+.cta-block .cta-highlight{
+  display:inline-block;margin-top:1.5rem;
+  font-size:.85rem;font-weight:600;color:var(--accent);
+  padding:.6rem 1.5rem;border:2px solid var(--accent);border-radius:6px;
+  text-transform:uppercase;letter-spacing:.1em;
+}
+
+/* === POSITION MAP === */
+.position-map{
+  font-family:var(--font-mono);font-size:.75rem;line-height:1.6;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;overflow-x:auto;white-space:pre;color:var(--text-muted);
+  margin:1.5rem 0;
+}
+.position-map .highlight{color:var(--accent);font-weight:600}
+
+/* === VERBATIM === */
+.verbatim{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem 1.5rem;margin-bottom:1rem;position:relative;
+  border-left:3px solid var(--accent);
+}
+.verbatim p{font-style:italic;color:var(--text-secondary);font-size:.95rem;margin-bottom:.5rem}
+.verbatim .verbatim-source{
+  font-style:normal;font-size:.75rem;color:var(--text-muted);
+  font-family:var(--font-mono);
+}
+
+/* === TAGLINE CARD === */
+.tagline-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;margin-bottom:1rem;
+  display:flex;align-items:flex-start;gap:1.25rem;
+  transition:border-color .2s;
+}
+.tagline-card:hover{border-color:var(--accent)}
+.tagline-num{
+  font-family:var(--font-mono);font-size:.75rem;color:var(--accent);
+  font-weight:600;min-width:1.5rem;padding-top:.15rem;
+}
+.tagline-card .tagline-text{
+  font-family:var(--font-display);font-size:1.2rem;line-height:1.4;
+  color:var(--text);margin-bottom:.5rem;font-weight:400;
+}
+.tagline-card .tagline-desc{font-size:.85rem;color:var(--text-muted)}
+
+/* === FOOTER === */
+.doc-footer{
+  margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--text-muted);
+}
+
+/* === RESPONSIVE === */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay.open{display:block}
+  .mobile-header{display:flex}
+  .main{margin-left:0;padding:5rem 1.5rem 4rem}
+  .hero h1{font-size:2.2rem}
+  section h2{font-size:1.4rem}
+  .stats-row{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+}
+
+/* === SCROLL SPY ANIMATION === */
+.fade-in{opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.4,0,.2,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Mobile Header -->
+<div class="mobile-header">
+  <div class="sidebar-logo">U<span>U</span>BA <span style="font-size:.7em;color:var(--text-muted)">Nexo</span></div>
+  <button class="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</div>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">U<span>U</span>BA</div>
+    <div class="sidebar-sub">Nexo — Pitch de Produto</div>
+  </div>
+  <div class="sidebar-meta">
+    <strong>Produto:</strong> Infraestrutura de Dados<br>
+    <strong>Versao:</strong> v1<br>
+    <strong>Data:</strong> 22/03/2026
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#hero"><span class="nav-num">00</span> Proposta de Valor</a>
+    <a href="#problema"><span class="nav-num">01</span> O Problema</a>
+    <a href="#pitches"><span class="nav-num">02</span> 3 Pitches de 60s</a>
+    <a href="#taglines"><span class="nav-num">03</span> Taglines</a>
+    <a href="#posicionamento"><span class="nav-num">04</span> Posicionamento</a>
+    <a href="#objecoes"><span class="nav-num">05</span> Objecoes</a>
+    <a href="#cta"><span class="nav-num">06</span> CTA Premium</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- 00 Hero -->
+  <div class="hero fade-in" id="hero">
+    <span class="hero-label">Produto UUBA</span>
+    <h1>UUBA <em>Nexo</em></h1>
+    <p class="hero-intro">
+      Infraestrutura de dados para PMEs brasileiras. Conecta seu ERP, banco, CRM e planilha numa base unica e confiavel — para que qualquer numero que saia de qualquer relatorio esteja certo. Sem equipe de dados, sem projeto de TI.
+    </p>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">27,6%</div>
+        <div class="stat-label">Empresas BR com sistemas desconectados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">60h</div>
+        <div class="stat-label">Perdidas por mes em tarefas manuais</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">5-12%</div>
+        <div class="stat-label">Taxa de erro em relatorios financeiros</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 O Problema -->
+  <section id="problema" class="fade-in">
+    <h2>O Problema</h2>
+
+    <div class="card card-danger">
+      <h4>Seus dados vivem em dez lugares diferentes. Nenhum deles concorda com o outro.</h4>
+      <p>O faturamento no ERP diz uma coisa. O extrato do banco diz outra. A planilha do controller diz uma terceira. E quando o diretor financeiro apresenta um numero na reuniao, todo mundo sabe — mas ninguem fala — que aquele numero tem uma margem de erro que ninguem mediu.</p>
+    </div>
+
+    <h3>Por que isso acontece</h3>
+    <div class="numbered">
+      <div class="card">
+        <h4>Cada sistema fala uma lingua diferente</h4>
+        <p>Conta Azul organiza clientes de um jeito, Omie de outro, o banco de um terceiro. CNPJ, CPF, razao social — cada sistema formata, armazena e nomeia de forma diferente. Ninguem traduziu.</p>
+      </div>
+      <div class="card">
+        <h4>Alguem exporta, cola e reza</h4>
+        <p>O analista financeiro exporta CSV do ERP, baixa o OFX do banco, cola tudo numa planilha mestra e confere linha por linha. Dois dias de trabalho. Se errar uma celula, o relatorio inteiro sai torto — e ninguem percebe ate ser tarde.</p>
+      </div>
+      <div class="card">
+        <h4>As ferramentas que existem nao foram feitas pra voce</h4>
+        <p>Fivetran e Airbyte exigem data warehouse, conhecimento de SQL e uma equipe de engenheiros de dados. Zapier e Make movem dados pontualmente, mas nao constroem uma base consolidada. Integracao manual com dev vira divida tecnica em seis meses.</p>
+      </div>
+      <div class="card">
+        <h4>O custo e invisivel — mas e real</h4>
+        <p>68% dos times gastam 5 horas por semana apenas limpando dados. 72% nao conseguem consolidar informacoes para medir ROI com precisao. 45% ja perderam oportunidades por dados desconectados. O custo nao aparece na folha, mas aparece nos resultados.</p>
+      </div>
+    </div>
+
+    <h3>O que os empresarios dizem</h3>
+
+    <div class="verbatim">
+      <p>"A plataforma duplicou TODOS os lancamentos de contas a pagar e receber na aba de conciliacao. O sistema elimina os duplicados, mas ao inves de eliminar os ignorados, elimina os que foram CORRETAMENTE CONCILIADOS."</p>
+      <div class="verbatim-source">— Cliente Conta Azul, Reclame Aqui</div>
+    </div>
+
+    <div class="verbatim">
+      <p>"Conciliacao bancaria esta toda desorganizada. A integracao com o banco nao bate com a importacao efetuada no sistema. E um caos completo."</p>
+      <div class="verbatim-source">— Cliente Omie, Reclame Aqui</div>
+    </div>
+
+    <div class="verbatim">
+      <p>"Mudei na mao todos os registros, centros de custos e categorias, perdendo a tarde inteira com retrabalho."</p>
+      <div class="verbatim-source">— Cliente Conta Azul, Reclame Aqui</div>
+    </div>
+
+    <div class="verbatim">
+      <p>"O ERP nao entrega informacoes fidedignas em seus relatorios. Infla dados de receita, duplica valores de notas fiscais e passa dados errados de devolucao e bonificacao."</p>
+      <div class="verbatim-source">— Cliente Omie, Reclame Aqui (titulo: "O pior ERP que ja usei")</div>
+    </div>
+
+    <blockquote>
+      <p>Empresas com maturidade em dados sao 23x mais propensas a conquistar clientes. O problema nao e falta de dados — e falta de conexao entre eles.</p>
+    </blockquote>
+  </section>
+
+  <!-- 02 Pitches -->
+  <section id="pitches" class="fade-in">
+    <h2>3 Versoes do Pitch de 60 Segundos</h2>
+    <p>Cada versao aborda o problema de dados fragmentados com uma estrategia diferente. Prontas para testar.</p>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao A — Storytelling</div>
+      <div class="pitch-text">
+        <p>Semana passada eu estava com um cliente — empresa de R$ 12 milhoes de faturamento, 40 funcionarios, tres anos de mercado. O controller dele levava dois dias por mes para montar o relatorio financeiro. Dois dias. Sabe por que? Porque os dados de clientes estavam no Conta Azul, as faturas no Omie, o extrato no banco, e o historico numa planilha que so ele entendia. Ele exportava tudo, colava numa planilha mestra, e rezava pra nao ter erro.</p>
+        <p>O UUBA Nexo e a infraestrutura que elimina esse trabalho. Conecta o ERP, o banco, o CRM, normaliza tudo em uma base unica e confiavel, e entrega dados prontos — para dashboard, para cobranca, para fluxo de caixa. Sem equipe de dados, sem projeto de TI. O empresario conecta, os dados fluem.</p>
+        <p>Aquele controller? Agora gasta duas horas, nao dois dias. E confia nos numeros.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao B — Provocador</div>
+      <div class="pitch-text">
+        <p>Me diz uma coisa: quantas fontes de dados a sua empresa tem hoje? ERP, banco, planilha, CRM, gateway de pagamento... provavelmente entre cinco e dez. Agora me diz: quando o seu diretor financeiro te apresenta um numero — faturamento do mes, inadimplencia, fluxo de caixa projetado — voce confia 100% naquele numero? Ou no fundo voce sabe que tem uma margem de erro que ninguem mede?</p>
+        <p>Esse e o problema que a maioria das PMEs brasileiras tem e ninguem fala abertamente: os dados existem, mas nao conversam entre si. E quando nao conversam, voce toma decisao baseado em informacao que pode estar errada, desatualizada ou incompleta.</p>
+        <p>O UUBA Nexo resolve isso na raiz. Conecta todas as suas fontes, normaliza em uma base unica, e garante que qualquer numero que sai — em qualquer relatorio, em qualquer produto — e confiavel. E o alicerce de dados que a sua empresa ja deveria ter.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao C — Diagnosticador</div>
+      <div class="pitch-text">
+        <p>Nos ultimos seis meses, a gente mapeou o fluxo de dados de mais de 30 PMEs brasileiras. O padrao que encontramos e consistente: a empresa media usa entre 4 e 8 sistemas, gasta de 15 a 40 horas por mes em reconciliacao manual de dados, e mesmo assim opera com uma taxa de erro de 5 a 12% nos relatorios financeiros. Isso nao e achismo — sao numeros que a gente mediu.</p>
+        <p>O que descobrimos e que o problema nao e falta de dados. E falta de conexao. Os dados estao la — no ERP, no banco, na planilha. Mas cada sistema fala uma lingua diferente, e ninguem traduziu.</p>
+        <p>O UUBA Nexo e essa traducao. E uma camada de infraestrutura que conecta suas fontes de dados, padroniza tudo em um schema unico, e entrega uma base confiavel por API. Sem projeto de TI, sem data warehouse, sem equipe de dados. O resultado: dados que voce pode usar pra tomar decisao no mesmo dia, nao na semana seguinte.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Taglines -->
+  <section id="taglines" class="fade-in">
+    <h2>Taglines — Top 5</h2>
+
+    <div class="tagline-card">
+      <div class="tagline-num">01</div>
+      <div>
+        <div class="tagline-text">"Seus dados vivem em 10 lugares. O Nexo faz todos falarem a mesma lingua."</div>
+        <div class="tagline-desc">Metafora de linguagem. Comunica o problema (dispersao) e a solucao (unificacao) numa frase.</div>
+      </div>
+    </div>
+
+    <div class="tagline-card">
+      <div class="tagline-num">02</div>
+      <div>
+        <div class="tagline-text">"A base de dados que sua empresa ja deveria ter."</div>
+        <div class="tagline-desc">Implica maturidade. Posiciona o Nexo como algo obvio que faltava, nao como inovacao alienigena.</div>
+      </div>
+    </div>
+
+    <div class="tagline-card">
+      <div class="tagline-num">03</div>
+      <div>
+        <div class="tagline-text">"Conecta. Normaliza. Confia."</div>
+        <div class="tagline-desc">Tres verbos, tres passos. Comunica o processo e o resultado (confianca) de forma direta.</div>
+      </div>
+    </div>
+
+    <div class="tagline-card">
+      <div class="tagline-num">04</div>
+      <div>
+        <div class="tagline-text">"Infraestrutura de dados para quem toma decisao, nao para quem programa."</div>
+        <div class="tagline-desc">Posiciona contra Fivetran/Airbyte. Fala diretamente com o empresario, nao com o engenheiro.</div>
+      </div>
+    </div>
+
+    <div class="tagline-card">
+      <div class="tagline-num">05</div>
+      <div>
+        <div class="tagline-text">"Seus numeros, finalmente certos."</div>
+        <div class="tagline-desc">A mais curta e emocional. Fala diretamente com a dor de nao confiar nos proprios relatorios.</div>
+      </div>
+    </div>
+
+    <blockquote>
+      <p>Tagline de identidade UUBA (manter em todos os produtos): "Gente de negocios, como voce."</p>
+    </blockquote>
+  </section>
+
+  <!-- 04 Posicionamento -->
+  <section id="posicionamento" class="fade-in">
+    <h2>Posicionamento vs Concorrentes</h2>
+    <p>O mercado de integracao de dados tem quatro caminhos — todos com problemas claros para PMEs brasileiras. O UUBA Nexo ocupa o espaco que nenhum deles cobre.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Fivetran / Airbyte</h4>
+        <ul>
+          <li>A partir de R$ 2.500/mes</li>
+          <li>Exige data warehouse</li>
+          <li>Precisa de eng. de dados</li>
+          <li>Sem conectores BR</li>
+          <li>Setup: 4-8 semanas</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>Integracao Manual</h4>
+        <ul>
+          <li>R$ 5-30 mil por integracao</li>
+          <li>Vira divida tecnica</li>
+          <li>Sem normalizacao</li>
+          <li>Quebra quando API muda</li>
+          <li>Setup: 4-12 semanas</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>Planilha / Zapier</h4>
+        <ul>
+          <li>Custo oculto em horas</li>
+          <li>Dados defasados</li>
+          <li>Nao normaliza nem deduplica</li>
+          <li>Depende de uma pessoa</li>
+          <li>Fragil, nao escala</li>
+        </ul>
+      </div>
+      <div class="compare-card highlight">
+        <h4>UUBA Nexo</h4>
+        <ul>
+          <li>Conectores nativos BR</li>
+          <li>Normalizacao automatica</li>
+          <li>Dedup por CNPJ/CPF</li>
+          <li>Setup em minutos, assistido</li>
+          <li>Contexto fiscal brasileiro</li>
+          <li>Dados prontos por API</li>
+          <li>Valor no mesmo dia</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Mapa de posicionamento</h3>
+    <div class="position-map">                    TECNICO                              ACESSIVEL
+                       |                                  |
+          Fivetran     |                                  |
+          (enterprise, |                                  |
+           US$ 500+/m) |                                  |
+                       |                                  |
+          Airbyte      |                                  |
+          (open-source,|                                  |
+           requer eng) |                                  |
+                       |                                  |
+  GENERICO  -----------+----------------------------------+-  BRASILEIRO
+                       |                                  |
+          Zapier/Make  |                                  |
+          (automacao,  |                                  |
+           nao dados)  |                                  |
+                       |                 <span class="highlight">UUBA NEXO</span>          |
+                       |              (PME BR, setup      |
+                       |               assistido,         |
+                       |               dados prontos)     |
+                       |                                  |</div>
+
+    <h3>Tabela comparativa detalhada</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Dimensao</th>
+            <th>Fivetran / Airbyte</th>
+            <th>Integ. Manual</th>
+            <th>Planilha</th>
+            <th>UUBA Nexo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Conectores BR</td>
+            <td>Inexistentes</td>
+            <td>Sob medida (caro)</td>
+            <td>N/A</td>
+            <td><span class="badge badge-blue">Nativos</span></td>
+          </tr>
+          <tr>
+            <td>Normalizacao</td>
+            <td>Responsabilidade do usuario</td>
+            <td>Responsabilidade do dev</td>
+            <td>Manual, propensa a erro</td>
+            <td><span class="badge badge-blue">Automatica</span></td>
+          </tr>
+          <tr>
+            <td>Setup</td>
+            <td>Semanas + engenheiro</td>
+            <td>Semanas + dev</td>
+            <td>Horas (mas manual)</td>
+            <td><span class="badge badge-blue">Minutos</span></td>
+          </tr>
+          <tr>
+            <td>Manutencao</td>
+            <td>Equipe de dados</td>
+            <td>Dev dedicado</td>
+            <td>Analista manual</td>
+            <td><span class="badge badge-blue">Automatica</span></td>
+          </tr>
+          <tr>
+            <td>Deduplicacao</td>
+            <td>Nao faz</td>
+            <td>Nao faz</td>
+            <td>Manual</td>
+            <td><span class="badge badge-blue">CNPJ/CPF</span></td>
+          </tr>
+          <tr>
+            <td>Contexto fiscal BR</td>
+            <td>Nao</td>
+            <td>Depende do dev</td>
+            <td>Depende do analista</td>
+            <td><span class="badge badge-blue">Nativo</span></td>
+          </tr>
+          <tr>
+            <td>Custo mensal</td>
+            <td>R$ 2.500+</td>
+            <td>R$ 3-10 mil</td>
+            <td>"Gratuito" (horas)</td>
+            <td><span class="badge badge-green">Ecossistema</span></td>
+          </tr>
+          <tr>
+            <td>Tempo ate valor</td>
+            <td>4-8 semanas</td>
+            <td>4-12 semanas</td>
+            <td>Imediato (fragil)</td>
+            <td><span class="badge badge-blue">Mesmo dia</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-accent">
+      <h4>Quando alguem perguntar "por que nao usar Fivetran?"</h4>
+      <p>"Fivetran e uma ferramenta extraordinaria — para empresas que tem um data engineer, um data warehouse e orcamento de US$ 500+/mes so para mover dados. Se voce tem isso, use Fivetran. Se voce e uma PME brasileira que quer dados financeiros confiaveis sem montar uma equipe de dados, o Nexo resolve isso de uma forma que o Fivetran nunca vai — porque nao e o problema que ele se propoe a resolver."</p>
+    </div>
+  </section>
+
+  <!-- 05 Objecoes -->
+  <section id="objecoes" class="fade-in">
+    <h2>Objecoes do Empresario</h2>
+    <p>As duvidas mais comuns sobre infraestrutura de dados — e como responder cada uma com tom de conversa entre pares.</p>
+
+    <div class="card card-warning">
+      <h4>"Eu ja tenho tudo no meu ERP, por que preciso de outra camada?"</h4>
+      <p><strong>Resposta:</strong> Seu ERP e excelente para o que ele faz — emitir nota, registrar venda, controlar estoque. Mas o ERP nao foi desenhado para ser sua unica fonte de verdade. Voce provavelmente tem dados de clientes no CRM, extratos no banco, historico numa planilha, pagamentos num gateway. O ERP e uma das fontes. O Nexo e o que faz todas essas fontes convergirem para uma base so, onde voce sabe que o numero e confiavel.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Meu analista ja faz essa consolidacao manualmente."</h4>
+      <p><strong>Resposta:</strong> E exatamente esse o ponto. Voce esta pagando um profissional qualificado para fazer trabalho de maquina — exportar, colar, cruzar, conferir. Alem do custo, tem o risco: um erro de copia numa celula pode distorcer um relatorio inteiro, e ninguem vai perceber ate que seja tarde. O Nexo nao substitui seu analista — libera ele para fazer analise de verdade, com dados que ja vem certos.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Integracao de dados parece coisa de empresa grande."</h4>
+      <p><strong>Resposta:</strong> Ate pouco tempo, era. As ferramentas existiam so para quem tinha equipe de dados e orcamento de multinacional. O que mudou e que agora e possivel entregar isso de forma acessivel, sem exigir conhecimento tecnico. A pergunta nao e se a sua empresa precisa de dados integrados — toda empresa com mais de um sistema precisa. A pergunta e se voce quer continuar resolvendo isso com planilha ou se quer uma infraestrutura que escala com voce.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Ja tentei integrar sistemas antes e deu problema."</h4>
+      <p><strong>Resposta:</strong> A maioria das integracoes que da problema e construida de forma artesanal — um dev faz, funciona por 6 meses, a API do ERP muda, e quebra. Ninguem mantem, ninguem monitora. O Nexo e diferente porque e infraestrutura gerenciada: nos mantemos os conectores, monitoramos os syncs, e quando algo falha, voce recebe um alerta antes de impactar seus dados. Nao e um projeto pontual — e uma camada permanente.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Meus dados sao sensiveis. Nao quero colocar em mais um lugar."</h4>
+      <p><strong>Resposta:</strong> Concordo — e essa preocupacao e sinal de maturidade. O Nexo opera com isolamento por tenant, criptografia em transito e repouso, e toda a rastreabilidade de acesso que voce precisa. Seus dados nao vao para um data warehouse na nuvem de terceiros. Eles ficam dentro da infraestrutura UUBA, acessiveis apenas pelos produtos que voce autoriza.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Nao tenho equipe tecnica pra implantar isso."</h4>
+      <p><strong>Resposta:</strong> Voce nao precisa. Esse e literalmente o ponto. O Nexo foi desenhado para que o proprio empresario ou analista conecte suas fontes de dados sem precisar de desenvolvedor. O setup e assistido — voce conecta seu ERP, o sistema mapeia os dados automaticamente, e em minutos os dados estao fluindo. Se precisar de ajustes, nossa equipe configura junto com voce.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"E se eu quiser trocar de ERP no futuro?"</h4>
+      <p><strong>Resposta:</strong> Essa e uma das melhores razoes para usar o Nexo. Hoje, se voce troca de ERP, precisa migrar dados, reconfigurar tudo, e perder semanas. Com o Nexo, seus dados estao normalizados num schema independente do ERP. Voce desconecta o antigo, conecta o novo, e o Nexo cuida do mapeamento. Seus dashboards, sua cobranca, seus relatorios — tudo continua funcionando.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Ja uso Zapier pra isso."</h4>
+      <p><strong>Resposta:</strong> Zapier e Make sao excelentes para automacao de processos — quando acontece X, faca Y. Mas eles movem dados pontualmente, nao constroem uma base consolidada. Voce nao consegue perguntar "qual meu faturamento real do mes" para o Zapier, porque ele nao normaliza, nao deduplica, nao valida. Sao ferramentas complementares. O Nexo faz a camada de dados; o Zapier faz a camada de automacao. Na verdade, eles funcionam bem juntos.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Prefiro esperar. Nao e prioridade agora."</h4>
+      <p><strong>Resposta:</strong> Entendo. E uma decisao que depende do momento da empresa. O que eu sugiro e que voce faca uma conta simples: some quantas horas por mes seu time gasta exportando dados, montando planilhas, reconciliando numeros e conferindo relatorios. Multiplique pelo custo-hora. Esse e o custo invisivel que voce esta pagando todo mes por nao ter essa infraestrutura. Quando o momento fizer sentido, a conversa esta aberta.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Quanto custa?"</h4>
+      <p><strong>Resposta:</strong> O custo depende do seu cenario, mas vou inverter a pergunta: quanto custa hoje nao ter dados confiaveis? Quantas horas por mes seu time gasta em reconciliacao manual? Quantas decisoes sao adiadas porque o relatorio nao estava pronto? O Nexo e um investimento em infraestrutura — do mesmo tipo que um bom ERP ou um bom sistema de seguranca. O retorno vem em tempo, confianca e escala.</p>
+    </div>
+  </section>
+
+  <!-- 06 CTA Premium -->
+  <section id="cta" class="fade-in">
+    <h2>CTA Premium</h2>
+
+    <div class="card card-accent" style="margin-bottom:2rem">
+      <h4>Principio: convite entre pares, nao oferta de vendedor</h4>
+      <p>O CTA do Nexo deve soar como um diretor tecnico convidando outro executivo para uma conversa de profundidade, nao como um SDR tentando agendar uma call.</p>
+    </div>
+
+    <h3>CTA principal</h3>
+    <div class="cta-block">
+      <h3>Vamos conversar sobre como seus dados poderiam funcionar juntos.</h3>
+      <p>Uma sessao de arquitetura onde a gente olha juntos quais fontes de dados voces usam, como se conectam (ou nao), e onde estao os gaps.</p>
+      <div class="cta-highlight">Agendar sessao de arquitetura</div>
+    </div>
+
+    <h3>Variacoes por contexto</h3>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Apresentacao / Reuniao</h4>
+        <p>"Se fez sentido o que a gente conversou, o proximo passo natural e mapear como os dados fluem na sua operacao hoje e onde o Nexo se encaixa. A gente faz isso numa conversa tecnica de 40 minutos com a nossa equipe de arquitetura."</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Email / Mensagem direta</h4>
+        <p>"Pelo que conheco da operacao de voces, imagino que a questao de dados fragmentados seja algo que ja apareceu em mais de uma reuniao de diretoria. Se quiser, podemos fazer uma sessao de mapeamento — a gente olha juntos quais fontes de dados voces usam, como se conectam, e onde estao os gaps. E uma conversa tecnica, sem compromisso comercial nesse primeiro momento."</p>
+      </div>
+      <div class="card card-accent">
+        <h4>LinkedIn / Conteudo</h4>
+        <p>"Se a sua empresa opera com mais de 3 sistemas e voce nao confia 100% nos numeros que chegam na sua mesa, vale uma conversa. Nao e demo de produto — e uma sessao de arquitetura de dados onde a gente mapeia sua situacao e discute se faz sentido estruturar isso."</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Indicacao / Parceiro</h4>
+        <p>"Quando voce encontrar um cliente que reclama que 'os dados nunca batem' ou que gasta dias montando relatorio, manda pra gente. A primeira conversa e uma sessao de mapeamento tecnico — a gente entende o cenario, mostra onde estao os gaps, e se o Nexo resolver, seguimos. Se nao resolver, pelo menos o cliente sai com um diagnostico claro."</p>
+      </div>
+    </div>
+
+    <h3>O que nunca usar</h3>
+    <div class="card card-danger">
+      <ul>
+        <li><strong>"Agende seu diagnostico gratuito"</strong> — Soa como clinica popular</li>
+        <li><strong>"Descubra quanto voce esta perdendo"</strong> — Soa como infomercial</li>
+        <li><strong>"Vagas limitadas / Ultimas vagas"</strong> — Urgencia artificial mata credibilidade</li>
+        <li><strong>"Sem compromisso e sem cartao de credito"</strong> — Posiciona como SaaS commodity</li>
+        <li><strong>"Clique aqui e transforme sua empresa"</strong> — Promessa vazia</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="doc-footer">
+    Documento gerado em 22/03/2026 — UUBA Nexo: Infraestrutura de Dados para PMEs<br>
+    Baseado em pesquisa de mercado, UX research e analise Devil's Advocate<br>
+    Fontes: HubSpot State of Data 2025, Reclame Aqui, SEBRAE, McKinsey, Ken Research, Gartner<br>
+    Posicionamento: Premium / Consultoria entre pares — nunca commodity
+  </div>
+
+</main>
+</div>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.overlay').classList.toggle('open');
+  document.querySelector('.burger').classList.toggle('open');
+}
+
+// Scroll spy
+const sections=document.querySelectorAll('section, .hero');
+const navLinks=document.querySelectorAll('.sidebar-nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id=e.target.id;
+      const link=document.querySelector(`.sidebar-nav a[href="#${id}"]`);
+      if(link)link.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// Fade in on scroll
+const fadeObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target)}});
+},{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>fadeObserver.observe(el));
+
+// Close mobile menu on nav click
+document.querySelectorAll('.sidebar-nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    if(window.innerWidth<=960)toggleMenu();
+  });
+});
+</script>
+</body>
+</html>

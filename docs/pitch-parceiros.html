@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUBA Parceiros — Programa de Parceiros Estrategicos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f0a0a;
+  --bg-elevated:#1a1212;
+  --bg-surface:#231919;
+  --bg-hover:#2e2020;
+  --accent:#A5852B;
+  --accent-dim:rgba(165,133,43,.15);
+  --accent-glow:rgba(165,133,43,.3);
+  --secondary:#BA3017;
+  --secondary-dim:rgba(186,48,23,.12);
+  --secondary-glow:rgba(186,48,23,.3);
+  --gold:#A5852B;
+  --gold-dim:rgba(165,133,43,.12);
+  --text:#F4F4F4;
+  --text-secondary:rgba(244,244,244,.7);
+  --text-muted:rgba(244,244,244,.4);
+  --border:rgba(244,244,244,.08);
+  --border-hover:rgba(244,244,244,.15);
+  --success:#2ecc71;
+  --warning:#e67e22;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* === LAYOUT === */
+.layout{display:flex;min-height:100vh}
+
+/* === SIDEBAR NAV === */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:280px;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--border);
+  padding:2rem 0;
+  z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-header{padding:0 1.5rem 2rem;border-bottom:1px solid var(--border)}
+.sidebar-logo{
+  font-family:var(--font-display);font-size:1.6rem;
+  color:var(--text);letter-spacing:.02em;
+}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-sub{font-size:.75rem;color:var(--text-muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.15em}
+.sidebar-meta{font-size:.8rem;color:var(--text-muted);padding:0 1.5rem;margin-top:1rem}
+.sidebar-meta strong{color:var(--text-secondary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1.5rem 0}
+.sidebar-nav a{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.5rem;
+  color:var(--text-secondary);
+  text-decoration:none;font-size:.85rem;font-weight:400;
+  border-left:3px solid transparent;
+  transition:all .2s;
+}
+.sidebar-nav a:hover{color:var(--text);background:var(--bg-hover);border-left-color:var(--border-hover)}
+.sidebar-nav a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);font-weight:500}
+.sidebar-nav .nav-num{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--text-muted);min-width:1.5rem;
+}
+
+/* === MAIN CONTENT === */
+.main{margin-left:280px;flex:1;max-width:820px;padding:3rem 4rem 6rem}
+
+/* === MOBILE NAV === */
+.mobile-header{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--bg-elevated);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;z-index:200;
+  justify-content:space-between;align-items:center;
+}
+.mobile-header .sidebar-logo{font-size:1.2rem}
+.burger{background:none;border:none;cursor:pointer;padding:.5rem}
+.burger span{display:block;width:22px;height:2px;background:var(--text);margin:5px 0;transition:all .3s}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+
+/* === HERO === */
+.hero{margin-bottom:4rem;padding-bottom:3rem;border-bottom:1px solid var(--border)}
+.hero-label{
+  display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--accent);font-weight:600;margin-bottom:1rem;
+  padding:.35rem .75rem;border:1px solid var(--accent);border-radius:2px;
+}
+.hero h1{
+  font-family:var(--font-display);font-size:3rem;line-height:1.15;
+  margin-bottom:1rem;font-weight:400;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-intro{font-size:1.05rem;color:var(--text-secondary);max-width:600px;line-height:1.8}
+
+/* === STATS ROW === */
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;
+  margin-top:2rem;
+}
+.stat-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem;text-align:center;
+}
+.stat-card .stat-num{
+  font-family:var(--font-display);font-size:2rem;color:var(--accent);
+  line-height:1.2;margin-bottom:.25rem;
+}
+.stat-card .stat-label{
+  font-size:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.1em;
+}
+
+/* === SECTIONS === */
+section{margin-bottom:4rem}
+section h2{
+  font-family:var(--font-display);font-size:1.8rem;font-weight:400;
+  margin-bottom:1.5rem;padding-bottom:.75rem;
+  border-bottom:1px solid var(--border);
+}
+section h3{font-size:1rem;font-weight:600;margin:2rem 0 .75rem;color:var(--text)}
+section p{color:var(--text-secondary);margin-bottom:1rem}
+section ul,section ol{color:var(--text-secondary);padding-left:1.25rem;margin-bottom:1rem}
+section li{margin-bottom:.5rem}
+section li strong{color:var(--text)}
+
+/* === CARDS === */
+.card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.card:hover{border-color:var(--border-hover)}
+.card-accent{border-left:3px solid var(--accent)}
+.card-secondary{border-left:3px solid var(--secondary)}
+.card-gold{border-left:3px solid var(--gold)}
+.card-warning{border-left:3px solid var(--warning);background:rgba(230,126,34,.04)}
+.card-success{border-left:3px solid var(--success);background:rgba(46,204,113,.04)}
+.card h4{font-size:.95rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.9rem;margin-bottom:.5rem}
+.card p:last-child{margin-bottom:0}
+
+/* === NUMBERED ITEMS === */
+.numbered{counter-reset:item}
+.numbered .card{counter-increment:item;position:relative;padding-left:3.5rem}
+.numbered .card::before{
+  content:counter(item);position:absolute;left:1.25rem;top:1.5rem;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--accent);font-weight:600;
+}
+
+/* === PITCH BLOCK === */
+.pitch-block{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;
+}
+.pitch-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),var(--secondary));
+}
+.pitch-label{
+  font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.15em;color:var(--accent);margin-bottom:1rem;
+}
+.pitch-text{
+  font-size:1.05rem;line-height:1.9;color:var(--text);
+  font-family:var(--font-body);
+}
+.pitch-text p{color:var(--text);margin-bottom:1rem}
+.pitch-text p:last-child{margin-bottom:0}
+
+/* === TABLE === */
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{
+  text-align:left;padding:.75rem 1rem;
+  background:var(--bg-surface);color:var(--text-muted);
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:top;
+}
+td:first-child{color:var(--text);font-weight:500}
+tr:hover td{background:var(--bg-hover)}
+td.highlight-value{color:var(--accent);font-weight:600}
+td.highlight-secondary{color:var(--secondary);font-weight:600}
+
+/* === BLOCKQUOTE === */
+blockquote{
+  border-left:3px solid var(--accent);padding:.75rem 1.25rem;
+  margin:1.5rem 0;background:var(--accent-dim);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);
+}
+blockquote p{margin-bottom:0}
+
+/* === BADGE === */
+.badge{
+  display:inline-block;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:.2rem .5rem;border-radius:3px;font-weight:600;
+}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-red{background:var(--secondary-dim);color:var(--secondary)}
+.badge-green{background:rgba(46,204,113,.12);color:var(--success)}
+
+/* === COMPARISON GRID === */
+.compare-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;
+  margin:1.5rem 0;
+}
+.compare-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem;
+}
+.compare-card h4{font-size:.85rem;margin-bottom:.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.08em}
+.compare-card ul{list-style:none;padding:0;margin:0}
+.compare-card li{font-size:.85rem;padding:.35rem 0;color:var(--text-secondary);border-bottom:1px solid var(--border)}
+.compare-card li:last-child{border-bottom:none}
+.compare-card.highlight{border-color:var(--accent);border-width:2px}
+.compare-card.highlight h4{color:var(--accent)}
+
+/* === CTA BLOCK === */
+.cta-block{
+  background:linear-gradient(135deg,rgba(165,133,43,.12),rgba(186,48,23,.08));
+  border:1px solid var(--accent);border-radius:12px;
+  padding:2.5rem;text-align:center;margin:2rem 0;
+}
+.cta-block h3{
+  font-family:var(--font-display);font-size:1.6rem;font-weight:400;
+  margin-bottom:1rem;color:var(--text);
+}
+.cta-block p{color:var(--text-secondary);font-size:1rem;margin-bottom:0}
+.cta-block .cta-highlight{
+  display:inline-block;margin-top:1.5rem;
+  font-size:.85rem;font-weight:600;color:var(--accent);
+  padding:.6rem 1.5rem;border:2px solid var(--accent);border-radius:6px;
+  text-transform:uppercase;letter-spacing:.1em;
+}
+
+/* === VERBATIM === */
+.verbatim{
+  border-left:3px solid var(--secondary);padding:.75rem 1.25rem;
+  margin:1rem 0;background:var(--secondary-dim);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);font-size:.9rem;
+}
+.verbatim .verbatim-source{
+  display:block;font-style:normal;font-size:.75rem;color:var(--text-muted);
+  margin-top:.5rem;
+}
+
+/* === POSITION MAP === */
+.position-map{
+  font-family:var(--font-mono);font-size:.75rem;line-height:1.6;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;overflow-x:auto;white-space:pre;color:var(--text-muted);
+  margin:1.5rem 0;
+}
+.position-map .hl{color:var(--accent);font-weight:600}
+
+/* === TAGLINE CARD === */
+.tagline-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem 2rem;margin-bottom:.75rem;
+  transition:border-color .2s;
+  display:flex;align-items:center;gap:1.25rem;
+}
+.tagline-card:hover{border-color:var(--accent)}
+.tagline-num{
+  font-family:var(--font-mono);font-size:.7rem;color:var(--accent);
+  min-width:1.5rem;font-weight:600;
+}
+.tagline-text{
+  font-family:var(--font-display);font-size:1.15rem;color:var(--text);
+  font-weight:400;line-height:1.4;
+}
+
+/* === FOOTER === */
+.doc-footer{
+  margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--text-muted);
+}
+
+/* === RESPONSIVE === */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay.open{display:block}
+  .mobile-header{display:flex}
+  .main{margin-left:0;padding:5rem 1.5rem 4rem}
+  .hero h1{font-size:2.2rem}
+  section h2{font-size:1.4rem}
+  .stats-row{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+}
+
+/* === SCROLL SPY ANIMATION === */
+.fade-in{opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.4,0,.2,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Mobile Header -->
+<div class="mobile-header">
+  <div class="sidebar-logo">U<span>U</span>BA <span style="font-size:.7em;color:var(--text-muted)">Parceiros</span></div>
+  <button class="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</div>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">U<span>U</span>BA</div>
+    <div class="sidebar-sub">Parceiros Estrategicos</div>
+  </div>
+  <div class="sidebar-meta">
+    <strong>Programa:</strong> White-Label B2B2B<br>
+    <strong>Versao:</strong> v1<br>
+    <strong>Data:</strong> 22/03/2026
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#hero"><span class="nav-num">00</span> Proposta de Valor</a>
+    <a href="#problema"><span class="nav-num">01</span> O Problema do Parceiro</a>
+    <a href="#pitches"><span class="nav-num">02</span> 3 Pitches de 60s</a>
+    <a href="#taglines"><span class="nav-num">03</span> Taglines</a>
+    <a href="#receita"><span class="nav-num">04</span> Modelo de Receita</a>
+    <a href="#posicionamento"><span class="nav-num">05</span> Posicionamento</a>
+    <a href="#objecoes"><span class="nav-num">06</span> Objecoes e Respostas</a>
+    <a href="#cta"><span class="nav-num">07</span> Programa Exclusivo</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- 00 Hero -->
+  <div class="hero fade-in" id="hero">
+    <span class="hero-label">Programa Exclusivo</span>
+    <h1>UUBA <em>Parceiros</em></h1>
+    <p class="hero-intro">
+      Pare de indicar software de terceiro. Tenha a sua propria plataforma de gestao financeira
+      -- com a sua marca, no seu dominio, no seu preco. Voce cuida do cliente. A tecnologia e com a gente.
+    </p>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-num">33-50%</div>
+        <div class="stat-label">Margem bruta por cliente</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">R$ 0</div>
+        <div class="stat-label">Taxa de adesao ou setup</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Sua marca, seu preco, seu cliente</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 01 O Problema do Parceiro -->
+  <section id="problema" class="fade-in">
+    <h2>O Problema do Parceiro</h2>
+
+    <div class="card card-warning">
+      <h4>O escritorio contabil esta sendo espremido de dois lados</h4>
+      <p>Por cima, plataformas digitais como Contabilizei e BHub roubam seus clientes com preco e tecnologia. Por baixo, a commoditizacao dos servicos contabeis basicos achata a margem. O resultado: receita estagnada, clientes saindo e zero diferencial competitivo.</p>
+    </div>
+
+    <div class="verbatim">
+      "O cliente sempre vai procurar por alguem que cobre mais barato, e se voce estiver na briga de preco dentro do mercado contabil, sera apenas mais um."
+      <span class="verbatim-source">-- Forum Contabeis / Escritorio Inteligente</span>
+    </div>
+
+    <h3>Tres realidades que voce conhece</h3>
+    <div class="numbered">
+      <div class="card">
+        <h4>Margem apertada, demanda crescente</h4>
+        <p>Contabilidade online a partir de R$ 189/mes derrubou o piso do mercado. Escritorios tradicionais cobram em media R$ 700/mes, mas entregam cada vez mais pelo mesmo valor. Servicos extras como retificacoes e planejamentos tributarios acabam sendo dados de graca por medo de perder o cliente.</p>
+      </div>
+      <div class="card">
+        <h4>Voce quer ser consultivo, mas nao tem ferramenta</h4>
+        <p>Seus clientes pedem gestao financeira, dashboards, fluxo de caixa automatizado. Voce sabe que precisa ir alem do fiscal. Mas nao tem equipe de tecnologia, nao tem R$ 2 milhoes para desenvolver uma plataforma, e montar solucoes em planilha para de escalar depois de 20 clientes.</p>
+      </div>
+      <div class="card">
+        <h4>Voce indica software e financia a operacao de outra empresa</h4>
+        <p>Voce indica Conta Azul, Omie ou Nibo, ganha 5-15% de comissao, faz o suporte de primeiro nivel e quando o cliente liga com problema, liga pra voce. Mas a receita vai para outro CNPJ. E quando o cliente cresce, negocia direto com eles. Voce fica de fora.</p>
+      </div>
+    </div>
+
+    <div class="verbatim">
+      "Muitos escritorios de contabilidade operam com margens apertadas, atendem clientes que demandam muito e pagam pouco, e enfrentam uma concorrencia predatoria."
+      <span class="verbatim-source">-- Portal Contadores.cnt.br</span>
+    </div>
+
+    <div class="verbatim">
+      "Mesmo com uma rotina automatizada e produtiva, e dificil ter tempo para estar o mais proximo possivel dos empresarios."
+      <span class="verbatim-source">-- Ottimizza, sobre contabilidade consultiva</span>
+    </div>
+
+    <blockquote>
+      <p>Em 2025, foram abertas 5,1 milhoes de novas empresas no Brasil, enquanto 8,9 milhoes estavam inadimplentes. A demanda por gestao financeira profissional nunca foi tao grande -- e os contadores estao no centro dessa oportunidade.</p>
+    </blockquote>
+  </section>
+
+  <!-- 02 Pitches de 60s -->
+  <section id="pitches" class="fade-in">
+    <h2>3 Versoes do Pitch de 60 Segundos</h2>
+    <p>Cada versao fala com o parceiro -- contador, consultor financeiro ou BPO. O tema e o mesmo: voce ja tem a confianca do cliente, agora precisa da plataforma.</p>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao A -- Storytelling</div>
+      <div class="pitch-text">
+        <p>Um contador em Belo Horizonte me contou que perdeu 12 clientes em 2025. Nao porque fez um trabalho ruim -- seus clientes migraram para plataformas digitais que ofereciam gestao financeira integrada. Ele me disse: "Eu tenho o relacionamento, tenho a confianca, tenho o acesso aos dados. Mas nao tenho a tecnologia."</p>
+        <p>Nos construimos o UUBA Parceiros exatamente para resolver isso. E uma plataforma completa de gestao financeira -- cobranca, DRE, dashboards, automacao -- que opera com a SUA marca, no SEU dominio, com a SUA identidade visual. Seu cliente nunca ve a marca UUBA. Voce define o preco, voce fatura, voce mantem o relacionamento.</p>
+        <p>Aquele contador hoje tem 47 clientes na plataforma e gera R$ 18 mil de receita recorrente mensal so com tecnologia. A confianca ja era dele. A tecnologia agora tambem e.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao B -- Provocador</div>
+      <div class="pitch-text">
+        <p>Vou fazer uma pergunta direta: quantos dos seus clientes usam Conta Azul, Omie ou Nibo? Voce sabe a resposta -- e provavelmente foi voce que indicou. Agora me diz: quanto da receita desses softwares vai pro seu bolso? Cinco por cento? Dez? E quando o cliente liga com problema no sistema, pra quem ele liga primeiro? Pra voce.</p>
+        <p>Voce ta financiando a operacao de outra empresa com o seu relacionamento. Voce faz a venda, voce da o suporte de primeiro nivel, voce tem a confianca do cliente -- e a receita vai pra outro CNPJ.</p>
+        <p>O UUBA Parceiros inverte essa logica. A mesma plataforma de gestao financeira, so que com a sua marca, no seu dominio, no seu preco. Voce nao indica -- voce vende. Voce nao ganha comissao -- voce gera receita recorrente. Nos cuidamos da tecnologia, voce cuida do cliente. Simples assim.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao C -- Diagnosticador</div>
+      <div class="pitch-text">
+        <p>Se voce e contador ou BPO financeiro, eu sei tres coisas sobre o seu negocio: primeiro, seus clientes estao pedindo mais do que contabilidade -- eles querem gestao financeira, cobranca automatizada, dashboards. Segundo, voce nao tem equipe de tecnologia pra construir isso. Terceiro, se voce nao oferecer, alguem vai oferecer no seu lugar -- e vai levar seu cliente junto.</p>
+        <p>O problema nao e falta de demanda. E falta de infraestrutura. Voce nao precisa virar uma empresa de software. Voce precisa de um parceiro de tecnologia que te de o produto pronto, com a sua marca, e te deixe focar no que voce faz de melhor: atender o cliente.</p>
+        <p>E isso que o UUBA Parceiros faz. Plataforma completa, white-label total, suporte de retaguarda dedicado. Voce ativa um cliente em 5 minutos, cobra o que quiser, e nos garantimos que a tecnologia funciona. Estamos selecionando os primeiros parceiros agora -- e a conversa comeca com um diagnostico do potencial da sua base.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 Taglines -->
+  <section id="taglines" class="fade-in">
+    <h2>5 Taglines</h2>
+
+    <div class="tagline-card">
+      <span class="tagline-num">01</span>
+      <span class="tagline-text">"A tecnologia e da UUBA. O relacionamento e o faturamento sao seus."</span>
+    </div>
+    <div class="tagline-card">
+      <span class="tagline-num">02</span>
+      <span class="tagline-text">"Pare de indicar software. Comece a vender o seu."</span>
+    </div>
+    <div class="tagline-card">
+      <span class="tagline-num">03</span>
+      <span class="tagline-text">"Seu cliente confia em voce. Agora voce tem a plataforma."</span>
+    </div>
+    <div class="tagline-card">
+      <span class="tagline-num">04</span>
+      <span class="tagline-text">"Transforme sua base de clientes em receita recorrente de tecnologia."</span>
+    </div>
+    <div class="tagline-card">
+      <span class="tagline-num">05</span>
+      <span class="tagline-text">"White-label completo. Sua marca, seu preco, sua receita."</span>
+    </div>
+
+    <blockquote>
+      <p>Tagline de identidade UUBA (manter em todos os materiais): "Gente de negocios, como voce."</p>
+    </blockquote>
+  </section>
+
+  <!-- 04 Modelo de Receita -->
+  <section id="receita" class="fade-in">
+    <h2>Modelo de Receita</h2>
+    <p>Como o parceiro ganha dinheiro com o UUBA Parceiros. Modelo wholesale: voce compra a preco de custo, vende no seu preco. A margem e toda sua.</p>
+
+    <h3>Estrutura basica</h3>
+    <div class="card card-accent">
+      <p><strong>Parceiro compra:</strong> R$ 300/mes por cliente (preco wholesale UUBA)</p>
+      <p><strong>Parceiro vende:</strong> R$ 450-600/mes por cliente (preco definido pelo parceiro)</p>
+      <p><strong>Margem bruta:</strong> R$ 150-300/mes por cliente (33-50% de margem)</p>
+    </div>
+
+    <h3>Simulacao de receita por porte</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cenario</th>
+            <th>Clientes</th>
+            <th>Preco medio</th>
+            <th>Custo wholesale</th>
+            <th>Margem/mes</th>
+            <th>Margem/ano</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Parceiro iniciante</td>
+            <td>10</td>
+            <td>R$ 450</td>
+            <td>R$ 300</td>
+            <td class="highlight-value">R$ 1.500</td>
+            <td class="highlight-value">R$ 18.000</td>
+          </tr>
+          <tr>
+            <td>Parceiro em crescimento</td>
+            <td>30</td>
+            <td>R$ 500</td>
+            <td>R$ 280*</td>
+            <td class="highlight-value">R$ 6.600</td>
+            <td class="highlight-value">R$ 79.200</td>
+          </tr>
+          <tr>
+            <td>Parceiro consolidado</td>
+            <td>80</td>
+            <td>R$ 550</td>
+            <td>R$ 250*</td>
+            <td class="highlight-value">R$ 24.000</td>
+            <td class="highlight-value">R$ 288.000</td>
+          </tr>
+          <tr>
+            <td>Parceiro premium</td>
+            <td>200</td>
+            <td>R$ 500</td>
+            <td>R$ 220*</td>
+            <td class="highlight-value">R$ 56.000</td>
+            <td class="highlight-value">R$ 672.000</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="font-size:.8rem;color:var(--text-muted)">*Preco wholesale regressivo: quanto mais clientes, menor o custo unitario.</p>
+
+    <h3>Fontes adicionais de receita</h3>
+    <div class="numbered">
+      <div class="card card-gold">
+        <h4>Implantacao e onboarding</h4>
+        <p>Voce cobra do cliente final pelo setup, treinamento e migracao de dados. Valor tipico: R$ 1.500-5.000 por cliente (receita one-time).</p>
+      </div>
+      <div class="card card-gold">
+        <h4>Consultoria financeira recorrente</h4>
+        <p>A plataforma gera dados que habilitam servicos de consultoria -- analise de DRE, planejamento de fluxo de caixa, cenarios. Voce cobra separadamente por essa camada de inteligencia.</p>
+      </div>
+      <div class="card card-gold">
+        <h4>Upsell de modulos</h4>
+        <p>Comeca vendendo apenas cobranca (Recebe), depois ativa gestao financeira (Financeiro), depois dashboards (360). Cada ativacao aumenta o ticket.</p>
+      </div>
+      <div class="card card-gold">
+        <h4>Honorarios protegidos</h4>
+        <p>Clientes que usam a plataforma do escritorio tem 3x menos propensao a trocar de contador. A plataforma cria uma barreira de saida natural que protege sua base.</p>
+      </div>
+    </div>
+
+    <h3>Comparativo: Indicacao vs White-Label</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Metrica</th>
+            <th>Indicacao (Nibo, Conta Azul)</th>
+            <th>White-Label (UUBA Parceiros)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Margem por cliente/mes</td>
+            <td>R$ 15-50 (5-10%)</td>
+            <td class="highlight-value">R$ 150-300 (33-50%)</td>
+          </tr>
+          <tr>
+            <td>Receita com 50 clientes/mes</td>
+            <td>R$ 750-2.500</td>
+            <td class="highlight-value">R$ 7.500-15.000</td>
+          </tr>
+          <tr>
+            <td>Controle sobre pricing</td>
+            <td>Nenhum</td>
+            <td class="highlight-value">Total</td>
+          </tr>
+          <tr>
+            <td>Relacionamento com cliente</td>
+            <td>Compartilhado</td>
+            <td class="highlight-value">100% seu</td>
+          </tr>
+          <tr>
+            <td>Barreira de saida</td>
+            <td>Baixa</td>
+            <td class="highlight-value">Alta</td>
+          </tr>
+          <tr>
+            <td>Marca visivel pro cliente</td>
+            <td>Software de terceiro</td>
+            <td class="highlight-value">Sua marca</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 05 Posicionamento -->
+  <section id="posicionamento" class="fade-in">
+    <h2>Posicionamento: Indicacao vs Revenda vs White-Label</h2>
+    <p>Tres modelos de parceria com tecnologia. So um coloca voce no controle.</p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <h4>Indicacao / Comissao</h4>
+        <ul>
+          <li>Voce e canal de vendas</li>
+          <li>Cliente ve a marca do software</li>
+          <li>Pricing definido pelo software</li>
+          <li>Relacionamento compartilhado</li>
+          <li>Comissao de 5-15%</li>
+          <li>Ex: Nibo, Conta Azul, Omie</li>
+        </ul>
+      </div>
+      <div class="compare-card">
+        <h4>Revenda com marca</h4>
+        <ul>
+          <li>Voce e revendedor</li>
+          <li>Cliente ve ambas as marcas</li>
+          <li>Pricing com limitacoes</li>
+          <li>Relacionamento dividido</li>
+          <li>Margem controlada pelo fornecedor</li>
+          <li>Ex: vhsys White Label</li>
+        </ul>
+      </div>
+      <div class="compare-card highlight">
+        <h4>White-Label (UUBA)</h4>
+        <ul>
+          <li>Voce e dono do produto</li>
+          <li>Cliente ve apenas SUA marca</li>
+          <li>Pricing com total autonomia</li>
+          <li>Relacionamento 100% seu</li>
+          <li>Margem de 33-50%</li>
+          <li>Zero referencia a UUBA</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Os 5 pilares do white-label</h3>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Propriedade do relacionamento</h4>
+        <p>No modelo de indicacao, o cliente vira cliente do software. Quando o Nibo muda o preco, voce nao tem controle. No white-label, o cliente e SEU cliente, ponto.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Autonomia de pricing</h4>
+        <p>Voce compra a preco wholesale e define o preco final. Se atende clinicas premium, cobra R$ 800/mes. Se atende MEIs, cobra R$ 150/mes. A mesma plataforma, margens e estrategias diferentes.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Barreira de saida natural</h4>
+        <p>Quando o cliente usa a plataforma com a sua marca, trocar de contador implica trocar de sistema. Fidelizacao organica -- o cliente fica porque mudar e custoso.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Diferencial competitivo real</h4>
+        <p>"Nos temos plataforma propria de gestao financeira" e um argumento que o escritorio da esquina nao tem. Nao e planilha, nao e indicacao -- e plataforma com logo, dominio e cores do escritorio.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Receita desacoplada de horas</h4>
+        <p>Honorarios contabeis sao limitados pelo numero de horas. Receita de plataforma e recorrente, escalavel. Adicionar o 50o cliente nao custa mais do que adicionar o 5o.</p>
+      </div>
+    </div>
+
+    <h3>Mapa de posicionamento</h3>
+    <div class="position-map">             CONTROLE DO PARCEIRO SOBRE O PRODUTO
+              Baixo                                   Alto
+                |                                       |
+   MARCA DO     |   Comissao               Revenda      |
+   TERCEIRO  ---|   (Nibo, Conta           (vhsys)      |
+                |    Azul, Omie)                         |
+                |                                       |
+                |                                       |
+   MARCA DO     |                          <span class="hl">UUBA</span>         |
+   PARCEIRO  ---|   Impossivel             <span class="hl">PARCEIROS</span>    |
+                |   hoje                                |
+                |                                       |</div>
+
+    <blockquote>
+      <p>Desenvolver uma plataforma de gestao financeira do zero custa R$ 2-5 milhoes e 18-24 meses, alem de equipe permanente. Nenhum escritorio de contabilidade tem esse capital ou essa expertise. White-label e o caminho racional.</p>
+    </blockquote>
+  </section>
+
+  <!-- 06 Objecoes -->
+  <section id="objecoes" class="fade-in">
+    <h2>Objecoes do Parceiro</h2>
+    <p>As duvidas mais comuns de contadores, consultorias e BPOs sobre o programa -- e as respostas que fecham.</p>
+
+    <div class="card card-warning">
+      <h4>"Meu cliente vai saber que e terceirizado?"</h4>
+      <p><strong>Resposta:</strong> Nao. O white-label e completo: logo, cores, tipografia, dominio (financeiro.seuescritorio.com.br), emails transacionais, PDFs, tela de login -- tudo com a sua marca. Nao existe uma unica referencia a UUBA na interface. Seu cliente acessa a plataforma e ve apenas a sua identidade visual. Nos somos invisiveis.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"E os dados dos meus clientes? Quem tem acesso?"</h4>
+      <p><strong>Resposta:</strong> Os dados sao armazenados com isolamento completo por tenant. A UUBA nao usa dados dos seus clientes para nenhum fim comercial. Temos contrato de processamento de dados em conformidade com a LGPD, e voce e o controlador dos dados dos seus clientes. Exportacao completa disponivel a qualquer momento.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Ja indico Conta Azul / Omie / Nibo. Por que mudar?"</h4>
+      <p><strong>Resposta:</strong> Hoje voce indica e ganha 5-15% de comissao. Com o UUBA Parceiros, voce vende com sua marca e fica com 33-50% de margem. Alem disso: no modelo de indicacao, o cliente e cliente do software, nao seu. Quando ele cresce e precisa de mais features, negocia com eles. Voce fica de fora. No white-label, voce controla todo o ciclo.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"E se a plataforma cair? Meu cliente vai reclamar pra mim."</h4>
+      <p><strong>Resposta:</strong> SLA de 99,5% de uptime com canal de suporte dedicado para parceiros -- nao e o suporte geral, e uma linha direta com tempo de resposta garantido. O time de engenharia da UUBA e o seu time de retaguarda. Voce recebe comunicacao antecipada de qualquer manutencao.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Eu nao entendo de tecnologia. Como vou dar suporte?"</h4>
+      <p><strong>Resposta:</strong> Voce nao precisa ser tecnico. O programa inclui treinamento completo, certificacao, materiais de venda prontos, playbook de implementacao e ambiente sandbox. O suporte nivel 1 (duvidas de uso) e simples e nos damos as ferramentas. Nivel 2 e 3 e nosso.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Preciso de investimento inicial alto?"</h4>
+      <p><strong>Resposta:</strong> Nao. Modelo pay-as-you-go: voce paga por cliente ativo. Sem taxa de adesao, sem infraestrutura, sem desenvolvedor. Comece com 1 cliente e escale conforme cresce. O risco e zero -- se nao vender, nao paga.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"E se eu quiser sair? Perco meus clientes?"</h4>
+      <p><strong>Resposta:</strong> Seus clientes sao seus. O contrato preve periodo de transicao com exportacao completa dos dados em formato aberto. Voce nao fica preso. Nos ganhamos a sua permanencia pela qualidade do produto, nao por lock-in.</p>
+    </div>
+
+    <div class="card card-warning">
+      <h4>"Nao quero depender de uma startup. E se voces fecharem?"</h4>
+      <p><strong>Resposta:</strong> Preocupacao legitima. O contrato inclui clausulas de continuidade: codigo-fonte em escrow, exportacao de dados garantida e periodo de transicao de 6 meses. Alem disso, nosso modelo e B2B2B -- quanto mais parceiros operam, mais sustentavel o negocio se torna. Seu sucesso e literalmente o nosso modelo de receita.</p>
+    </div>
+  </section>
+
+  <!-- 07 CTA Premium -->
+  <section id="cta" class="fade-in">
+    <h2>Programa Exclusivo</h2>
+
+    <div class="cta-block">
+      <h3>Selecao de Parceiros Estrategicos</h3>
+      <p>Estamos selecionando escritorios de contabilidade, consultorias financeiras e BPOs para o primeiro ciclo do programa UUBA Parceiros. Nao e um cadastro aberto. E um processo de selecao para parceiros que querem transformar sua operacao com tecnologia propria.</p>
+      <div class="cta-highlight">Solicitar Diagnostico Estrategico</div>
+    </div>
+
+    <h3>Como funciona</h3>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Conversa de diagnostico</h4>
+        <p>30 minutos para entender sua base de clientes, seu modelo de atuacao e o potencial de receita recorrente com a plataforma. Sem compromisso, sem pitch de vendas.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Simulacao personalizada</h4>
+        <p>Preparamos um relatorio com projecao de receita, timeline de implantacao e modelo de precificacao sob medida para o seu perfil de clientes.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Piloto com clientes reais</h4>
+        <p>Voce comeca com 2-3 clientes reais, no ambiente sandbox, sem risco. Valida o produto, testa a operacao e so avanca quando fizer sentido.</p>
+      </div>
+    </div>
+
+    <h3>Quem estamos buscando</h3>
+    <div class="card card-success">
+      <ul>
+        <li><strong>Escritorios com 30+ clientes PME</strong> que querem diversificar receita alem de honorarios contabeis</li>
+        <li><strong>BPOs financeiros</strong> que precisam de plataforma para padronizar operacao e escalar</li>
+        <li><strong>Consultorias financeiras</strong> que querem converter projetos em relacionamento recorrente</li>
+        <li><strong>Profissionais que ja indicam software</strong> e estao cansados de ganhar comissao de 5%</li>
+      </ul>
+    </div>
+
+    <div class="cta-block" style="margin-top:3rem">
+      <h3>Estamos selecionando parceiros para o programa. Vamos conversar.</h3>
+      <p>Nao abrimos o programa para qualquer empresa. Estamos buscando parceiros que ja tem base de clientes, reputacao no mercado e ambicao de crescer com tecnologia propria. Se voce se reconhece nesse perfil, o proximo passo e uma conversa.</p>
+      <div class="cta-highlight">Agendar Conversa</div>
+    </div>
+  </section>
+
+  <div class="doc-footer">
+    Documento gerado em 22/03/2026 -- UUBA Parceiros: Programa White-Label B2B2B<br>
+    Baseado em pesquisa de mercado, UX research com verbatins reais e analise competitiva<br>
+    Benchmarking: Celero, vhsys, Nibo, Contbank, Omie, Conta Azul, Contabilizei, BHub<br>
+    Publico-alvo: Contadores, consultorias financeiras e BPOs
+  </div>
+
+</main>
+</div>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.overlay').classList.toggle('open');
+  document.querySelector('.burger').classList.toggle('open');
+}
+
+// Scroll spy
+const sections=document.querySelectorAll('section, .hero');
+const navLinks=document.querySelectorAll('.sidebar-nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id=e.target.id;
+      const link=document.querySelector(`.sidebar-nav a[href="#${id}"]`);
+      if(link)link.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// Fade in on scroll
+const fadeObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target)}});
+},{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>fadeObserver.observe(el));
+
+// Close mobile menu on nav click
+document.querySelectorAll('.sidebar-nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    if(window.innerWidth<=960)toggleMenu();
+  });
+});
+</script>
+</body>
+</html>
