@@ -6,5 +6,10 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
 
 
 async def get_db():
+    """Dependency injection de AsyncSession para endpoints FastAPI.
+
+    Yields:
+        AsyncSession: Sessão assíncrona do SQLAlchemy, fechada automaticamente ao fim do request.
+    """
     async with async_session() as session:
         yield session

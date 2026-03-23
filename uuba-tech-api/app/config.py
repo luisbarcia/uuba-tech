@@ -2,6 +2,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    """Configurações da aplicação, carregadas de variáveis de ambiente ou ``.env``."""
+
     database_url: str = "postgresql+asyncpg://uuba:uuba@localhost:5432/uuba"
     api_key: str = "uuba-dev-key-change-me"
     asaas_webhook_secret: str = ""

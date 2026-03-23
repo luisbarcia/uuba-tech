@@ -3,6 +3,8 @@ from pydantic import BaseModel, Field
 
 
 class ClienteCreate(BaseModel):
+    """Request body para criação de cliente (POST /api/v1/clientes)."""
+
     nome: str = Field(
         min_length=1,
         max_length=255,
@@ -27,6 +29,8 @@ class ClienteCreate(BaseModel):
 
 
 class ClienteUpdate(BaseModel):
+    """Request body para atualização parcial de cliente (PATCH)."""
+
     nome: str | None = Field(
         default=None,
         min_length=1,
@@ -46,6 +50,8 @@ class ClienteUpdate(BaseModel):
 
 
 class ClienteMetricas(BaseModel):
+    """Métricas financeiras de um cliente (DSO, aging, totais em aberto)."""
+
     dso_dias: float = Field(
         default=0.0,
         description="Days Sales Outstanding — média de dias que o cliente leva para pagar",
@@ -69,6 +75,8 @@ class ClienteMetricas(BaseModel):
 
 
 class ClienteResponse(BaseModel):
+    """Response body para cliente serializado da API."""
+
     id: str
     object: str = "cliente"
     nome: str

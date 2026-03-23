@@ -4,6 +4,8 @@ from pydantic import BaseModel, Field
 
 
 class CobrancaCreate(BaseModel):
+    """Request body para registrar uma cobrança (POST /api/v1/cobrancas)."""
+
     fatura_id: str = Field(
         pattern=r"^fat_[a-zA-Z0-9_-]+$",
         description="ID da fatura sendo cobrada (prefixo fat_)",
@@ -31,6 +33,8 @@ class CobrancaCreate(BaseModel):
 
 
 class CobrancaResponse(BaseModel):
+    """Response body para cobrança serializada da API."""
+
     id: str
     object: str = "cobranca"
     fatura_id: str

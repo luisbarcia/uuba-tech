@@ -5,6 +5,8 @@ from app.domain.value_objects.fatura_status import FaturaStatus
 
 
 class FaturaCreate(BaseModel):
+    """Request body para criação de fatura (POST /api/v1/faturas). Valor em centavos."""
+
     cliente_id: str = Field(
         pattern=r"^cli_[a-zA-Z0-9_-]+$",
         description="ID do cliente (prefixo cli_)",
@@ -29,6 +31,8 @@ class FaturaCreate(BaseModel):
 
 
 class FaturaUpdate(BaseModel):
+    """Request body para atualização parcial de fatura (PATCH). Transições de status validadas via FaturaStatus."""
+
     status: FaturaStatus | None = Field(
         default=None,
         description="Status atual: pendente, pago, vencido ou cancelado",
@@ -44,6 +48,8 @@ class FaturaUpdate(BaseModel):
 
 
 class FaturaResponse(BaseModel):
+    """Response body para fatura serializada da API."""
+
     id: str
     object: str = "fatura"
     cliente_id: str
