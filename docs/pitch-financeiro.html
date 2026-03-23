@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UUBA Financeiro — Pitch de Produto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f0a0a;
+  --bg-elevated:#1a1212;
+  --bg-surface:#231919;
+  --bg-hover:#2e2020;
+  --accent:#A5852B;
+  --accent-dim:rgba(165,133,43,.15);
+  --accent-glow:rgba(165,133,43,.3);
+  --gold:#A5852B;
+  --gold-dim:rgba(165,133,43,.12);
+  --red:#BA3017;
+  --red-dim:rgba(186,48,23,.15);
+  --text:#F4F4F4;
+  --text-secondary:rgba(244,244,244,.7);
+  --text-muted:rgba(244,244,244,.4);
+  --border:rgba(244,244,244,.08);
+  --border-hover:rgba(244,244,244,.15);
+  --success:#2ecc71;
+  --success-dim:rgba(46,204,113,.12);
+  --warning:#e67e22;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.7;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* === LAYOUT === */
+.layout{display:flex;min-height:100vh}
+
+/* === SIDEBAR NAV === */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:280px;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--border);
+  padding:2rem 0;
+  z-index:100;
+  display:flex;flex-direction:column;
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+}
+.sidebar-header{padding:0 1.5rem 2rem;border-bottom:1px solid var(--border)}
+.sidebar-logo{
+  font-family:var(--font-display);font-size:1.6rem;
+  color:var(--text);letter-spacing:.02em;
+}
+.sidebar-logo span{color:var(--accent)}
+.sidebar-sub{font-size:.75rem;color:var(--text-muted);margin-top:.25rem;text-transform:uppercase;letter-spacing:.15em}
+.sidebar-meta{font-size:.8rem;color:var(--text-muted);padding:0 1.5rem;margin-top:1rem}
+.sidebar-meta strong{color:var(--text-secondary)}
+
+.sidebar-nav{flex:1;overflow-y:auto;padding:1.5rem 0}
+.sidebar-nav a{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.65rem 1.5rem;
+  color:var(--text-secondary);
+  text-decoration:none;font-size:.85rem;font-weight:400;
+  border-left:3px solid transparent;
+  transition:all .2s;
+}
+.sidebar-nav a:hover{color:var(--text);background:var(--bg-hover);border-left-color:var(--border-hover)}
+.sidebar-nav a.active{color:var(--accent);border-left-color:var(--accent);background:var(--accent-dim);font-weight:500}
+.sidebar-nav .nav-num{
+  font-family:var(--font-mono);font-size:.7rem;
+  color:var(--text-muted);min-width:1.5rem;
+}
+
+/* === MAIN CONTENT === */
+.main{margin-left:280px;flex:1;max-width:860px;padding:3rem 4rem 6rem}
+
+/* === MOBILE NAV === */
+.mobile-header{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--bg-elevated);border-bottom:1px solid var(--border);
+  padding:1rem 1.5rem;z-index:200;
+  justify-content:space-between;align-items:center;
+}
+.mobile-header .sidebar-logo{font-size:1.2rem}
+.burger{background:none;border:none;cursor:pointer;padding:.5rem}
+.burger span{display:block;width:22px;height:2px;background:var(--text);margin:5px 0;transition:all .3s}
+.burger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:90}
+
+/* === HERO === */
+.hero{margin-bottom:4rem;padding-bottom:3rem;border-bottom:1px solid var(--border)}
+.hero-label{
+  display:inline-block;font-size:.7rem;text-transform:uppercase;letter-spacing:.2em;
+  color:var(--accent);font-weight:600;margin-bottom:1rem;
+  padding:.35rem .75rem;border:1px solid var(--accent);border-radius:2px;
+}
+.hero h1{
+  font-family:var(--font-display);font-size:3rem;line-height:1.15;
+  margin-bottom:1rem;font-weight:400;
+}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero-intro{font-size:1.05rem;color:var(--text-secondary);max-width:600px;line-height:1.8}
+.hero-tagline{
+  font-family:var(--font-display);font-size:1.3rem;
+  color:var(--accent);margin-top:1.5rem;font-style:italic;
+}
+
+/* === SECTIONS === */
+section{margin-bottom:4rem}
+section h2{
+  font-family:var(--font-display);font-size:1.8rem;font-weight:400;
+  margin-bottom:1.5rem;padding-bottom:.75rem;
+  border-bottom:1px solid var(--border);
+}
+section h3{font-size:1rem;font-weight:600;margin:2rem 0 .75rem;color:var(--text)}
+section p{color:var(--text-secondary);margin-bottom:1rem}
+section ul,section ol{color:var(--text-secondary);padding-left:1.25rem;margin-bottom:1rem}
+section li{margin-bottom:.5rem}
+section li strong{color:var(--text)}
+
+/* === CARDS === */
+.card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.card:hover{border-color:var(--border-hover)}
+.card-accent{border-left:3px solid var(--accent)}
+.card-gold{border-left:3px solid var(--gold)}
+.card-red{border-left:3px solid var(--red)}
+.card-warning{border-left:3px solid var(--warning);background:rgba(230,126,34,.04)}
+.card-success{border-left:3px solid var(--success)}
+.card h4{font-size:.95rem;font-weight:600;margin-bottom:.5rem}
+.card p{font-size:.9rem;margin-bottom:.5rem}
+.card p:last-child{margin-bottom:0}
+
+/* === NUMBERED ITEMS === */
+.numbered{counter-reset:item}
+.numbered .card{counter-increment:item;position:relative;padding-left:3.5rem}
+.numbered .card::before{
+  content:counter(item);position:absolute;left:1.25rem;top:1.5rem;
+  font-family:var(--font-mono);font-size:.75rem;color:var(--accent);font-weight:600;
+}
+
+/* === PITCH BLOCK === */
+.pitch-block{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden;
+}
+.pitch-block::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--accent),#D4AF37);
+}
+.pitch-label{
+  font-family:var(--font-mono);font-size:.7rem;text-transform:uppercase;
+  letter-spacing:.15em;color:var(--accent);margin-bottom:1rem;
+}
+.pitch-text{
+  font-size:1.05rem;line-height:1.9;color:var(--text);
+  font-family:var(--font-body);
+}
+.pitch-text p{color:var(--text);margin-bottom:1rem}
+.pitch-text p:last-child{margin-bottom:0}
+
+/* === TABLE === */
+.table-wrap{overflow-x:auto;margin-bottom:1.5rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{
+  text-align:left;padding:.75rem 1rem;
+  background:var(--bg-surface);color:var(--text-muted);
+  font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;font-weight:600;
+  border-bottom:1px solid var(--border);
+}
+td{
+  padding:.75rem 1rem;border-bottom:1px solid var(--border);
+  color:var(--text-secondary);vertical-align:top;
+}
+td:first-child{color:var(--text);font-weight:500}
+tr:hover td{background:var(--bg-hover)}
+
+/* === COMPARISON TABLE === */
+.compare-table td.uuba{color:var(--accent);font-weight:500}
+.compare-table td.competitor{color:var(--text-muted)}
+.compare-table .check{color:var(--success);font-weight:700;font-size:1.1rem}
+.compare-table .cross{color:var(--text-muted);font-weight:700;font-size:1.1rem}
+
+/* === STAT GRID === */
+.stat-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:1rem;margin:1.5rem 0;
+}
+.stat-card{
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;text-align:center;
+  border-top:3px solid var(--accent);
+}
+.stat-number{
+  font-family:var(--font-display);font-size:2.2rem;color:var(--accent);
+  margin-bottom:.25rem;
+}
+.stat-label{font-size:.8rem;color:var(--text-muted);line-height:1.4}
+
+/* === BLOCKQUOTE === */
+blockquote{
+  border-left:3px solid var(--accent);padding:.75rem 1.25rem;
+  margin:1.5rem 0;background:var(--accent-dim);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);
+}
+blockquote p{margin-bottom:0}
+blockquote cite{
+  display:block;font-style:normal;font-size:.75rem;
+  color:var(--text-muted);margin-top:.5rem;
+}
+
+/* === VERBATIM === */
+.verbatim{
+  border-left:3px solid var(--warning);padding:.75rem 1.25rem;
+  margin:1rem 0;background:rgba(230,126,34,.04);border-radius:0 6px 6px 0;
+  font-style:italic;color:var(--text-secondary);font-size:.95rem;
+}
+.verbatim-label{
+  font-style:normal;font-size:.65rem;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--warning);margin-bottom:.25rem;font-weight:600;
+}
+
+/* === BADGE === */
+.badge{
+  display:inline-block;font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;
+  padding:.2rem .5rem;border-radius:3px;font-weight:600;
+}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-green{background:var(--success-dim);color:var(--success)}
+
+/* === POSITION MAP === */
+.position-map{
+  font-family:var(--font-mono);font-size:.75rem;line-height:1.6;
+  background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;
+  padding:1.5rem;overflow-x:auto;white-space:pre;color:var(--text-muted);
+  margin:1.5rem 0;
+}
+.position-map .highlight{color:var(--accent);font-weight:600}
+
+/* === OBJECTION BLOCK === */
+.objection{margin-bottom:1.5rem}
+.objection-q{
+  font-weight:600;color:var(--text);font-size:.95rem;
+  margin-bottom:.5rem;padding-left:1rem;
+  border-left:3px solid var(--warning);
+}
+.objection-a{
+  color:var(--text-secondary);font-size:.9rem;
+  padding-left:1rem;margin-left:0;
+}
+
+/* === CTA SECTION === */
+.cta-block{
+  background:linear-gradient(135deg,var(--bg-surface),rgba(165,133,43,.08));
+  border:1px solid var(--accent);border-radius:12px;
+  padding:2.5rem;text-align:center;margin:2rem 0;
+}
+.cta-block h3{
+  font-family:var(--font-display);font-size:1.5rem;
+  color:var(--text);margin-bottom:1rem;font-weight:400;
+}
+.cta-block p{color:var(--text-secondary);margin-bottom:1.5rem}
+.cta-steps{
+  display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;
+  margin-top:1.5rem;
+}
+.cta-step{
+  background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;
+  padding:1.25rem;flex:1;min-width:180px;max-width:220px;
+}
+.cta-step-num{
+  font-family:var(--font-mono);font-size:.7rem;color:var(--accent);
+  margin-bottom:.5rem;font-weight:600;
+}
+.cta-step-text{font-size:.85rem;color:var(--text-secondary)}
+
+/* === FOOTER === */
+.doc-footer{
+  margin-top:4rem;padding-top:2rem;border-top:1px solid var(--border);
+  font-size:.8rem;color:var(--text-muted);
+}
+
+/* === RESPONSIVE === */
+@media(max-width:960px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .overlay.open{display:block}
+  .mobile-header{display:flex}
+  .main{margin-left:0;padding:5rem 1.5rem 4rem}
+  .hero h1{font-size:2.2rem}
+  section h2{font-size:1.4rem}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .cta-steps{flex-direction:column;align-items:center}
+  .cta-step{max-width:100%}
+}
+
+@media(max-width:480px){
+  .stat-grid{grid-template-columns:1fr}
+}
+
+/* === SCROLL SPY ANIMATION === */
+.fade-in{opacity:0;transform:translateY(12px);transition:all .5s cubic-bezier(.4,0,.2,1)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Mobile Header -->
+<div class="mobile-header">
+  <div class="sidebar-logo">U<span>U</span>BA <small style="font-size:.6em;color:var(--text-muted)">Financeiro</small></div>
+  <button class="burger" onclick="toggleMenu()"><span></span><span></span><span></span></button>
+</div>
+<div class="overlay" onclick="toggleMenu()"></div>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">U<span>U</span>BA</div>
+    <div class="sidebar-sub">Financeiro — Pitch</div>
+  </div>
+  <div class="sidebar-meta">
+    <strong>Produto:</strong> UUBA Financeiro<br>
+    <strong>Categoria:</strong> Financeiro Inteligente<br>
+    <strong>Data:</strong> 22/03/2026
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#hero"><span class="nav-num">00</span> Visao Geral</a>
+    <a href="#problema"><span class="nav-num">01</span> O Problema</a>
+    <a href="#mercado"><span class="nav-num">02</span> Mercado</a>
+    <a href="#pitches"><span class="nav-num">03</span> 3 Pitches de 60s</a>
+    <a href="#taglines"><span class="nav-num">04</span> Taglines</a>
+    <a href="#competitivo"><span class="nav-num">05</span> UUBA vs FinDrive</a>
+    <a href="#posicionamento"><span class="nav-num">06</span> Posicionamento</a>
+    <a href="#objecoes"><span class="nav-num">07</span> Objecoes</a>
+    <a href="#cta"><span class="nav-num">08</span> CTA e Proximos Passos</a>
+  </nav>
+</aside>
+
+<!-- Main Content -->
+<main class="main">
+
+  <!-- 00 Hero -->
+  <div class="hero fade-in" id="hero">
+    <span class="hero-label">Pitch de Produto</span>
+    <h1>UUBA <em>Financeiro</em></h1>
+    <p class="hero-intro">
+      Departamento financeiro completo. Sem montar equipe.
+      DRE, fluxo de caixa, conciliacao, alertas e relatorios — tudo funcionando
+      desde o dia 1, com tecnologia e gente especializada operando como extensao do seu time.
+    </p>
+    <p class="hero-tagline">"FinDrive mostra. UUBA faz."</p>
+  </div>
+
+  <!-- 01 O Problema -->
+  <section id="problema" class="fade-in">
+    <h2>O Problema</h2>
+
+    <p>O dono de PME acorda pensando em vender, atender, entregar. O financeiro fica pra depois. Sempre pra depois. Ate que o "depois" vira uma crise que ninguem viu chegando.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">76%</div>
+        <div class="stat-label">das PMEs nao tem gestao financeira estruturada <span class="badge badge-gold">Sebrae</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">60%</div>
+        <div class="stat-label">fecham em 5 anos — causa #1: ma gestao financeira</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">15h/mes</div>
+        <div class="stat-label">que o empresario gasta fazendo trabalho financeiro que nao e dele</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">8,9M</div>
+        <div class="stat-label">de empresas negativadas no Brasil <span class="badge badge-gold">Serasa</span></div>
+      </div>
+    </div>
+
+    <h3>O que o empresario diz</h3>
+
+    <div class="verbatim">
+      <div class="verbatim-label">Verbatim de pesquisa</div>
+      "Minha empresa da lucro no papel mas nunca sobra dinheiro."
+    </div>
+    <div class="verbatim">
+      <div class="verbatim-label">Verbatim de pesquisa</div>
+      "Meu contador so aparece pra pedir documento."
+    </div>
+    <div class="verbatim">
+      <div class="verbatim-label">Verbatim de pesquisa</div>
+      "Eu passo o dia vendendo, a parte financeira fica pro final quando ja to destruido."
+    </div>
+
+    <h3>A traducao</h3>
+    <div class="card card-accent">
+      <p>Ele nao diz "DRE" — diz <strong>"saber se to lucrando"</strong>.</p>
+      <p>Nao diz "fluxo de caixa" — diz <strong>"saber se vai dar pra pagar as contas"</strong>.</p>
+      <p>Nao diz "conciliacao" — diz <strong>"conferir o extrato"</strong>.</p>
+      <p>Nao diz "projecao de cenarios" — diz <strong>"saber se o mes que vem vai apertar"</strong>.</p>
+    </div>
+
+    <h3>O cenario atual</h3>
+    <div class="numbered">
+      <div class="card">
+        <h4>Montar equipe interna</h4>
+        <p>Analista + assistente financeiro CLT: <strong>R$ 15 a 20 mil por mes</strong> com encargos. Fora turnover, ferias e o tempo que o dono gasta gerenciando.</p>
+      </div>
+      <div class="card">
+        <h4>Comprar software (Conta Azul, Omie, FinDrive)</h4>
+        <p>Mostra grafico bonito, mas <strong>ninguem opera</strong>. O dono compra, nao usa, e volta pra planilha em 3 meses.</p>
+      </div>
+      <div class="card">
+        <h4>Depender do contador</h4>
+        <p>O contador faz contabilidade fiscal, nao gestao financeira. Ele entrega DRE <strong>45 dias depois do mes fechar</strong> — quando ja nao serve pra decidir nada.</p>
+      </div>
+      <div class="card">
+        <h4>BPO tradicional (BHub, Celero, Contabilizei)</h4>
+        <p>Terceiriza a operacao, mas <strong>sem tecnologia proprietaria</strong>. Planilha com grife. E nao escala.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 Mercado -->
+  <section id="mercado" class="fade-in">
+    <h2>O Tamanho da Oportunidade</h2>
+
+    <p>19 milhoes de empresas ativas no Brasil. 76% sem financeiro estruturado. O mercado nao precisa ser convencido de que tem um problema — ele precisa de alguem que resolva.</p>
+
+    <div class="card card-accent">
+      <h4>Publico-alvo principal</h4>
+      <p>PMEs de 10 a 100 funcionarios, faturamento de R$ 500 mil a R$ 10 milhoes por ano. Empresas que tem volume suficiente pra precisar de estrutura financeira, mas nao o bastante pra justificar uma equipe interna.</p>
+    </div>
+
+    <h3>Custo do problema vs. custo da solucao</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Alternativa</th><th>Custo mensal</th><th>Limitacao</th></tr></thead>
+        <tbody>
+          <tr><td>Equipe interna (analista + assistente)</td><td>R$ 15.000 - 20.000</td><td>Turnover, gestao, encargos</td></tr>
+          <tr><td>BPO financeiro (BHub, Celero)</td><td>R$ 2.000 - 5.000</td><td>Planilha com grife, sem tech</td></tr>
+          <tr><td>Software puro (FinDrive, Nibo)</td><td>R$ 349 - 999</td><td>Mostra dados, ninguem opera</td></tr>
+          <tr><td>Contador</td><td>R$ 500 - 2.000</td><td>Fiscal, nao financeiro. Atrasado 45 dias</td></tr>
+          <tr>
+            <td style="color:var(--accent);font-weight:600">UUBA Financeiro</td>
+            <td style="color:var(--accent)">Fracao da equipe interna</td>
+            <td style="color:var(--accent)">Tech + gente. Opera de verdade.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>Segmentos adicionais</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Controller solo sobrecarregado:</strong> medias empresas (100-500 func.) onde uma pessoa faz tudo. A UUBA amplifica a capacidade dela.</li>
+        <li><strong>Holdings e grupos:</strong> multiplos CNPJs, precisam de visao consolidada. Modo BPO opera as subsidiarias menores.</li>
+        <li><strong>Startups pos-seed:</strong> precisam reportar pra investidores. Relatorios executivos automatizados pra board meetings.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 03 Pitches -->
+  <section id="pitches" class="fade-in">
+    <h2>3 Versoes do Pitch — 60 segundos</h2>
+    <p>Cada versao foca no financeiro. Linguagem do empresario, nao jargao. Prontas pra testar.</p>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao A — Storytelling</div>
+      <div class="pitch-text">
+        <p>Toda segunda-feira, o Ricardo abre o extrato e tenta entender onde foi parar o dinheiro. A empresa fatura R$ 120 mil por mes, mas no final do mes nunca sobra. Ele nao sabe se ta lucrando ou se ta queimando caixa. O contador manda o balancete 45 dias depois — quando ja nao serve pra nada.</p>
+        <p>A gente entrou. Em duas semanas, ele sabia exatamente quanto entrava, quanto saia, e quanto ia sobrar nos proximos 90 dias. Sem contratar ninguem. Sem instalar sistema complicado. A UUBA colocou tecnologia que categoriza cada centavo no automatico, e um especialista financeiro que acompanha o caixa dele todo dia. Quando uma conta grande atrasou, o alerta chegou no WhatsApp dele antes de virar problema.</p>
+        <p>Hoje o Ricardo sabe se ta lucrando em tempo real. Nao no papel — de verdade. E parou de perder 15 horas por mes tentando ser o financeiro da propria empresa.</p>
+        <p>Quer saber como ta o financeiro da sua empresa de verdade? A gente faz um diagnostico gratuito em 48 horas. Sem compromisso. Me chama no WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao B — Provocador</div>
+      <div class="pitch-text">
+        <p>Voce sabe me dizer agora, sem abrir nada, se vai ter dinheiro pra pagar tudo que vence mes que vem? Se a resposta e "acho que sim" ou "preciso ver", voce ta gerenciando no olho. E voce nao ta sozinho — 76% das PMEs brasileiras fazem isso. O resultado: 60% fecham em cinco anos. Causa numero um: nao saber o que ta acontecendo com o proprio dinheiro.</p>
+        <p>Ai voce pensa: vou contratar alguem. Sai R$ 15 a 20 mil por mes com CLT e encargos. Ou compra um software — que mostra grafico bonito mas nao mexe em nada. O extrato continua la, sem conferir. O boleto vencido continua la, sem cobrar. A grana continua sumindo, sem ninguem entender pra onde.</p>
+        <p>A UUBA e diferente: tecnologia que organiza cada real no automatico, mais um especialista financeiro que opera o dia a dia. Sabe quanto vai sobrar nos proximos 90 dias. Avisa quando vai apertar. Confere o extrato todo dia. Coisa que nenhum software sozinho faz e nenhum BPO tradicional consegue fazer nessa velocidade.</p>
+        <p>Quer descobrir quanto voce ta perdendo por nao ter isso? Diagnostico gratuito, 48 horas, sem compromisso. Me chama no WhatsApp.</p>
+      </div>
+    </div>
+
+    <div class="pitch-block">
+      <div class="pitch-label">Versao C — Diagnosticador</div>
+      <div class="pitch-text">
+        <p>Deixa eu te fazer tres perguntas. Voce sabe hoje — agora — se sua empresa deu lucro no mes passado? Sabe quanto vai receber nos proximos 90 dias? E sabe quantos boletos vencidos tem nesse momento sem ninguem cobrando? Se travou em alguma, o financeiro da sua empresa ta funcionando do mesmo jeito que o de 60% das empresas que fecham no Brasil.</p>
+        <p>O problema nao e falta de competencia — e falta de estrutura. O financeiro de PME foi montado pra pagar conta e emitir boleto. Nao foi montado pra mostrar se o mes vai apertar, se a margem ta caindo, se aquele cliente grande ta atrasando demais. E montar essa estrutura internamente custa R$ 15 a 20 mil por mes.</p>
+        <p>A UUBA entrega essa estrutura pronta. Tecnologia que categoriza cada lancamento no automatico e projeta o caixa pra 30, 60, 90 dias. Mais um especialista financeiro que confere extrato, organiza as contas e te avisa antes do problema acontecer. Nao e software que voce precisa aprender a usar. E um financeiro que ja nasce funcionando.</p>
+        <p>O primeiro passo e um diagnostico gratuito. Em 48 horas eu te entrego um raio-x completo do seu financeiro. Sem custo, sem compromisso. Me chama no WhatsApp.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 Taglines -->
+  <section id="taglines" class="fade-in">
+    <h2>5 Taglines do Financeiro</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>#</th><th>Tagline</th><th>Por que funciona</th><th>Onde usar</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><strong>"Seu financeiro funcionando. De verdade."</strong></td>
+            <td>Implica que o que existe hoje e de mentira. Curto, assertivo, memoravel.</td>
+            <td>Hero do site, cartao, assinatura</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><strong>"A gente nao mostra o problema. A gente resolve."</strong></td>
+            <td>Posicionamento direto contra FinDrive e softwares de dashboard. Combativo.</td>
+            <td>Apresentacoes, LinkedIn, videos</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><strong>"Saber se ta sobrando ou faltando. Todo dia."</strong></td>
+            <td>Linguagem do empresario. Traduz "fluxo de caixa" pra quem nao fala jargao.</td>
+            <td>Anuncios, WhatsApp, conteudo</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><strong>"Depto financeiro completo. Sem montar equipe."</strong></td>
+            <td>Ancora de custo implicita (R$ 15-20k/mes). Concreto, funcional.</td>
+            <td>Pitch deck, propostas, site</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><strong>"Voce cuida do negocio. A gente cuida do dinheiro."</strong></td>
+            <td>Divisao clara de papeis. Alivia a culpa do dono que sabe que negligencia o financeiro.</td>
+            <td>Redes sociais, rodape, bio</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Tagline de identidade da marca (manter em tudo):</strong> "Gente de negocios, como voce" — footer, assinatura, material institucional.</p>
+    </div>
+  </section>
+
+  <!-- 05 Competitivo -->
+  <section id="competitivo" class="fade-in">
+    <h2>UUBA vs. FinDrive</h2>
+    <p>O FinDrive e o concorrente mais visivel. Bom produto de visualizacao, bem integrado com Conta Azul. Mas o FinDrive mostra. A UUBA faz.</p>
+
+    <div class="table-wrap">
+      <table class="compare-table">
+        <thead><tr><th>O que o empresario precisa</th><th>FinDrive</th><th>UUBA Financeiro</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Saber se ta lucrando (DRE)</td>
+            <td>Sim, via Conta Azul</td>
+            <td class="uuba">Sim, com IA que categoriza sozinha</td>
+          </tr>
+          <tr>
+            <td>Saber se vai dar pra pagar as contas (fluxo de caixa)</td>
+            <td>Limitado</td>
+            <td class="uuba">30, 60 e 90 dias com cenarios</td>
+          </tr>
+          <tr>
+            <td>Conferir o extrato (conciliacao)</td>
+            <td class="cross">Nao faz</td>
+            <td class="uuba">Automatico, todo dia</td>
+          </tr>
+          <tr>
+            <td>Avisar antes de apertar (alertas)</td>
+            <td class="cross">Nao faz</td>
+            <td class="uuba">WhatsApp, email, in-app</td>
+          </tr>
+          <tr>
+            <td>Simular cenarios (e se o faturamento cair 20%?)</td>
+            <td class="cross">Nao faz</td>
+            <td class="uuba">What-if completo</td>
+          </tr>
+          <tr>
+            <td>Relatorio pra investidor/socio</td>
+            <td class="cross">Nao faz</td>
+            <td class="uuba">PDF executivo automatizado</td>
+          </tr>
+          <tr>
+            <td>Alguem operando de verdade</td>
+            <td class="cross">Nao faz</td>
+            <td class="uuba">Modo BPO — equipe UUBA como extensao</td>
+          </tr>
+          <tr>
+            <td>Integrar com ERP</td>
+            <td>So Conta Azul</td>
+            <td class="uuba">Conta Azul + Omie + Bling + Open Finance</td>
+          </tr>
+          <tr>
+            <td>IA integrada</td>
+            <td class="cross">Nao tem</td>
+            <td class="uuba">Claude AI pra categorizacao e insights</td>
+          </tr>
+          <tr>
+            <td>Modelo de entrega</td>
+            <td>Software (ferramenta)</td>
+            <td class="uuba">Software + Servico (ferramenta + gente)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card card-accent">
+      <h4>Sintese competitiva</h4>
+      <p>O FinDrive atende quem quer VER os numeros organizados. A UUBA atende quem quer que alguem CUIDE dos numeros. Sao problemas diferentes. O nosso e maior, mais doloroso, e mais dificil de resolver — por isso a barreira competitiva e alta.</p>
+    </div>
+
+    <h3>Versus outros concorrentes</h3>
+    <div class="numbered">
+      <div class="card">
+        <h4>Conta Azul / Omie (ERP basico)</h4>
+        <p>Ferramentas de gestao ampla — nota fiscal, estoque, vendas. O financeiro e um modulo, nao o foco. <strong>Nao operam nada.</strong> O empresario compra e nao usa a metade.</p>
+      </div>
+      <div class="card">
+        <h4>Contadores tradicionais</h4>
+        <p>Fazem contabilidade fiscal, nao gestao financeira. Entregam balancete <strong>45 dias depois do mes fechar</strong>. Nao projetam, nao alertam, nao operam.</p>
+      </div>
+      <div class="card">
+        <h4>BPOs financeiros (BHub, Celero, Contabilizei)</h4>
+        <p>Operam o financeiro com pessoas, mas <strong>sem tecnologia proprietaria</strong>. Planilha compartilhada como ferramenta. Nao escala, nao tem inteligencia, nao tem projecao.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 Posicionamento -->
+  <section id="posicionamento" class="fade-in">
+    <h2>Posicionamento: Financeiro Inteligente</h2>
+
+    <p>A UUBA nao cabe nas categorias que existem. Entao a gente cria a nossa.</p>
+
+    <div class="card card-accent">
+      <h4>Por que "Financeiro Inteligente"</h4>
+      <ul>
+        <li><strong>Nao e BPO</strong> — soa terceirizacao barata, gente em planilha</li>
+        <li><strong>Nao e SaaS</strong> — soa ferramenta que ninguem usa depois do trial</li>
+        <li><strong>Nao e consultoria</strong> — soa caro, pontual, e que vai embora</li>
+        <li><strong>Nao e ERP</strong> — soa sistema complexo que precisa de treinamento</li>
+        <li>E um <strong>financeiro de verdade</strong>, melhor do que o cliente montaria internamente</li>
+      </ul>
+    </div>
+
+    <h3>Quando perguntarem "o que a UUBA faz?"</h3>
+    <blockquote>
+      <p>"Cuida do financeiro da sua empresa com tecnologia e gente especializada, pra voce focar no que faz crescer."</p>
+    </blockquote>
+
+    <h3>Mapa de posicionamento</h3>
+    <div class="position-map">              ESTRATEGICO / INTELIGENTE
+                        |
+                  Nibo  |         <span class="highlight">UUBA Financeiro</span>
+                        |       (tech + operacao
+                        |        + inteligencia)
+                        |
+                        |         FinDrive
+                        |       (dashboard)
+SOFTWARE  --------------|---------------- OPERACAO
+  PURO                  |                 COMPLETA
+                        |
+        Conta Azul      |     BHub / Celero
+          Omie          |     (BPO manual)
+       (ERP generico)   |
+                        |
+              BASICO / OPERACIONAL</div>
+    <p>A UUBA Financeiro ocupa <strong>sozinha o canto superior-direito</strong>. Nenhum concorrente combina tecnologia proprietaria com IA, operacao completa e inteligencia financeira preditiva.</p>
+
+    <h3>O diferencial que ninguem copia facil</h3>
+    <div class="card card-accent">
+      <p>Concorrentes de software nao tem operacao. BPOs tradicionais nao tem tecnologia. A UUBA tem os dois — e a IA conectando tudo. Copiar um pedaco e facil. Copiar a combinacao e outra historia.</p>
+    </div>
+  </section>
+
+  <!-- 07 Objecoes -->
+  <section id="objecoes" class="fade-in">
+    <h2>Objecoes e Respostas</h2>
+    <p>O que o empresario pensa mas nem sempre diz. E como responder.</p>
+
+    <div class="card card-warning" style="margin-bottom:2rem">
+      <div class="objection">
+        <div class="objection-q">"Vou entregar meus dados financeiros pra voces?"</div>
+        <div class="objection-a">
+          <p>Voce ja entrega pro contador, pro banco, pra Receita Federal. A diferenca e que a gente usa os dados pra te proteger, nao so pra cumprir obrigacao. E tudo criptografado, com acesso controlado — voce define quem ve o que. Se quiser revogar, revoga na hora.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warning" style="margin-bottom:2rem">
+      <div class="objection">
+        <div class="objection-q">"Meu contador ja faz isso."</div>
+        <div class="objection-a">
+          <p>Seu contador faz contabilidade fiscal. Ele garante que voce paga imposto certo e entrega obrigacao acessoria. Gestao financeira e outra coisa: e saber todo dia se vai sobrar ou faltar, e projetar os proximos 90 dias, e receber alerta quando algo sai do trilho. A gente nao substitui o contador — a gente cuida do que ele nao cuida.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warning" style="margin-bottom:2rem">
+      <div class="objection">
+        <div class="objection-q">"E caro."</div>
+        <div class="objection-a">
+          <p>Montar um departamento financeiro interno custa R$ 15 a 20 mil por mes. Contratar so um analista junior, com encargos, sai mais de R$ 8 mil. E ainda precisa gerenciar, treinar, substituir quando sai. A UUBA entrega mais do que uma equipe interna entregaria, por uma fracao do custo. A pergunta e: quanto custa NAO ter financeiro?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warning" style="margin-bottom:2rem">
+      <div class="objection">
+        <div class="objection-q">"Ja tentei software financeiro e ninguem usou."</div>
+        <div class="objection-a">
+          <p>Porque software sozinho nao resolve. Voce compra, tenta configurar, desiste em 3 meses e volta pra planilha. A UUBA nao e so software. Tem gente operando junto. Voce nao precisa aprender a usar, importar dados, ou configurar nada. A gente monta, a gente opera, voce acompanha o resultado.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-warning">
+      <div class="objection">
+        <div class="objection-q">"Prefiro ir resolvendo aos poucos, no meu ritmo."</div>
+        <div class="objection-a">
+          <p>Cada mes sem estrutura financeira e um mes onde voce nao sabe se ta ganhando ou perdendo dinheiro. E um mes onde boleto vence sem cobrar, margem cai sem perceber, e caixa aperta sem aviso. O diagnostico gratuito de 48 horas mostra exatamente onde voce ta. Sem compromisso. Se depois disso voce decidir que prefere resolver sozinho, pelo menos vai saber o tamanho do problema.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 CTA -->
+  <section id="cta" class="fade-in">
+    <h2>Proximos Passos</h2>
+
+    <div class="cta-block">
+      <h3>Diagnostico Financeiro Gratuito</h3>
+      <p>Em 48 horas, um raio-x completo do financeiro da empresa.<br>Sem custo. Sem compromisso. Sem instalar nada.</p>
+      <div class="cta-steps">
+        <div class="cta-step">
+          <div class="cta-step-num">Passo 01</div>
+          <div class="cta-step-text">Chama no WhatsApp e pede o diagnostico</div>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">Passo 02</div>
+          <div class="cta-step-text">A gente acessa os dados basicos (extrato, ERP) com sua autorizacao</div>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">Passo 03</div>
+          <div class="cta-step-text">Em 48h voce recebe o raio-x com pontos criticos e oportunidades</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Para o time comercial</h3>
+    <div class="numbered">
+      <div class="card card-accent">
+        <h4>Escolher a versao do pitch</h4>
+        <p>Storytelling pra contextos de networking e eventos. Provocador pra reunioes diretas e cold outreach. Diagnosticador pra conversas consultivas e indicacoes.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Definir a tagline</h4>
+        <p>Escolher uma e usar em tudo — site, cartao, LinkedIn, assinatura. Consistencia gera reconhecimento.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Primeiro case real</h4>
+        <p>Pegar o primeiro cliente, documentar o antes/depois com numeros. O pitch fica 10x mais forte com prova social concreta.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Material de apoio</h4>
+        <p>Alinhar landing page, pitch deck e one-pager com o posicionamento "Financeiro Inteligente" e a tagline escolhida.</p>
+      </div>
+      <div class="card card-accent">
+        <h4>Gatilhos de venda</h4>
+        <p>Sempre usar: ancora de custo (R$ 15-20k equipe interna), reciprocidade (diagnostico gratis), e loss framing (quanto esta perdendo, nao quanto pode ganhar).</p>
+      </div>
+    </div>
+
+    <h3>O produto entrega</h3>
+    <div class="card card-gold">
+      <ul>
+        <li><strong>DRE automatizado</strong> — categorizacao inteligente, sem classificar na mao</li>
+        <li><strong>Fluxo de caixa preditivo</strong> — 30, 60, 90 dias com cenarios</li>
+        <li><strong>Conciliacao bancaria automatica</strong> — extrato conferido todo dia</li>
+        <li><strong>Alertas de risco</strong> — avisa antes de apertar, via WhatsApp</li>
+        <li><strong>Relatorios pra conselho/investidor</strong> — PDF executivo, automatizado</li>
+        <li><strong>Modo BPO</strong> — equipe UUBA como extensao do seu time</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="doc-footer">
+    Documento gerado em 22/03/2026 — UUBA Financeiro: Departamento financeiro completo, sem montar equipe.<br>
+    Baseado em pesquisa com 8 agentes especializados. Frameworks: Kahneman, Cialdini, StoryBrand, Klaff, Raskin, Dunford.<br>
+    Dados: Sebrae, Serasa, IBGE, pesquisa UX com empresarios PME.<br>
+    <br>
+    Categoria: Financeiro Inteligente. Posicionamento: "FinDrive mostra. UUBA faz."
+  </div>
+
+</main>
+</div>
+
+<script>
+// Mobile menu
+function toggleMenu(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.querySelector('.overlay').classList.toggle('open');
+  document.querySelector('.burger').classList.toggle('open');
+}
+
+// Scroll spy
+const sections=document.querySelectorAll('section, .hero');
+const navLinks=document.querySelectorAll('.sidebar-nav a');
+const observer=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const id=e.target.id;
+      const link=document.querySelector('.sidebar-nav a[href="#'+id+'"]');
+      if(link)link.classList.add('active');
+    }
+  });
+},{rootMargin:'-20% 0px -60% 0px'});
+sections.forEach(s=>observer.observe(s));
+
+// Fade in on scroll
+const fadeObserver=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');fadeObserver.unobserve(e.target)}});
+},{threshold:.1});
+document.querySelectorAll('.fade-in').forEach(el=>fadeObserver.observe(el));
+
+// Close mobile menu on nav click
+document.querySelectorAll('.sidebar-nav a').forEach(a=>{
+  a.addEventListener('click',()=>{
+    if(window.innerWidth<=960)toggleMenu();
+  });
+});
+</script>
+</body>
+</html>
