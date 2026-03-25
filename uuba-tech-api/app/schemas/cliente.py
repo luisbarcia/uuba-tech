@@ -87,3 +87,37 @@ class ClienteResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ClienteListItem(BaseModel):
+    """Response para listagens — documento mascarado (LGPD Art. 46)."""
+
+    id: str
+    object: str = "cliente"
+    nome: str
+    documento_mascarado: str
+    email: str | None = None
+    telefone: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+    @classmethod
+    def from_cliente(cls, c) -> "ClienteListItem":
+        doc = c.documento
+        if len(doc) == 11:
+            masked = f"***.{doc[3:6]}.***-{doc[9:]}"
+        elif len(doc) == 14:
+            masked = f"**.{doc[2:5]}.{doc[5:8]}/****-{doc[12:]}"
+        else:
+            masked = "***"
+        return cls(
+            id=c.id,
+            nome=c.nome,
+            documento_mascarado=masked,
+            email=c.email,
+            telefone=c.telefone,
+            created_at=c.created_at,
+            updated_at=c.updated_at,
+        )

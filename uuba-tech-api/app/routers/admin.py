@@ -9,8 +9,9 @@ from app.exceptions import APIError
 from app.models.cliente import Cliente
 from app.models.cobranca import Cobranca
 from app.models.fatura import Fatura
+from app.schemas.common import ListResponse, PaginationMeta
 from app.seed import build_seed_data
-from app.services import cleanup_service
+from app.services import audit_service, cleanup_service
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -107,3 +108,40 @@ async def reset_database(
 )
 async def cleanup(db: AsyncSession = Depends(get_db)):
     return await cleanup_service.executar_cleanup(db)
+
+
+@router.get(
+    "/audit",
+    summary="Consultar audit trail (LGPD Art. 37)",
+    description="Lista registros de auditoria de acesso a dados pessoais.",
+)
+async def get_audit(
+    recurso: str | None = Query(None, description="Filtrar por tipo de recurso"),
+    recurso_id: str | None = Query(None, description="Filtrar por ID do recurso"),
+    limit: int = Query(50, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    db: AsyncSession = Depends(get_db),
+):
+    items, total = await audit_service.listar(
+        db, recurso=recurso, recurso_id=recurso_id, limit=limit, offset=offset
+    )
+    return ListResponse(
+        data=[
+            {
+                "id": a.id,
+                "acao": a.acao,
+                "recurso": a.recurso,
+                "recurso_id": a.recurso_id,
+                "detalhes": a.detalhes,
+                "ip_address": a.ip_address,
+                "created_at": a.created_at.isoformat() if a.created_at else None,
+            }
+            for a in items
+        ],
+        pagination=PaginationMeta(
+            total=total,
+            page_size=limit,
+            has_more=(offset + limit) < total,
+            offset=offset,
+        ),
+    )

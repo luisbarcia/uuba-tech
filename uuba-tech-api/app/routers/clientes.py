@@ -1,9 +1,15 @@
 from fastapi import APIRouter, Depends, Query, Response
 
 from app.auth.api_key import verify_api_key
-from app.database import get_cliente_repository, get_fatura_repository
+from app.database import get_cliente_repository, get_cobranca_repository, get_fatura_repository
 from app.exceptions import APIError
-from app.schemas.cliente import ClienteCreate, ClienteMetricas, ClienteResponse, ClienteUpdate
+from app.schemas.cliente import (
+    ClienteCreate,
+    ClienteListItem,
+    ClienteMetricas,
+    ClienteResponse,
+    ClienteUpdate,
+)
 from app.schemas.common import ListResponse, PaginationMeta
 from app.services import cliente_service
 
@@ -43,7 +49,7 @@ async def list_clientes(
         repo, telefone=telefone, limit=limit, offset=offset
     )
     return ListResponse(
-        data=[ClienteResponse.model_validate(c) for c in clientes],
+        data=[ClienteListItem.from_cliente(c) for c in clientes],
         pagination=PaginationMeta(
             total=total, page_size=limit, has_more=(offset + limit) < total, offset=offset
         ),
@@ -128,3 +134,26 @@ async def get_metricas(
             f"Cliente {cliente_id} não existe.",
         )
     return await cliente_service.get_metricas(fatura_repo, cliente_id)
+
+
+@router.get(
+    "/{cliente_id}/dados-pessoais",
+    summary="Dados pessoais do titular (LGPD Art. 18)",
+    description="Retorna todos os dados pessoais do titular em formato portável (JSON). "
+    "Inclui cadastro, faturas e cobranças associadas. Conforme Art. 18, II e V da LGPD.",
+)
+async def get_dados_pessoais(
+    cliente_id: str,
+    cliente_repo=Depends(get_cliente_repository),
+    fatura_repo=Depends(get_fatura_repository),
+    cobranca_repo=Depends(get_cobranca_repository),
+):
+    cliente = await cliente_service.get_cliente(cliente_repo, cliente_id)
+    if not cliente:
+        raise APIError(
+            404,
+            "cliente-nao-encontrado",
+            "Cliente não encontrado",
+            f"Cliente {cliente_id} não existe.",
+        )
+    return await cliente_service.exportar_dados_pessoais(cliente, fatura_repo, cobranca_repo)

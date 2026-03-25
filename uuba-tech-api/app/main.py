@@ -305,9 +305,13 @@ class RequestIdMiddleware:
 
 app.add_middleware(RequestIdMiddleware)
 
+from app.middleware.rate_limit import RateLimitMiddleware  # noqa: E402
+
+app.add_middleware(RateLimitMiddleware)
+
 
 # --- Routers ---
-from app.routers import clientes, faturas, cobrancas, admin, jobs, import_csv
+from app.routers import clientes, faturas, cobrancas, admin, jobs, import_csv, privacidade
 
 app.include_router(clientes.router)
 app.include_router(faturas.router)
@@ -315,6 +319,7 @@ app.include_router(cobrancas.router)
 app.include_router(admin.router)
 app.include_router(jobs.router)
 app.include_router(import_csv.router)
+app.include_router(privacidade.router)
 
 
 # --- Health ---

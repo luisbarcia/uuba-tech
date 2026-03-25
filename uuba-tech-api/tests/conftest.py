@@ -1,3 +1,7 @@
+import os
+
+os.environ["TESTING"] = "1"
+
 import pytest
 from datetime import datetime, timezone, timedelta
 from httpx import AsyncClient, ASGITransport
@@ -6,6 +10,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 from sqlalchemy.pool import StaticPool
 
 from app.models.base import Base
+from app.models.audit_log import AuditLog  # noqa: F401 — registra tabela no metadata
 from app.main import app
 from app.database import (
     get_db,

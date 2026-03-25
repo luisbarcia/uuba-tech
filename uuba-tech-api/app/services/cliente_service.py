@@ -1,15 +1,17 @@
 """Serviço de clientes.
 
 Persistência delegada ao ClienteRepository (DP-04).
+Exportação de dados pessoais conforme LGPD Art. 18.
 """
 
 from datetime import datetime, timezone
 
-from app.models.cliente import Cliente
-from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteMetricas
-from app.utils.ids import generate_id
 from app.domain.repositories.cliente_repository import ClienteRepository
+from app.domain.repositories.cobranca_repository import CobrancaRepository
 from app.domain.repositories.fatura_repository import FaturaRepository
+from app.models.cliente import Cliente
+from app.schemas.cliente import ClienteCreate, ClienteMetricas, ClienteUpdate
+from app.utils.ids import generate_id
 
 
 def _aware(dt: datetime) -> datetime:
@@ -93,3 +95,52 @@ async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> Client
         faturas_em_aberto=len(em_aberto),
         faturas_vencidas=len(vencidas),
     )
+
+
+async def exportar_dados_pessoais(
+    cliente: Cliente,
+    fatura_repo: FaturaRepository,
+    cobranca_repo: CobrancaRepository,
+) -> dict:
+    """Exporta todos os dados pessoais do titular (LGPD Art. 18 II/V)."""
+    faturas, _ = await fatura_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
+    cobrancas, _ = await cobranca_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
+
+    return {
+        "titular": {
+            "id": cliente.id,
+            "nome": cliente.nome,
+            "documento": cliente.documento,
+            "email": cliente.email,
+            "telefone": cliente.telefone,
+            "cadastrado_em": cliente.created_at.isoformat() if cliente.created_at else None,
+        },
+        "faturas": [
+            {
+                "id": f.id,
+                "valor": f.valor,
+                "moeda": f.moeda,
+                "status": f.status,
+                "vencimento": f.vencimento.isoformat() if f.vencimento else None,
+                "descricao": f.descricao,
+                "numero_nf": f.numero_nf,
+                "pago_em": f.pago_em.isoformat() if f.pago_em else None,
+            }
+            for f in faturas
+        ],
+        "cobrancas": [
+            {
+                "id": c.id,
+                "fatura_id": c.fatura_id,
+                "tipo": c.tipo,
+                "canal": c.canal,
+                "mensagem": c.mensagem,
+                "tom": c.tom,
+                "status": c.status,
+                "enviado_em": c.enviado_em.isoformat() if c.enviado_em else None,
+            }
+            for c in cobrancas
+        ],
+        "exportado_em": datetime.now(timezone.utc).isoformat(),
+        "lgpd": "Exportação conforme Art. 18, II e V da Lei 13.709/2018",
+    }
