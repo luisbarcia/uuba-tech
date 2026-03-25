@@ -101,9 +101,7 @@ class SqlAlchemyClienteRepository:
     async def anonimizar_mensagens(self, cliente_id: str) -> int:
         """Remove mensagens de cobrança do cliente (LGPD)."""
         result = await self._session.execute(
-            update(Cobranca)
-            .where(Cobranca.cliente_id == cliente_id)
-            .values(mensagem=None)
+            update(Cobranca).where(Cobranca.cliente_id == cliente_id).values(mensagem=None)
         )
         await self._session.commit()
         return result.rowcount
