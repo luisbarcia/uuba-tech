@@ -1,3 +1,5 @@
+"""Router de faturas — CRUD com filtros por status e cliente."""
+
 from fastapi import APIRouter, Depends, Query
 
 from app.database import get_event_bus, get_fatura_repository
@@ -22,6 +24,15 @@ router = APIRouter(
     description="Cria uma nova fatura a receber vinculada a um cliente. O valor deve ser em centavos (R$ 2.500,00 = `250000`).",
 )
 async def create_fatura(data: FaturaCreate, repo=Depends(get_fatura_repository)):
+    """Cria nova fatura vinculada a um cliente. Retorna 201.
+
+    Args:
+        data: Dados da fatura (valor em centavos).
+        repo: Repositório de faturas (injetado).
+
+    Returns:
+        FaturaResponse com os dados da fatura criada.
+    """
     return await fatura_service.create_fatura(repo, data)
 
 
@@ -41,6 +52,18 @@ async def list_faturas(
     offset: int = Query(0, ge=0, description="Pular N itens"),
     repo=Depends(get_fatura_repository),
 ):
+    """Lista faturas com paginação e filtros por status e cliente.
+
+    Args:
+        status: Status para filtrar, separados por vírgula (opcional).
+        cliente_id: ID do cliente para filtrar (opcional).
+        limit: Quantidade máxima de itens por página.
+        offset: Deslocamento para paginação.
+        repo: Repositório de faturas (injetado).
+
+    Returns:
+        ListResponse com dados paginados das faturas.
+    """
     faturas, total = await fatura_service.list_faturas(
         repo, status=status, cliente_id=cliente_id, limit=limit, offset=offset
     )
@@ -59,6 +82,15 @@ async def list_faturas(
     description="Retorna os dados completos de uma fatura pelo ID.",
 )
 async def get_fatura(fatura_id: str, repo=Depends(get_fatura_repository)):
+    """Busca fatura por ID. Retorna 404 se não existir.
+
+    Args:
+        fatura_id: Identificador único da fatura.
+        repo: Repositório de faturas (injetado).
+
+    Returns:
+        FaturaResponse com os dados da fatura.
+    """
     fatura = await fatura_service.get_fatura(repo, fatura_id)
     if not fatura:
         raise APIError(
@@ -82,6 +114,17 @@ async def update_fatura(
     repo=Depends(get_fatura_repository),
     event_bus=Depends(get_event_bus),
 ):
+    """Atualiza status ou dados de uma fatura. Retorna 404 se não existir.
+
+    Args:
+        fatura_id: Identificador único da fatura.
+        data: Campos a atualizar (parcial).
+        repo: Repositório de faturas (injetado).
+        event_bus: Barramento de eventos (injetado).
+
+    Returns:
+        FaturaResponse com os dados atualizados.
+    """
     fatura = await fatura_service.update_fatura(repo, fatura_id, data, event_bus=event_bus)
     if not fatura:
         raise APIError(

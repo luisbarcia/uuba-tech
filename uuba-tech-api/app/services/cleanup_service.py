@@ -32,7 +32,15 @@ async def executar_cleanup(session: AsyncSession) -> dict:
 
 
 async def _limpar_mensagens_antigas(session: AsyncSession, now: datetime) -> int:
-    """Remove mensagens de cobranças de faturas resolvidas há mais de N anos."""
+    """Remove mensagens de cobranças de faturas resolvidas há mais de N anos.
+
+    Args:
+        session: Sessão assíncrona do SQLAlchemy.
+        now: Instante atual UTC para cálculo do cutoff.
+
+    Returns:
+        Quantidade de registros de cobrança com mensagem apagada.
+    """
     cutoff = now - timedelta(days=settings.retencao_mensagens_anos * 365)
 
     # Faturas resolvidas (pago/cancelado) antes do cutoff
@@ -53,7 +61,18 @@ async def _limpar_mensagens_antigas(session: AsyncSession, now: datetime) -> int
 
 
 async def _anonimizar_clientes_inativos(session: AsyncSession, now: datetime) -> int:
-    """Anonimiza clientes sem faturas ativas há mais de N anos."""
+    """Anonimiza clientes sem faturas ativas há mais de N anos.
+
+    Substitui PII (nome, documento, email, telefone) por valores neutros
+    e marca ``deletado_em`` com o instante atual.
+
+    Args:
+        session: Sessão assíncrona do SQLAlchemy.
+        now: Instante atual UTC para cálculo do cutoff.
+
+    Returns:
+        Quantidade de clientes anonimizados.
+    """
     import hashlib
 
     cutoff = now - timedelta(days=settings.retencao_clientes_inativos_anos * 365)

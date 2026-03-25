@@ -102,7 +102,20 @@ async def exportar_dados_pessoais(
     fatura_repo: FaturaRepository,
     cobranca_repo: CobrancaRepository,
 ) -> dict:
-    """Exporta todos os dados pessoais do titular (LGPD Art. 18 II/V)."""
+    """Exporta todos os dados pessoais do titular (LGPD Art. 18 II/V).
+
+    Reúne dados cadastrais, faturas e cobranças do cliente em um
+    dicionário serializável para entrega ao titular.
+
+    Args:
+        cliente: Modelo do cliente cujos dados serão exportados.
+        fatura_repo: Repository de faturas para busca por cliente.
+        cobranca_repo: Repository de cobranças para busca por cliente.
+
+    Returns:
+        Dict com chaves ``titular``, ``faturas``, ``cobrancas``,
+        ``exportado_em`` e referência LGPD.
+    """
     faturas, _ = await fatura_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
     cobrancas, _ = await cobranca_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
 

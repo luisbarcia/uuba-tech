@@ -23,14 +23,31 @@ OPTIONAL_COLUMNS = {"email", "telefone", "numero_nf", "descricao"}
 
 
 def _detect_separator(first_line: str) -> str:
-    """Auto-detecta separador: ';' se mais frequente que ','."""
+    """Auto-detecta separador do CSV pela primeira linha.
+
+    Args:
+        first_line: Primeira linha (header) do arquivo CSV.
+
+    Returns:
+        ``';'`` se mais frequente que ``','``, caso contrário ``','``.
+    """
     return ";" if first_line.count(";") > first_line.count(",") else ","
 
 
 def _parse_valor(raw: str) -> int:
-    """Converte valor para centavos.
+    """Converte valor monetário em string para centavos inteiros.
 
-    Aceita: "2500.00", "2500,00" (reais com decimais) ou "250000" (centavos).
+    Aceita: ``"2500.00"``, ``"2500,00"`` (reais com decimais) ou
+    ``"250000"`` (já em centavos).
+
+    Args:
+        raw: Valor bruto como string do CSV.
+
+    Returns:
+        Valor em centavos (inteiro positivo).
+
+    Raises:
+        ValueError: Se o formato não for reconhecido ou valor vazio.
     """
     raw = raw.strip()
     if not raw:
@@ -48,9 +65,18 @@ def _parse_valor(raw: str) -> int:
 
 
 def _parse_date(raw: str) -> datetime:
-    """Converte data para datetime UTC.
+    """Converte string de data para datetime com timezone UTC.
 
-    Aceita: ISO 8601 ou 'dd/mm/yyyy' (formato BR).
+    Aceita: ISO 8601 (``"2024-01-15"``) ou formato BR (``"15/01/2024"``).
+
+    Args:
+        raw: Data bruta como string do CSV.
+
+    Returns:
+        Datetime com timezone UTC.
+
+    Raises:
+        ValueError: Se o formato não for reconhecido ou data vazia.
     """
     raw = raw.strip()
     if not raw:

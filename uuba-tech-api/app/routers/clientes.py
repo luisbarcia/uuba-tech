@@ -1,3 +1,5 @@
+"""Router de clientes — CRUD, métricas e endpoints LGPD."""
+
 from fastapi import APIRouter, Depends, Query, Response
 
 from app.auth.api_key import verify_api_key
@@ -28,6 +30,15 @@ router = APIRouter(
     description="Registra um novo cliente na carteira. O campo `documento` (CPF ou CNPJ) deve ser único.",
 )
 async def create_cliente(data: ClienteCreate, repo=Depends(get_cliente_repository)):
+    """Cria novo cliente. Delega ao service e retorna 201.
+
+    Args:
+        data: Dados do cliente a cadastrar.
+        repo: Repositório de clientes (injetado).
+
+    Returns:
+        ClienteResponse com os dados do cliente criado.
+    """
     return await cliente_service.create_cliente(repo, data)
 
 
@@ -45,6 +56,17 @@ async def list_clientes(
     offset: int = Query(0, ge=0, description="Pular N itens"),
     repo=Depends(get_cliente_repository),
 ):
+    """Lista clientes com paginação e filtro opcional por telefone.
+
+    Args:
+        telefone: Número WhatsApp para filtrar (opcional).
+        limit: Quantidade máxima de itens por página.
+        offset: Deslocamento para paginação.
+        repo: Repositório de clientes (injetado).
+
+    Returns:
+        ListResponse com dados paginados dos clientes.
+    """
     clientes, total = await cliente_service.list_clientes(
         repo, telefone=telefone, limit=limit, offset=offset
     )
@@ -63,6 +85,15 @@ async def list_clientes(
     description="Retorna os dados de um cliente específico pelo ID.",
 )
 async def get_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
+    """Busca cliente por ID. Retorna 404 se não existir.
+
+    Args:
+        cliente_id: Identificador único do cliente.
+        repo: Repositório de clientes (injetado).
+
+    Returns:
+        ClienteResponse com os dados do cliente.
+    """
     cliente = await cliente_service.get_cliente(repo, cliente_id)
     if not cliente:
         raise APIError(
@@ -83,6 +114,16 @@ async def get_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
 async def update_cliente(
     cliente_id: str, data: ClienteUpdate, repo=Depends(get_cliente_repository)
 ):
+    """Atualiza parcialmente um cliente. Retorna 404 se não existir.
+
+    Args:
+        cliente_id: Identificador único do cliente.
+        data: Campos a atualizar (parcial).
+        repo: Repositório de clientes (injetado).
+
+    Returns:
+        ClienteResponse com os dados atualizados.
+    """
     cliente = await cliente_service.update_cliente(repo, cliente_id, data)
     if not cliente:
         raise APIError(
@@ -103,6 +144,15 @@ async def update_cliente(
     "mantêm integridade referencial mas mensagens são apagadas.",
 )
 async def delete_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
+    """Anonimiza dados pessoais do cliente (LGPD Art. 18 VI). Retorna 204.
+
+    Args:
+        cliente_id: Identificador único do cliente.
+        repo: Repositório de clientes (injetado).
+
+    Returns:
+        Response 204 No Content em caso de sucesso.
+    """
     anonimizado = await cliente_service.anonimizar_cliente(repo, cliente_id)
     if not anonimizado:
         raise APIError(
@@ -125,6 +175,16 @@ async def get_metricas(
     cliente_repo=Depends(get_cliente_repository),
     fatura_repo=Depends(get_fatura_repository),
 ):
+    """Retorna métricas financeiras (DSO, totais, contagens) do cliente.
+
+    Args:
+        cliente_id: Identificador único do cliente.
+        cliente_repo: Repositório de clientes (injetado).
+        fatura_repo: Repositório de faturas (injetado).
+
+    Returns:
+        ClienteMetricas com indicadores financeiros.
+    """
     cliente = await cliente_service.get_cliente(cliente_repo, cliente_id)
     if not cliente:
         raise APIError(
@@ -148,6 +208,17 @@ async def get_dados_pessoais(
     fatura_repo=Depends(get_fatura_repository),
     cobranca_repo=Depends(get_cobranca_repository),
 ):
+    """Exporta todos os dados pessoais do titular em JSON portável (LGPD Art. 18).
+
+    Args:
+        cliente_id: Identificador único do cliente.
+        cliente_repo: Repositório de clientes (injetado).
+        fatura_repo: Repositório de faturas (injetado).
+        cobranca_repo: Repositório de cobranças (injetado).
+
+    Returns:
+        Dict com cadastro, faturas e cobranças do titular.
+    """
     cliente = await cliente_service.get_cliente(cliente_repo, cliente_id)
     if not cliente:
         raise APIError(

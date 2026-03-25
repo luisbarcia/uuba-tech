@@ -1,3 +1,5 @@
+"""Geração de identificadores prefixados com nanoid."""
+
 import nanoid
 
 

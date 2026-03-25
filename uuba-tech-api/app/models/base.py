@@ -1,3 +1,5 @@
+"""Classes base e mixins para os modelos SQLAlchemy do projeto."""
+
 from datetime import datetime, timezone
 from sqlalchemy import DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column

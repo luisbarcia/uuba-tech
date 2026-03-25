@@ -1,3 +1,5 @@
+"""Modelo SQLAlchemy da cobrança (tabela ``cobrancas``). Registra envios ao cliente."""
+
 from datetime import datetime
 from sqlalchemy import String, DateTime, ForeignKey, Text, Boolean, Index
 from sqlalchemy.orm import Mapped, mapped_column

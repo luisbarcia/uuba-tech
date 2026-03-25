@@ -1,3 +1,5 @@
+"""Router de cobranças — registro, listagem, histórico, pausar e retomar."""
+
 from fastapi import APIRouter, Depends, Query
 
 from app.database import get_cobranca_repository, get_event_bus, get_fatura_repository
@@ -27,6 +29,17 @@ async def create_cobranca(
     fatura_repo=Depends(get_fatura_repository),
     event_bus=Depends(get_event_bus),
 ):
+    """Registra nova ação de cobrança vinculada a uma fatura. Retorna 201.
+
+    Args:
+        data: Dados da cobrança (tipo, tom, mensagem).
+        cobranca_repo: Repositório de cobranças (injetado).
+        fatura_repo: Repositório de faturas (injetado).
+        event_bus: Barramento de eventos (injetado).
+
+    Returns:
+        CobrancaResponse com os dados da cobrança criada.
+    """
     return await cobranca_service.create_cobranca(
         cobranca_repo, fatura_repo, data, event_bus=event_bus
     )
@@ -46,6 +59,19 @@ async def list_cobrancas(
     offset: int = Query(0, ge=0, description="Pular N itens"),
     repo=Depends(get_cobranca_repository),
 ):
+    """Lista cobranças com filtros por período, cliente e fatura.
+
+    Args:
+        periodo: Período em dias para filtrar (ex: 7d, 30d).
+        cliente_id: ID do cliente para filtrar (opcional).
+        fatura_id: ID da fatura para filtrar (opcional).
+        limit: Quantidade máxima de itens por página.
+        offset: Deslocamento para paginação.
+        repo: Repositório de cobranças (injetado).
+
+    Returns:
+        ListResponse com dados paginados das cobranças.
+    """
     items, total = await cobranca_service.list_cobrancas(
         repo,
         periodo=periodo,
@@ -69,6 +95,15 @@ async def list_cobrancas(
     description="Retorna toda a timeline de cobranças enviadas para uma fatura específica, ordenadas da mais recente para a mais antiga.",
 )
 async def get_historico(fatura_id: str, repo=Depends(get_cobranca_repository)):
+    """Retorna timeline de cobranças de uma fatura, da mais recente à mais antiga.
+
+    Args:
+        fatura_id: Identificador único da fatura.
+        repo: Repositório de cobranças (injetado).
+
+    Returns:
+        ListResponse com histórico completo de cobranças.
+    """
     items = await cobranca_service.get_historico(repo, fatura_id)
     return ListResponse(
         data=[CobrancaResponse.model_validate(c) for c in items],
@@ -83,6 +118,15 @@ async def get_historico(fatura_id: str, repo=Depends(get_cobranca_repository)):
     description="Pausa a régua de cobrança para esta fatura. Nenhuma mensagem será enviada enquanto estiver pausada.",
 )
 async def pausar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
+    """Pausa a régua de cobrança. Retorna 404 se não existir.
+
+    Args:
+        cobranca_id: Identificador único da cobrança.
+        repo: Repositório de cobranças (injetado).
+
+    Returns:
+        CobrancaResponse com status atualizado para pausado.
+    """
     cobranca = await cobranca_service.pausar(repo, cobranca_id)
     if not cobranca:
         raise APIError(
@@ -101,6 +145,15 @@ async def pausar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
     description="Retoma uma cobrança que estava pausada. A régua volta a funcionar normalmente.",
 )
 async def retomar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
+    """Retoma cobrança pausada. Retorna 404 se não existir.
+
+    Args:
+        cobranca_id: Identificador único da cobrança.
+        repo: Repositório de cobranças (injetado).
+
+    Returns:
+        CobrancaResponse com status atualizado para ativo.
+    """
     cobranca = await cobranca_service.retomar(repo, cobranca_id)
     if not cobranca:
         raise APIError(

@@ -1,3 +1,5 @@
+"""Configuração do banco de dados e factories de injeção de dependência."""
+
 from fastapi import Request
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 

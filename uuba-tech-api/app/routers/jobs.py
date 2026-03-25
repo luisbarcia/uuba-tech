@@ -1,3 +1,5 @@
+"""Router de jobs — tarefas agendáveis (transição de vencidas, régua de cobrança)."""
+
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -25,6 +27,14 @@ router = APIRouter(
     ),
 )
 async def transicionar_vencidas(repo=Depends(get_fatura_repository)):
+    """Transiciona faturas pendentes com vencimento ultrapassado para vencido. Idempotente.
+
+    Args:
+        repo: Repositório de faturas (injetado).
+
+    Returns:
+        Dict com quantidade de faturas transicionadas.
+    """
     count = await fatura_service.transicionar_faturas_vencidas(repo)
     return {
         "status": "ok",
@@ -52,6 +62,17 @@ async def processar_regua(
         "Ex: 2026-03-25T10:00:00Z",
     ),
 ):
+    """Executa um ciclo da régua de cobrança automática. Idempotente.
+
+    Args:
+        request: Request HTTP (usado para extrair tenant_id).
+        db: Sessão assíncrona do banco (injetada).
+        event_bus: Barramento de eventos (injetado).
+        simular_horario: Datetime ISO 8601 para simular horário em testes.
+
+    Returns:
+        Dict com resultado do processamento (cobranças criadas, ignoradas).
+    """
     agora = None
     if simular_horario:
         agora = datetime.fromisoformat(simular_horario)

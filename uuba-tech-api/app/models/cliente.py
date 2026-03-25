@@ -1,3 +1,5 @@
+"""Modelo SQLAlchemy do cliente (tabela ``clientes``)."""
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Index

@@ -136,7 +136,18 @@ async def processar_regua(
 
 
 def _proximo_passo(passos: list[ReguaPasso], dias_atraso: int) -> ReguaPasso | None:
-    """Retorna o passo mais avançado aplicável para os dias de atraso."""
+    """Retorna o passo mais avançado aplicável para os dias de atraso.
+
+    Filtra passos cujo ``dias_atraso`` seja <= ao atraso real e retorna
+    aquele com maior ``dias_atraso`` (mais avançado na régua).
+
+    Args:
+        passos: Lista de passos configurados na régua.
+        dias_atraso: Dias de atraso da fatura em relação ao vencimento.
+
+    Returns:
+        O passo aplicável mais avançado, ou None se nenhum se aplica.
+    """
     aplicaveis = [p for p in passos if p.dias_atraso <= dias_atraso]
     if not aplicaveis:
         return None
@@ -144,7 +155,19 @@ def _proximo_passo(passos: list[ReguaPasso], dias_atraso: int) -> ReguaPasso | N
 
 
 def _renderizar_template(template: str, fatura: Fatura, dias_atraso: int) -> str:
-    """Substitui variáveis no template da mensagem."""
+    """Substitui variáveis no template da mensagem.
+
+    Variáveis suportadas: ``{numero_nf}``, ``{valor}``, ``{vencimento}``,
+    ``{dias_atraso}``, ``{link_pagamento}``.
+
+    Args:
+        template: String com placeholders no formato ``str.format``.
+        fatura: Fatura cujos dados preencherão o template.
+        dias_atraso: Dias de atraso para inserção no template.
+
+    Returns:
+        Mensagem renderizada pronta para envio.
+    """
     valor_reais = f"{fatura.valor / 100:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
     venc = fatura.vencimento
