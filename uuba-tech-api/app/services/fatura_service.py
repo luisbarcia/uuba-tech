@@ -1,6 +1,6 @@
 """Serviço de faturas.
 
-Transições de status delegadas ao Value Object FaturaStatus (DP-01).
+Transições de status delegadas ao FaturaAggregate (DP-02).
 """
 
 import logging
@@ -15,6 +15,7 @@ from app.schemas.fatura import FaturaCreate, FaturaUpdate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
 from app.domain.value_objects.fatura_status import FaturaStatus
+from app.domain.aggregates.fatura import FaturaAggregate
 
 logger = logging.getLogger("uuba")
 
@@ -73,7 +74,7 @@ async def get_fatura(db: AsyncSession, fatura_id: str) -> Fatura | None:
 
 
 async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) -> Fatura | None:
-    """Atualiza fatura (patch parcial). Valida transições via FaturaStatus Value Object.
+    """Atualiza fatura (patch parcial). Valida transições via FaturaAggregate (DP-02).
 
     Raises:
         APIError 409: Se a transição de status for inválida.
@@ -88,19 +89,23 @@ async def update_fatura(db: AsyncSession, fatura_id: str, data: FaturaUpdate) ->
             if isinstance(update_data["status"], FaturaStatus)
             else FaturaStatus(update_data["status"])
         )
-        current = FaturaStatus(fatura.status)
-        if not current.pode_transicionar_para(novo):
-            allowed = [s.value for s in current.transicoes_validas]
-            raise APIError(
-                409,
-                "transicao-invalida",
-                "Transição de status inválida",
-                f"Não é possível mudar de '{current.value}' para '{novo.value}'. "
-                f"Transições permitidas: {allowed or 'nenhuma (status terminal)'}.",
-            )
-        if novo == FaturaStatus.PAGO:
-            update_data["pago_em"] = datetime.now(timezone.utc)
-        update_data["status"] = novo.value
+        aggregate = FaturaAggregate.from_primitives(
+            id=fatura.id,
+            cliente_id=fatura.cliente_id,
+            valor=fatura.valor,
+            moeda=fatura.moeda,
+            status=fatura.status,
+            vencimento=fatura.vencimento,
+            descricao=fatura.descricao,
+            numero_nf=fatura.numero_nf,
+            pagamento_link=fatura.pagamento_link,
+            pago_em=fatura.pago_em,
+            promessa_pagamento=fatura.promessa_pagamento,
+        )
+        aggregate.transicionar(novo)  # levanta APIError se inválido
+        update_data["status"] = aggregate.status.value
+        if aggregate.pago_em and not fatura.pago_em:
+            update_data["pago_em"] = aggregate.pago_em
     for key, value in update_data.items():
         setattr(fatura, key, value)
     await db.commit()

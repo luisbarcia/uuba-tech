@@ -1,3 +1,8 @@
+"""Serviço de cobranças.
+
+Invariante: fatura em status terminal não aceita novas cobranças (DP-02).
+"""
+
 import re
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import select, func
@@ -5,14 +10,44 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cobranca import Cobranca
+from app.models.fatura import Fatura
 from app.schemas.cobranca import CobrancaCreate
 from app.exceptions import APIError
 from app.utils.ids import generate_id
 from app.domain.value_objects.cobranca_enums import CobrancaStatus
+from app.domain.aggregates.fatura import FaturaAggregate
 
 
 async def create_cobranca(db: AsyncSession, data: CobrancaCreate) -> Cobranca:
-    """Registra uma nova cobrança com timestamp de envio. Levanta APIError 409 se fatura ou cliente não existir."""
+    """Registra uma nova cobrança. Verifica invariante do aggregate antes de persistir.
+
+    Raises:
+        APIError 409: Se fatura está em status terminal ou FK inválida.
+    """
+    result = await db.execute(select(Fatura).where(Fatura.id == data.fatura_id))
+    fatura = result.scalar_one_or_none()
+    if fatura:
+        aggregate = FaturaAggregate.from_primitives(
+            id=fatura.id,
+            cliente_id=fatura.cliente_id,
+            valor=fatura.valor,
+            moeda=fatura.moeda,
+            status=fatura.status,
+            vencimento=fatura.vencimento,
+            descricao=fatura.descricao,
+            numero_nf=fatura.numero_nf,
+            pagamento_link=fatura.pagamento_link,
+            pago_em=fatura.pago_em,
+            promessa_pagamento=fatura.promessa_pagamento,
+        )
+        if not aggregate.pode_receber_cobranca():
+            raise APIError(
+                409,
+                "fatura-terminal",
+                "Fatura em status terminal",
+                f"Fatura {data.fatura_id} está '{aggregate.status.value}' "
+                f"e não aceita novas cobranças.",
+            )
     cobranca = Cobranca(
         id=generate_id("cob"),
         enviado_em=datetime.now(timezone.utc),
