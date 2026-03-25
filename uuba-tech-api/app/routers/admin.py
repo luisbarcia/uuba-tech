@@ -10,7 +10,9 @@ from app.models.cliente import Cliente
 from app.models.cobranca import Cobranca
 from app.models.fatura import Fatura
 from app.schemas.common import ListResponse, PaginationMeta
+from app.models.regua import Regua, ReguaPasso
 from app.seed import build_seed_data
+from app.seed_regua import build_regua_seed
 from app.services import audit_service, cleanup_service
 
 router = APIRouter(
@@ -145,3 +147,34 @@ async def get_audit(
             offset=offset,
         ),
     )
+
+
+@router.post(
+    "/seed-regua",
+    summary="Criar régua padrão UÚBA",
+    description="Cria (ou recria) a régua de cobrança padrão com 5 passos progressivos.",
+)
+async def seed_regua(db: AsyncSession = Depends(get_db)):
+    from sqlalchemy import select, delete as sql_delete
+
+    data = build_regua_seed()
+
+    # Idempotente: remove régua existente e recria
+    existing = await db.execute(select(Regua).where(Regua.id == data["regua"]["id"]))
+    if existing.scalar_one_or_none():
+        await db.execute(sql_delete(ReguaPasso).where(ReguaPasso.regua_id == data["regua"]["id"]))
+        await db.execute(sql_delete(Regua).where(Regua.id == data["regua"]["id"]))
+        await db.commit()
+
+    db.add(Regua(**data["regua"]))
+    await db.commit()
+
+    for passo in data["passos"]:
+        db.add(ReguaPasso(**passo))
+    await db.commit()
+
+    return {
+        "status": "ok",
+        "regua": data["regua"]["nome"],
+        "passos": len(data["passos"]),
+    }

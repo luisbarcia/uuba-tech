@@ -1,8 +1,11 @@
-from fastapi import APIRouter, Depends
+from datetime import datetime, timezone
 
-from app.database import get_fatura_repository
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.auth.api_key import verify_api_key
-from app.services import fatura_service
+from app.database import get_db, get_event_bus, get_fatura_repository
+from app.services import fatura_service, regua_service
 
 router = APIRouter(
     prefix="/api/v1/jobs",
@@ -27,3 +30,30 @@ async def transicionar_vencidas(repo=Depends(get_fatura_repository)):
         "status": "ok",
         "transicionadas": count,
     }
+
+
+@router.post(
+    "/processar-regua",
+    summary="Processar régua de cobrança",
+    description=(
+        "Executa um ciclo da régua de cobrança automática. Para cada fatura "
+        "vencida, identifica o próximo passo, verifica compliance (horário, "
+        "frequência) e registra a cobrança. Idempotente — não repete passos "
+        "já executados."
+    ),
+)
+async def processar_regua(
+    db: AsyncSession = Depends(get_db),
+    event_bus=Depends(get_event_bus),
+    simular_horario: str | None = Query(
+        None,
+        description="ISO 8601 datetime para simular horário (debug/testes). "
+        "Ex: 2026-03-25T10:00:00Z",
+    ),
+):
+    agora = None
+    if simular_horario:
+        agora = datetime.fromisoformat(simular_horario)
+        if agora.tzinfo is None:
+            agora = agora.replace(tzinfo=timezone.utc)
+    return await regua_service.processar_regua(db, event_bus=event_bus, agora=agora)
