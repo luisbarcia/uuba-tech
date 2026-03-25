@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.database import get_fatura_repository
 from app.auth.api_key import verify_api_key
 from app.exceptions import APIError
 from app.schemas.fatura import FaturaCreate, FaturaUpdate, FaturaResponse
@@ -22,8 +21,8 @@ router = APIRouter(
     summary="Registrar fatura",
     description="Cria uma nova fatura a receber vinculada a um cliente. O valor deve ser em centavos (R$ 2.500,00 = `250000`).",
 )
-async def create_fatura(data: FaturaCreate, db: AsyncSession = Depends(get_db)):
-    return await fatura_service.create_fatura(db, data)
+async def create_fatura(data: FaturaCreate, repo=Depends(get_fatura_repository)):
+    return await fatura_service.create_fatura(repo, data)
 
 
 @router.get(
@@ -40,10 +39,10 @@ async def list_faturas(
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
-    db: AsyncSession = Depends(get_db),
+    repo=Depends(get_fatura_repository),
 ):
     faturas, total = await fatura_service.list_faturas(
-        db, status=status, cliente_id=cliente_id, limit=limit, offset=offset
+        repo, status=status, cliente_id=cliente_id, limit=limit, offset=offset
     )
     return ListResponse(
         data=[FaturaResponse.model_validate(f) for f in faturas],
@@ -59,8 +58,8 @@ async def list_faturas(
     summary="Buscar fatura",
     description="Retorna os dados completos de uma fatura pelo ID.",
 )
-async def get_fatura(fatura_id: str, db: AsyncSession = Depends(get_db)):
-    fatura = await fatura_service.get_fatura(db, fatura_id)
+async def get_fatura(fatura_id: str, repo=Depends(get_fatura_repository)):
+    fatura = await fatura_service.get_fatura(repo, fatura_id)
     if not fatura:
         raise APIError(
             404,
@@ -77,8 +76,8 @@ async def get_fatura(fatura_id: str, db: AsyncSession = Depends(get_db)):
     summary="Atualizar fatura",
     description="Atualiza status, promessa de pagamento, ou link de pagamento. Ao marcar como `pago`, o campo `pago_em` é preenchido automaticamente.",
 )
-async def update_fatura(fatura_id: str, data: FaturaUpdate, db: AsyncSession = Depends(get_db)):
-    fatura = await fatura_service.update_fatura(db, fatura_id, data)
+async def update_fatura(fatura_id: str, data: FaturaUpdate, repo=Depends(get_fatura_repository)):
+    fatura = await fatura_service.update_fatura(repo, fatura_id, data)
     if not fatura:
         raise APIError(
             404,

@@ -7,7 +7,10 @@ from sqlalchemy.pool import StaticPool
 
 from app.models.base import Base
 from app.main import app
-from app.database import get_db
+from app.database import get_db, get_fatura_repository, get_cobranca_repository, get_cliente_repository
+from app.infrastructure.repositories.sqlalchemy_fatura_repo import SqlAlchemyFaturaRepository
+from app.infrastructure.repositories.sqlalchemy_cobranca_repo import SqlAlchemyCobrancaRepository
+from app.infrastructure.repositories.sqlalchemy_cliente_repo import SqlAlchemyClienteRepository
 from app.config import settings
 
 API_KEY = settings.api_key
@@ -46,7 +49,22 @@ async def client(engine):
         async with factory() as session:
             yield session
 
+    async def override_fatura_repo():
+        async with factory() as session:
+            yield SqlAlchemyFaturaRepository(session)
+
+    async def override_cobranca_repo():
+        async with factory() as session:
+            yield SqlAlchemyCobrancaRepository(session)
+
+    async def override_cliente_repo():
+        async with factory() as session:
+            yield SqlAlchemyClienteRepository(session)
+
     app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_fatura_repository] = override_fatura_repo
+    app.dependency_overrides[get_cobranca_repository] = override_cobranca_repo
+    app.dependency_overrides[get_cliente_repository] = override_cliente_repo
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",

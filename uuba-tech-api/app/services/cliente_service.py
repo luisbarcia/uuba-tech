@@ -1,13 +1,16 @@
+"""Serviço de clientes.
+
+Persistência delegada ao ClienteRepository (DP-04).
+"""
+
 from datetime import datetime, timezone
-from sqlalchemy import select, func
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cliente import Cliente
 from app.models.fatura import Fatura
 from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteMetricas
-from app.exceptions import APIError
 from app.utils.ids import generate_id
+from app.domain.repositories.cliente_repository import ClienteRepository
+from app.domain.repositories.fatura_repository import FaturaRepository
 
 
 def _aware(dt: datetime) -> datetime:
@@ -17,80 +20,67 @@ def _aware(dt: datetime) -> datetime:
     return dt
 
 
-async def create_cliente(db: AsyncSession, data: ClienteCreate) -> Cliente:
+async def create_cliente(repo: ClienteRepository, data: ClienteCreate) -> Cliente:
     """Cria um novo cliente. Levanta APIError 409 se documento já existir."""
     cliente = Cliente(id=generate_id("cli"), **data.model_dump())
-    db.add(cliente)
-    try:
-        await db.commit()
-    except IntegrityError:
-        await db.rollback()
-        raise APIError(
-            409,
-            "documento-duplicado",
-            "Documento já cadastrado",
-            f"Já existe um cliente com o documento {data.documento}.",
-        )
-    await db.refresh(cliente)
-    return cliente
+    return await repo.create(cliente)
 
 
 async def list_clientes(
-    db: AsyncSession,
+    repo: ClienteRepository,
     telefone: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[Cliente], int]:
-    """Lista clientes com paginação. Filtra por telefone se informado.
+    """Lista clientes com paginação.
 
     Returns:
         Tupla (lista de clientes, total de registros).
     """
-    query = select(Cliente)
-    count_q = select(func.count(Cliente.id))
-    if telefone:
-        query = query.where(Cliente.telefone == telefone)
-        count_q = count_q.where(Cliente.telefone == telefone)
-    total = (await db.execute(count_q)).scalar() or 0
-    result = await db.execute(query.order_by(Cliente.nome).limit(limit).offset(offset))
-    return result.scalars().all(), total
+    return await repo.list_by_filters(
+        telefone=telefone, limit=limit, offset=offset
+    )
 
 
-async def get_cliente(db: AsyncSession, cliente_id: str) -> Cliente | None:
+async def get_cliente(repo: ClienteRepository, cliente_id: str) -> Cliente | None:
     """Busca cliente por ID. Retorna None se não encontrado."""
-    result = await db.execute(select(Cliente).where(Cliente.id == cliente_id))
-    return result.scalar_one_or_none()
+    return await repo.get_by_id(cliente_id)
 
 
-async def update_cliente(db: AsyncSession, cliente_id: str, data: ClienteUpdate) -> Cliente | None:
+async def update_cliente(
+    repo: ClienteRepository, cliente_id: str, data: ClienteUpdate
+) -> Cliente | None:
     """Atualiza campos do cliente (patch parcial). Retorna None se não encontrado."""
-    cliente = await get_cliente(db, cliente_id)
+    cliente = await repo.get_by_id(cliente_id)
     if not cliente:
         return None
     update_data = data.model_dump(exclude_unset=True)
     for key, value in update_data.items():
         setattr(cliente, key, value)
-    await db.commit()
-    await db.refresh(cliente)
-    return cliente
+    return await repo.update(cliente)
 
 
-async def get_metricas(db: AsyncSession, cliente_id: str) -> ClienteMetricas:
+async def get_metricas(
+    fatura_repo: FaturaRepository, cliente_id: str
+) -> ClienteMetricas:
     """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
     now = datetime.now(timezone.utc)
-    result = await db.execute(select(Fatura).where(Fatura.cliente_id == cliente_id))
-    faturas = result.scalars().all()
+    faturas_list, _ = await fatura_repo.list_by_filters(
+        cliente_id=cliente_id, limit=10000
+    )
 
-    em_aberto = [f for f in faturas if f.status in ("pendente", "vencido")]
+    em_aberto = [f for f in faturas_list if f.status in ("pendente", "vencido")]
     vencidas = [f for f in em_aberto if _aware(f.vencimento) < now]
 
     total_em_aberto = sum(f.valor for f in em_aberto)
     total_vencido = sum(f.valor for f in vencidas)
 
     dso_dias = 0.0
-    pagas = [f for f in faturas if f.status == "pago" and f.pago_em]
+    pagas = [f for f in faturas_list if f.status == "pago" and f.pago_em]
     if pagas:
-        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
+        total_dias = sum(
+            (_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas
+        )
         dso_dias = total_dias / len(pagas)
 
     return ClienteMetricas(

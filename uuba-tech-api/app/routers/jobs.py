@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db
+from app.database import get_fatura_repository
 from app.auth.api_key import verify_api_key
 from app.services import fatura_service
 
@@ -22,8 +21,8 @@ router = APIRouter(
         "causa efeitos colaterais."
     ),
 )
-async def transicionar_vencidas(db: AsyncSession = Depends(get_db)):
-    count = await fatura_service.transicionar_faturas_vencidas(db)
+async def transicionar_vencidas(repo=Depends(get_fatura_repository)):
+    count = await fatura_service.transicionar_faturas_vencidas(repo)
     return {
         "status": "ok",
         "transicionadas": count,
