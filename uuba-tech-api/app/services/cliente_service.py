@@ -6,7 +6,6 @@ Persistência delegada ao ClienteRepository (DP-04).
 from datetime import datetime, timezone
 
 from app.models.cliente import Cliente
-from app.models.fatura import Fatura
 from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteMetricas
 from app.utils.ids import generate_id
 from app.domain.repositories.cliente_repository import ClienteRepository

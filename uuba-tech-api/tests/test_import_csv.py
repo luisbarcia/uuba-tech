@@ -1,6 +1,5 @@
 """Testes do endpoint POST /api/v1/import/csv."""
 
-import pytest
 from httpx import AsyncClient
 
 from tests.conftest import AUTH, create_test_cliente

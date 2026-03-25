@@ -110,7 +110,6 @@ async def import_csv(
     sep = _detect_separator(lines[0])
     reader = csv.DictReader(io.StringIO(text), delimiter=sep)
 
-    fieldnames = set(reader.fieldnames or [])
     # Normalize headers (strip whitespace, lowercase)
     header_map = {f.strip().lower(): f for f in (reader.fieldnames or [])}
     missing = REQUIRED_COLUMNS - set(header_map.keys())
