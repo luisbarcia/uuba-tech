@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = False
 
+    # LGPD: Períodos de retenção (Art. 15/16)
+    retencao_faturas_anos: int = 5
+    retencao_mensagens_anos: int = 2
+    retencao_clientes_inativos_anos: int = 5
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

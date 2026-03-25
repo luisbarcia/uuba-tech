@@ -57,6 +57,18 @@ async def update_cliente(
     return await repo.update(cliente)
 
 
+async def anonimizar_cliente(repo: ClienteRepository, cliente_id: str) -> bool:
+    """Anonimiza dados PII do cliente e mensagens de cobrança (LGPD Art. 18 VI).
+
+    Returns:
+        True se anonimizado, False se não encontrado.
+    """
+    anonimizado = await repo.anonimizar(cliente_id)
+    if anonimizado:
+        await repo.anonimizar_mensagens(cliente_id)
+    return anonimizado
+
+
 async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> ClienteMetricas:
     """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
     now = datetime.now(timezone.utc)

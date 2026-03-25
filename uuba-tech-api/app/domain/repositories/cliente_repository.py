@@ -34,5 +34,19 @@ class ClienteRepository(Protocol):
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Cliente], int]:
-        """Lista clientes com filtros e paginação."""
+        """Lista clientes com filtros e paginação. Exclui deletados."""
+        ...
+
+    async def anonimizar(self, cliente_id: str) -> bool:
+        """Anonimiza dados PII do cliente (LGPD Art. 18 VI).
+
+        Retorna True se anonimizado, False se não encontrado.
+        """
+        ...
+
+    async def anonimizar_mensagens(self, cliente_id: str) -> int:
+        """Remove mensagens de cobrança do cliente (LGPD).
+
+        Retorna quantidade de cobranças anonimizadas.
+        """
         ...

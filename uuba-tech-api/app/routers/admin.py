@@ -2,14 +2,15 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.auth.api_key import verify_api_key
 from app.config import settings
 from app.database import get_db
-from app.auth.api_key import verify_api_key
 from app.exceptions import APIError
 from app.models.cliente import Cliente
-from app.models.fatura import Fatura
 from app.models.cobranca import Cobranca
+from app.models.fatura import Fatura
 from app.seed import build_seed_data
+from app.services import cleanup_service
 
 router = APIRouter(
     prefix="/api/v1/admin",
@@ -94,3 +95,15 @@ async def reset_database(
             "clientes": r_cli.rowcount,
         },
     }
+
+
+@router.post(
+    "/cleanup",
+    summary="Limpeza de dados conforme LGPD",
+    description="Executa política de retenção: anonimiza clientes inativos "
+    "e remove mensagens de cobranças de faturas resolvidas além do período de retenção. "
+    "Configurável via env vars RETENCAO_FATURAS_ANOS, RETENCAO_MENSAGENS_ANOS, "
+    "RETENCAO_CLIENTES_INATIVOS_ANOS.",
+)
+async def cleanup(db: AsyncSession = Depends(get_db)):
+    return await cleanup_service.executar_cleanup(db)

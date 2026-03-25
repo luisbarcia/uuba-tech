@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 
-from app.database import get_cliente_repository, get_fatura_repository
 from app.auth.api_key import verify_api_key
+from app.database import get_cliente_repository, get_fatura_repository
 from app.exceptions import APIError
-from app.schemas.cliente import ClienteCreate, ClienteUpdate, ClienteResponse, ClienteMetricas
+from app.schemas.cliente import ClienteCreate, ClienteMetricas, ClienteResponse, ClienteUpdate
 from app.schemas.common import ListResponse, PaginationMeta
 from app.services import cliente_service
 
@@ -86,6 +86,26 @@ async def update_cliente(
             f"Cliente {cliente_id} não existe.",
         )
     return cliente
+
+
+@router.delete(
+    "/{cliente_id}",
+    status_code=204,
+    summary="Anonimizar cliente (LGPD)",
+    description="Anonimiza dados pessoais do cliente conforme Art. 18 VI da LGPD. "
+    "Nome, documento, email e telefone são removidos. Faturas e cobranças "
+    "mantêm integridade referencial mas mensagens são apagadas.",
+)
+async def delete_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
+    anonimizado = await cliente_service.anonimizar_cliente(repo, cliente_id)
+    if not anonimizado:
+        raise APIError(
+            404,
+            "cliente-nao-encontrado",
+            "Cliente não encontrado",
+            f"Cliente {cliente_id} não existe.",
+        )
+    return Response(status_code=204)
 
 
 @router.get(
