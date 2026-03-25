@@ -17,6 +17,7 @@ class AuditLog(Base):
     __tablename__ = "audit_log"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(20), index=True)
     acao: Mapped[str] = mapped_column(String(30))  # criar, ler, atualizar, deletar
     recurso: Mapped[str] = mapped_column(String(30))  # cliente, fatura, cobranca
     recurso_id: Mapped[str | None] = mapped_column(String(20), nullable=True)

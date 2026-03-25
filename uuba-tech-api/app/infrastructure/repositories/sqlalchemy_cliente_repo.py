@@ -1,9 +1,9 @@
-"""Implementação SQLAlchemy do ClienteRepository."""
+"""Implementação SQLAlchemy do ClienteRepository (multi-tenant)."""
 
 import hashlib
 from datetime import datetime, timezone
 
-from sqlalchemy import select, func, update
+from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,30 +13,29 @@ from app.models.cobranca import Cobranca
 
 
 class SqlAlchemyClienteRepository:
-    """Repositório de Clientes via SQLAlchemy AsyncSession."""
+    """Repositório de Clientes via SQLAlchemy AsyncSession — filtrado por tenant."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str) -> None:
         self._session = session
+        self._tenant_id = tenant_id
+
+    def _base_filter(self):
+        return (Cliente.tenant_id == self._tenant_id, Cliente.deletado_em.is_(None))
 
     async def get_by_id(self, cliente_id: str) -> Cliente | None:
         result = await self._session.execute(
-            select(Cliente).where(
-                Cliente.id == cliente_id,
-                Cliente.deletado_em.is_(None),
-            )
+            select(Cliente).where(Cliente.id == cliente_id, *self._base_filter())
         )
         return result.scalar_one_or_none()
 
     async def get_by_documento(self, documento: str) -> Cliente | None:
         result = await self._session.execute(
-            select(Cliente).where(
-                Cliente.documento == documento,
-                Cliente.deletado_em.is_(None),
-            )
+            select(Cliente).where(Cliente.documento == documento, *self._base_filter())
         )
         return result.scalar_one_or_none()
 
     async def create(self, cliente: Cliente) -> Cliente:
+        cliente.tenant_id = self._tenant_id
         self._session.add(cliente)
         try:
             await self._session.commit()
@@ -63,9 +62,9 @@ class SqlAlchemyClienteRepository:
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Cliente], int]:
-        base = Cliente.deletado_em.is_(None)
-        query = select(Cliente).where(base)
-        count_q = select(func.count(Cliente.id)).where(base)
+        base = self._base_filter()
+        query = select(Cliente).where(*base)
+        count_q = select(func.count(Cliente.id)).where(*base)
 
         if telefone:
             query = query.where(Cliente.telefone == telefone)
@@ -80,10 +79,7 @@ class SqlAlchemyClienteRepository:
     async def anonimizar(self, cliente_id: str) -> bool:
         """Anonimiza PII do cliente (LGPD Art. 18 VI)."""
         result = await self._session.execute(
-            select(Cliente).where(
-                Cliente.id == cliente_id,
-                Cliente.deletado_em.is_(None),
-            )
+            select(Cliente).where(Cliente.id == cliente_id, *self._base_filter())
         )
         cliente = result.scalar_one_or_none()
         if not cliente:
@@ -101,7 +97,9 @@ class SqlAlchemyClienteRepository:
     async def anonimizar_mensagens(self, cliente_id: str) -> int:
         """Remove mensagens de cobrança do cliente (LGPD)."""
         result = await self._session.execute(
-            update(Cobranca).where(Cobranca.cliente_id == cliente_id).values(mensagem=None)
+            update(Cobranca)
+            .where(Cobranca.cliente_id == cliente_id, Cobranca.tenant_id == self._tenant_id)
+            .values(mensagem=None)
         )
         await self._session.commit()
         return result.rowcount

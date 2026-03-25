@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -154,10 +154,11 @@ async def get_audit(
     summary="Criar régua padrão UÚBA",
     description="Cria (ou recria) a régua de cobrança padrão com 5 passos progressivos.",
 )
-async def seed_regua(db: AsyncSession = Depends(get_db)):
+async def seed_regua(request: Request, db: AsyncSession = Depends(get_db)):
     from sqlalchemy import select, delete as sql_delete
 
-    data = build_regua_seed()
+    tenant_id = request.state.tenant_id
+    data = build_regua_seed(tenant_id)
 
     # Idempotente: remove régua existente e recria
     existing = await db.execute(select(Regua).where(Regua.id == data["regua"]["id"]))

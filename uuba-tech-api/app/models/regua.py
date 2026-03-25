@@ -16,6 +16,7 @@ class Regua(Base, TimestampMixin):
     __tablename__ = "reguas"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(20), index=True)
     nome: Mapped[str] = mapped_column(String(100))
     ativa: Mapped[bool] = mapped_column(Boolean, default=True)
 

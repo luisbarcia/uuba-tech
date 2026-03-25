@@ -20,6 +20,7 @@ from app.utils.ids import generate_id
 
 async def processar_regua(
     session: AsyncSession,
+    tenant_id: str,
     event_bus: EventBus | None = None,
     agora: datetime | None = None,
 ) -> dict:
@@ -31,8 +32,10 @@ async def processar_regua(
     if agora is None:
         agora = datetime.now(timezone.utc)
 
-    # Buscar régua ativa
-    result = await session.execute(select(Regua).where(Regua.ativa.is_(True)).limit(1))
+    # Buscar régua ativa do tenant
+    result = await session.execute(
+        select(Regua).where(Regua.tenant_id == tenant_id, Regua.ativa.is_(True)).limit(1)
+    )
     regua = result.scalar_one_or_none()
     if not regua:
         return {
@@ -42,8 +45,10 @@ async def processar_regua(
             "erro": "Nenhuma régua ativa encontrada",
         }
 
-    # Buscar faturas vencidas
-    result = await session.execute(select(Fatura).where(Fatura.status == "vencido"))
+    # Buscar faturas vencidas do tenant
+    result = await session.execute(
+        select(Fatura).where(Fatura.tenant_id == tenant_id, Fatura.status == "vencido")
+    )
     faturas_vencidas = result.scalars().all()
 
     cobrancas_criadas = 0
@@ -94,6 +99,7 @@ async def processar_regua(
         # Criar cobrança
         cobranca = Cobranca(
             id=generate_id("cob"),
+            tenant_id=tenant_id,
             fatura_id=fatura.id,
             cliente_id=fatura.cliente_id,
             tipo=passo.tipo,

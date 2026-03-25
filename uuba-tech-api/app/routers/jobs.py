@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.api_key import verify_api_key
@@ -43,6 +43,7 @@ async def transicionar_vencidas(repo=Depends(get_fatura_repository)):
     ),
 )
 async def processar_regua(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     event_bus=Depends(get_event_bus),
     simular_horario: str | None = Query(
@@ -56,4 +57,5 @@ async def processar_regua(
         agora = datetime.fromisoformat(simular_horario)
         if agora.tzinfo is None:
             agora = agora.replace(tzinfo=timezone.utc)
-    return await regua_service.processar_regua(db, event_bus=event_bus, agora=agora)
+    tenant_id = request.state.tenant_id
+    return await regua_service.processar_regua(db, tenant_id, event_bus=event_bus, agora=agora)

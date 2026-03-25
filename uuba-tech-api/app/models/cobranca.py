@@ -10,6 +10,7 @@ class Cobranca(Base, TimestampMixin):
     __tablename__ = "cobrancas"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)  # cob_abc123
+    tenant_id: Mapped[str] = mapped_column(String(20), index=True)
     fatura_id: Mapped[str] = mapped_column(String(20), ForeignKey("faturas.id"))
     cliente_id: Mapped[str] = mapped_column(String(20), ForeignKey("clientes.id"))
     tipo: Mapped[str] = mapped_column(String(30))

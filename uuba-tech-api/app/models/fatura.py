@@ -10,6 +10,7 @@ class Fatura(Base, TimestampMixin):
     __tablename__ = "faturas"
 
     id: Mapped[str] = mapped_column(String(20), primary_key=True)  # fat_abc123
+    tenant_id: Mapped[str] = mapped_column(String(20), index=True)
     cliente_id: Mapped[str] = mapped_column(String(20), ForeignKey("clientes.id"))
     valor: Mapped[int] = mapped_column(Integer)  # centavos
     moeda: Mapped[str] = mapped_column(String(3), default="BRL")

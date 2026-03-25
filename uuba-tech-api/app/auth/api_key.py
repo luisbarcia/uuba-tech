@@ -1,28 +1,68 @@
-from fastapi import Security
+"""Autenticação por API key com tenant lookup.
+
+Cada tenant tem sua própria API key. O middleware valida a key,
+identifica o tenant e injeta tenant_id no request.state.
+"""
+
+import hmac as _hmac
+
+from fastapi import Depends, Request, Security
 from fastapi.security import APIKeyHeader
-from app.config import settings
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db
+from app.exceptions import APIError
+from app.models.tenant import Tenant
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
+# Cache simples em memória (tenant por api_key)
+_tenant_cache: dict[str, Tenant] = {}
 
-async def verify_api_key(api_key: str | None = Security(api_key_header)) -> str:
-    """Valida a API key enviada no header ``X-API-Key``.
 
-    Usa comparação constant-time (HMAC) para prevenir timing attacks.
+async def verify_api_key(
+    request: Request,
+    api_key: str | None = Security(api_key_header),
+    db: AsyncSession = Depends(get_db),
+) -> str:
+    """Valida API key e identifica o tenant.
 
-    Args:
-        api_key: Valor do header X-API-Key (injetado pelo FastAPI Security).
-
-    Returns:
-        A API key validada.
-
-    Raises:
-        APIError: 401 se a key for ausente ou inválida.
+    Injeta ``request.state.tenant_id`` para uso nos endpoints.
+    Usa comparação constant-time para prevenir timing attacks.
     """
-    import hmac as _hmac
+    if not api_key:
+        raise APIError(
+            401,
+            "auth-invalida",
+            "Autenticação inválida",
+            "API key ausente ou inválida",
+        )
 
-    if not api_key or not _hmac.compare_digest(api_key, settings.api_key):
-        from app.exceptions import APIError
+    # Lookup no cache primeiro
+    tenant = _tenant_cache.get(api_key)
 
-        raise APIError(401, "auth-invalida", "Autenticação inválida", "API key ausente ou inválida")
+    if not tenant:
+        result = await db.execute(select(Tenant).where(Tenant.ativo.is_(True)))
+        tenants = result.scalars().all()
+        for t in tenants:
+            if _hmac.compare_digest(api_key, t.api_key):
+                tenant = t
+                _tenant_cache[api_key] = t
+                break
+
+    if not tenant:
+        raise APIError(
+            401,
+            "auth-invalida",
+            "Autenticação inválida",
+            "API key ausente ou inválida",
+        )
+
+    request.state.tenant_id = tenant.id
     return api_key
+
+
+def clear_tenant_cache() -> None:
+    """Limpa cache de tenants (útil em testes)."""
+    _tenant_cache.clear()

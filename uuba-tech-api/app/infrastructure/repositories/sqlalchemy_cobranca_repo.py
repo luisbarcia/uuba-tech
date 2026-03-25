@@ -1,27 +1,34 @@
-"""Implementação SQLAlchemy do CobrancaRepository."""
+"""Implementação SQLAlchemy do CobrancaRepository (multi-tenant)."""
 
 import re
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.cobranca import Cobranca
 from app.exceptions import APIError
+from app.models.cobranca import Cobranca
 
 
 class SqlAlchemyCobrancaRepository:
-    """Repositório de Cobranças via SQLAlchemy AsyncSession."""
+    """Repositório de Cobranças via SQLAlchemy AsyncSession — filtrado por tenant."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str) -> None:
         self._session = session
+        self._tenant_id = tenant_id
 
     async def get_by_id(self, cobranca_id: str) -> Cobranca | None:
-        result = await self._session.execute(select(Cobranca).where(Cobranca.id == cobranca_id))
+        result = await self._session.execute(
+            select(Cobranca).where(
+                Cobranca.id == cobranca_id,
+                Cobranca.tenant_id == self._tenant_id,
+            )
+        )
         return result.scalar_one_or_none()
 
     async def create(self, cobranca: Cobranca) -> Cobranca:
+        cobranca.tenant_id = self._tenant_id
         self._session.add(cobranca)
         try:
             await self._session.commit()
@@ -50,8 +57,9 @@ class SqlAlchemyCobrancaRepository:
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Cobranca], int]:
-        query = select(Cobranca)
-        count_q = select(func.count(Cobranca.id))
+        base = Cobranca.tenant_id == self._tenant_id
+        query = select(Cobranca).where(base)
+        count_q = select(func.count(Cobranca.id)).where(base)
 
         if periodo:
             match = re.fullmatch(r"(\d+)d", periodo)
@@ -83,7 +91,10 @@ class SqlAlchemyCobrancaRepository:
     async def list_by_fatura(self, fatura_id: str) -> list[Cobranca]:
         result = await self._session.execute(
             select(Cobranca)
-            .where(Cobranca.fatura_id == fatura_id)
+            .where(
+                Cobranca.fatura_id == fatura_id,
+                Cobranca.tenant_id == self._tenant_id,
+            )
             .order_by(Cobranca.created_at.desc())
         )
         return result.scalars().all()

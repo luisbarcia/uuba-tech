@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 from app.models.base import Base
 from app.models.audit_log import AuditLog  # noqa: F401 — registra tabela no metadata
 from app.models.regua import Regua, ReguaPasso  # noqa: F401
+from app.models.tenant import Tenant  # noqa: F401
 from app.main import app
 from app.database import (
     get_db,
@@ -22,8 +23,10 @@ from app.database import (
 from app.infrastructure.repositories.sqlalchemy_fatura_repo import SqlAlchemyFaturaRepository
 from app.infrastructure.repositories.sqlalchemy_cobranca_repo import SqlAlchemyCobrancaRepository
 from app.infrastructure.repositories.sqlalchemy_cliente_repo import SqlAlchemyClienteRepository
+from app.auth.api_key import clear_tenant_cache
 from app.config import settings
 
+TEST_TENANT_ID = "ten_test"
 API_KEY = settings.api_key
 AUTH = {"X-API-Key": API_KEY}
 
@@ -45,6 +48,20 @@ async def engine():
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
+    # Criar tenant de teste
+    factory = async_sessionmaker(_engine, class_=AsyncSession, expire_on_commit=False)
+    async with factory() as session:
+        session.add(
+            Tenant(
+                id=TEST_TENANT_ID,
+                nome="Tenant Teste",
+                documento="00000000000100",
+                api_key=API_KEY,
+                ativo=True,
+            )
+        )
+        await session.commit()
+
     yield _engine
 
     async with _engine.begin() as conn:
@@ -62,26 +79,30 @@ async def client(engine):
 
     async def override_fatura_repo():
         async with factory() as session:
-            yield SqlAlchemyFaturaRepository(session)
+            yield SqlAlchemyFaturaRepository(session, TEST_TENANT_ID)
 
     async def override_cobranca_repo():
         async with factory() as session:
-            yield SqlAlchemyCobrancaRepository(session)
+            yield SqlAlchemyCobrancaRepository(session, TEST_TENANT_ID)
 
     async def override_cliente_repo():
         async with factory() as session:
-            yield SqlAlchemyClienteRepository(session)
+            yield SqlAlchemyClienteRepository(session, TEST_TENANT_ID)
 
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_fatura_repository] = override_fatura_repo
     app.dependency_overrides[get_cobranca_repository] = override_cobranca_repo
     app.dependency_overrides[get_cliente_repository] = override_cliente_repo
+
+    clear_tenant_cache()
+
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://test",
     ) as ac:
         yield ac
     app.dependency_overrides.clear()
+    clear_tenant_cache()
 
 
 # --- Helpers ---

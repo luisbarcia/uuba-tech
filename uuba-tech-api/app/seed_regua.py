@@ -12,11 +12,12 @@ from app.utils.ids import generate_id
 REGUA_ID = "reg_padrao_uuba"
 
 
-def build_regua_seed() -> dict:
+def build_regua_seed(tenant_id: str) -> dict:
     """Retorna régua padrão com 5 passos progressivos."""
     return {
         "regua": {
             "id": REGUA_ID,
+            "tenant_id": tenant_id,
             "nome": "Régua Padrão UÚBA",
             "ativa": True,
         },

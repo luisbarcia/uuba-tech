@@ -1,30 +1,37 @@
-"""Implementação SQLAlchemy do FaturaRepository."""
+"""Implementação SQLAlchemy do FaturaRepository (multi-tenant)."""
 
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy import select, func, update, exists
+from sqlalchemy import exists, func, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.fatura import Fatura
 from app.domain.value_objects.fatura_status import FaturaStatus
 from app.exceptions import APIError
+from app.models.fatura import Fatura
 
 logger = logging.getLogger("uuba")
 
 
 class SqlAlchemyFaturaRepository:
-    """Repositório de Faturas via SQLAlchemy AsyncSession."""
+    """Repositório de Faturas via SQLAlchemy AsyncSession — filtrado por tenant."""
 
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, tenant_id: str) -> None:
         self._session = session
+        self._tenant_id = tenant_id
 
     async def get_by_id(self, fatura_id: str) -> Fatura | None:
-        result = await self._session.execute(select(Fatura).where(Fatura.id == fatura_id))
+        result = await self._session.execute(
+            select(Fatura).where(
+                Fatura.id == fatura_id,
+                Fatura.tenant_id == self._tenant_id,
+            )
+        )
         return result.scalar_one_or_none()
 
     async def create(self, fatura: Fatura) -> Fatura:
+        fatura.tenant_id = self._tenant_id
         self._session.add(fatura)
         try:
             await self._session.commit()
@@ -52,8 +59,9 @@ class SqlAlchemyFaturaRepository:
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[Fatura], int]:
-        query = select(Fatura)
-        count_q = select(func.count(Fatura.id))
+        base = Fatura.tenant_id == self._tenant_id
+        query = select(Fatura).where(base)
+        count_q = select(func.count(Fatura.id)).where(base)
 
         if status:
             statuses = [s.strip() for s in status.split(",")]
@@ -73,8 +81,11 @@ class SqlAlchemyFaturaRepository:
         now = datetime.now(timezone.utc)
         stmt = (
             update(Fatura)
-            .where(Fatura.status == FaturaStatus.PENDENTE.value)
-            .where(Fatura.vencimento < now)
+            .where(
+                Fatura.tenant_id == self._tenant_id,
+                Fatura.status == FaturaStatus.PENDENTE.value,
+                Fatura.vencimento < now,
+            )
             .values(status=FaturaStatus.VENCIDO.value, updated_at=now)
         )
         result = await self._session.execute(stmt)
@@ -88,6 +99,7 @@ class SqlAlchemyFaturaRepository:
             exists().where(
                 Fatura.numero_nf == numero_nf,
                 Fatura.cliente_id == cliente_id,
+                Fatura.tenant_id == self._tenant_id,
             )
         )
         result = await self._session.execute(stmt)
