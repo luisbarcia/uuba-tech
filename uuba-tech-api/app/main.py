@@ -307,13 +307,14 @@ app.add_middleware(RequestIdMiddleware)
 
 
 # --- Routers ---
-from app.routers import clientes, faturas, cobrancas, admin, jobs
+from app.routers import clientes, faturas, cobrancas, admin, jobs, import_csv
 
 app.include_router(clientes.router)
 app.include_router(faturas.router)
 app.include_router(cobrancas.router)
 app.include_router(admin.router)
 app.include_router(jobs.router)
+app.include_router(import_csv.router)
 
 
 # --- Health ---
