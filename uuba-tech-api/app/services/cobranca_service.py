@@ -2,26 +2,32 @@
 
 Invariante: fatura em status terminal não aceita novas cobranças (DP-02).
 Persistência delegada aos repositories (DP-04).
+Domain Events publicados via EventBus (DP-03).
 """
 
 from datetime import datetime, timezone
 
+from app.domain.aggregates.fatura import FaturaAggregate
+from app.domain.events.event_bus import EventBus
+from app.domain.events.fatura_events import CobrancaEnviada
+from app.domain.repositories.cobranca_repository import CobrancaRepository
+from app.domain.repositories.fatura_repository import FaturaRepository
+from app.domain.value_objects.cobranca_enums import CobrancaStatus
+from app.exceptions import APIError
 from app.models.cobranca import Cobranca
 from app.schemas.cobranca import CobrancaCreate
 from app.utils.ids import generate_id
-from app.domain.value_objects.cobranca_enums import CobrancaStatus
-from app.domain.aggregates.fatura import FaturaAggregate
-from app.domain.repositories.fatura_repository import FaturaRepository
-from app.domain.repositories.cobranca_repository import CobrancaRepository
-from app.exceptions import APIError
 
 
 async def create_cobranca(
     cobranca_repo: CobrancaRepository,
     fatura_repo: FaturaRepository,
     data: CobrancaCreate,
+    event_bus: EventBus | None = None,
 ) -> Cobranca:
     """Registra uma nova cobrança. Verifica invariante do aggregate antes de persistir.
+
+    Publica CobrancaEnviada via EventBus (DP-03) após persistência.
 
     Raises:
         APIError 409: Se fatura está em status terminal ou FK inválida.
@@ -54,7 +60,18 @@ async def create_cobranca(
         enviado_em=datetime.now(timezone.utc),
         **data.model_dump(),
     )
-    return await cobranca_repo.create(cobranca)
+    result = await cobranca_repo.create(cobranca)
+    if event_bus:
+        await event_bus.publish(
+            CobrancaEnviada(
+                cobranca_id=result.id,
+                fatura_id=data.fatura_id,
+                cliente_id=data.cliente_id,
+                canal=data.canal,
+                tom=data.tom or "",
+            )
+        )
+    return result
 
 
 async def list_cobrancas(

@@ -25,6 +25,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 
+from app.domain.events.base import DomainEvent
+from app.domain.events.fatura_events import FaturaVenceu, PagamentoConfirmado
 from app.domain.value_objects.cobranca_enums import CobrancaStatus
 from app.domain.value_objects.fatura_status import FaturaStatus
 from app.exceptions import APIError
@@ -83,6 +85,13 @@ class FaturaAggregate:
     pago_em: datetime | None
     promessa_pagamento: datetime | None
     cobrancas: list[CobrancaData] = field(default_factory=list)
+    _events: list[DomainEvent] = field(default_factory=list, repr=False)
+
+    def collect_events(self) -> list[DomainEvent]:
+        """Retorna eventos acumulados e limpa a lista interna."""
+        events = list(self._events)
+        self._events.clear()
+        return events
 
     @classmethod
     def from_primitives(
@@ -145,6 +154,31 @@ class FaturaAggregate:
         self.status = novo_status
         if novo_status == FaturaStatus.PAGO:
             self.pago_em = datetime.now(timezone.utc)
+
+        # Emitir domain events
+        if novo_status == FaturaStatus.VENCIDO:
+            now = datetime.now(timezone.utc)
+            venc = self.vencimento
+            if venc.tzinfo is None:
+                venc = venc.replace(tzinfo=timezone.utc)
+            dias = max(0, (now - venc).days)
+            self._events.append(
+                FaturaVenceu(
+                    fatura_id=self.id,
+                    cliente_id=self.cliente_id,
+                    valor_centavos=self.valor,
+                    dias_atraso=dias,
+                )
+            )
+        elif novo_status == FaturaStatus.PAGO:
+            self._events.append(
+                PagamentoConfirmado(
+                    fatura_id=self.id,
+                    cliente_id=self.cliente_id,
+                    valor_centavos=self.valor,
+                    meio_pagamento="",  # Preenchido pelo service quando disponível
+                )
+            )
 
     def pode_receber_cobranca(self) -> bool:
         """Verifica se a fatura aceita novas cobranças (não terminal)."""

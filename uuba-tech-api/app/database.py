@@ -1,8 +1,12 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine, AsyncSession
 from app.config import settings
+from app.infrastructure.event_bus import InMemoryEventBus
 
 engine = create_async_engine(settings.database_url, echo=settings.debug)
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+# Singleton EventBus — substituído por PgNotifyEventBus em DP-09
+_event_bus = InMemoryEventBus()
 
 
 async def get_db():
@@ -42,3 +46,8 @@ async def get_cliente_repository():
 
     async with async_session() as session:
         yield SqlAlchemyClienteRepository(session)
+
+
+def get_event_bus() -> InMemoryEventBus:
+    """DI factory para EventBus (DP-03). Retorna singleton."""
+    return _event_bus

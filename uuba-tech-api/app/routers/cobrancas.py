@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.database import get_cobranca_repository, get_fatura_repository
+from app.database import get_cobranca_repository, get_event_bus, get_fatura_repository
 from app.auth.api_key import verify_api_key
 from app.exceptions import APIError
 from app.schemas.cobranca import CobrancaCreate, CobrancaResponse
@@ -25,8 +25,11 @@ async def create_cobranca(
     data: CobrancaCreate,
     cobranca_repo=Depends(get_cobranca_repository),
     fatura_repo=Depends(get_fatura_repository),
+    event_bus=Depends(get_event_bus),
 ):
-    return await cobranca_service.create_cobranca(cobranca_repo, fatura_repo, data)
+    return await cobranca_service.create_cobranca(
+        cobranca_repo, fatura_repo, data, event_bus=event_bus
+    )
 
 
 @router.get(

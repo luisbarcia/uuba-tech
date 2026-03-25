@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 
-from app.database import get_fatura_repository
+from app.database import get_event_bus, get_fatura_repository
 from app.auth.api_key import verify_api_key
 from app.exceptions import APIError
 from app.schemas.fatura import FaturaCreate, FaturaUpdate, FaturaResponse
@@ -76,8 +76,13 @@ async def get_fatura(fatura_id: str, repo=Depends(get_fatura_repository)):
     summary="Atualizar fatura",
     description="Atualiza status, promessa de pagamento, ou link de pagamento. Ao marcar como `pago`, o campo `pago_em` é preenchido automaticamente.",
 )
-async def update_fatura(fatura_id: str, data: FaturaUpdate, repo=Depends(get_fatura_repository)):
-    fatura = await fatura_service.update_fatura(repo, fatura_id, data)
+async def update_fatura(
+    fatura_id: str,
+    data: FaturaUpdate,
+    repo=Depends(get_fatura_repository),
+    event_bus=Depends(get_event_bus),
+):
+    fatura = await fatura_service.update_fatura(repo, fatura_id, data, event_bus=event_bus)
     if not fatura:
         raise APIError(
             404,
