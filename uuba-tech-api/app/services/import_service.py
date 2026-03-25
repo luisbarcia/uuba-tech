@@ -150,11 +150,7 @@ async def import_csv(
         try:
             doc = Documento(doc_raw)
         except (ValueError, TypeError) as e:
-            errors.append(
-                ImportRowError(
-                    linha=i, campo="documento", valor=doc_raw, motivo=str(e)
-                )
-            )
+            errors.append(ImportRowError(linha=i, campo="documento", valor=doc_raw, motivo=str(e)))
 
         # Validar valor
         valor_raw = norm_row.get("valor", "")
@@ -164,9 +160,7 @@ async def import_csv(
             if valor_centavos <= 0:
                 raise ValueError("Valor deve ser maior que zero.")
         except ValueError as e:
-            errors.append(
-                ImportRowError(linha=i, campo="valor", valor=valor_raw, motivo=str(e))
-            )
+            errors.append(ImportRowError(linha=i, campo="valor", valor=valor_raw, motivo=str(e)))
 
         # Validar vencimento
         venc_raw = norm_row.get("vencimento", "")
@@ -175,9 +169,7 @@ async def import_csv(
             vencimento = _parse_date(venc_raw)
         except ValueError as e:
             errors.append(
-                ImportRowError(
-                    linha=i, campo="vencimento", valor=venc_raw, motivo=str(e)
-                )
+                ImportRowError(linha=i, campo="vencimento", valor=venc_raw, motivo=str(e))
             )
 
         if errors:
@@ -203,9 +195,7 @@ async def import_csv(
         # Deduplicar por numero_nf + cliente_id
         numero_nf = norm_row.get("numero_nf") or None
         if numero_nf:
-            exists = await fatura_repo.exists_by_numero_nf_and_cliente(
-                numero_nf, cliente.id
-            )
+            exists = await fatura_repo.exists_by_numero_nf_and_cliente(numero_nf, cliente.id)
             if exists:
                 result.ignoradas += 1
                 continue

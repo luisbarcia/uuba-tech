@@ -15,15 +15,11 @@ class SqlAlchemyClienteRepository:
         self._session = session
 
     async def get_by_id(self, cliente_id: str) -> Cliente | None:
-        result = await self._session.execute(
-            select(Cliente).where(Cliente.id == cliente_id)
-        )
+        result = await self._session.execute(select(Cliente).where(Cliente.id == cliente_id))
         return result.scalar_one_or_none()
 
     async def get_by_documento(self, documento: str) -> Cliente | None:
-        result = await self._session.execute(
-            select(Cliente).where(Cliente.documento == documento)
-        )
+        result = await self._session.execute(select(Cliente).where(Cliente.documento == documento))
         return result.scalar_one_or_none()
 
     async def create(self, cliente: Cliente) -> Cliente:

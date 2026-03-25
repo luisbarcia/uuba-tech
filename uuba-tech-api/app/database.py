@@ -21,13 +21,17 @@ async def get_db():
 async def get_fatura_repository():
     """DI factory para FaturaRepository."""
     from app.infrastructure.repositories.sqlalchemy_fatura_repo import SqlAlchemyFaturaRepository
+
     async with async_session() as session:
         yield SqlAlchemyFaturaRepository(session)
 
 
 async def get_cobranca_repository():
     """DI factory para CobrancaRepository."""
-    from app.infrastructure.repositories.sqlalchemy_cobranca_repo import SqlAlchemyCobrancaRepository
+    from app.infrastructure.repositories.sqlalchemy_cobranca_repo import (
+        SqlAlchemyCobrancaRepository,
+    )
+
     async with async_session() as session:
         yield SqlAlchemyCobrancaRepository(session)
 
@@ -35,5 +39,6 @@ async def get_cobranca_repository():
 async def get_cliente_repository():
     """DI factory para ClienteRepository."""
     from app.infrastructure.repositories.sqlalchemy_cliente_repo import SqlAlchemyClienteRepository
+
     async with async_session() as session:
         yield SqlAlchemyClienteRepository(session)

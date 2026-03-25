@@ -21,9 +21,7 @@ class SqlAlchemyFaturaRepository:
         self._session = session
 
     async def get_by_id(self, fatura_id: str) -> Fatura | None:
-        result = await self._session.execute(
-            select(Fatura).where(Fatura.id == fatura_id)
-        )
+        result = await self._session.execute(select(Fatura).where(Fatura.id == fatura_id))
         return result.scalar_one_or_none()
 
     async def create(self, fatura: Fatura) -> Fatura:
@@ -82,14 +80,10 @@ class SqlAlchemyFaturaRepository:
         result = await self._session.execute(stmt)
         await self._session.commit()
         count = result.rowcount
-        logger.info(
-            f"transicionar_faturas_vencidas: {count} fatura(s) pendente→vencido"
-        )
+        logger.info(f"transicionar_faturas_vencidas: {count} fatura(s) pendente→vencido")
         return count
 
-    async def exists_by_numero_nf_and_cliente(
-        self, numero_nf: str, cliente_id: str
-    ) -> bool:
+    async def exists_by_numero_nf_and_cliente(self, numero_nf: str, cliente_id: str) -> bool:
         stmt = select(
             exists().where(
                 Fatura.numero_nf == numero_nf,

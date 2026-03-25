@@ -7,7 +7,12 @@ from sqlalchemy.pool import StaticPool
 
 from app.models.base import Base
 from app.main import app
-from app.database import get_db, get_fatura_repository, get_cobranca_repository, get_cliente_repository
+from app.database import (
+    get_db,
+    get_fatura_repository,
+    get_cobranca_repository,
+    get_cliente_repository,
+)
 from app.infrastructure.repositories.sqlalchemy_fatura_repo import SqlAlchemyFaturaRepository
 from app.infrastructure.repositories.sqlalchemy_cobranca_repo import SqlAlchemyCobrancaRepository
 from app.infrastructure.repositories.sqlalchemy_cliente_repo import SqlAlchemyClienteRepository

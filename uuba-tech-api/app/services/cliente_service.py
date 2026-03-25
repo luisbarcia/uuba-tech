@@ -36,9 +36,7 @@ async def list_clientes(
     Returns:
         Tupla (lista de clientes, total de registros).
     """
-    return await repo.list_by_filters(
-        telefone=telefone, limit=limit, offset=offset
-    )
+    return await repo.list_by_filters(telefone=telefone, limit=limit, offset=offset)
 
 
 async def get_cliente(repo: ClienteRepository, cliente_id: str) -> Cliente | None:
@@ -59,14 +57,10 @@ async def update_cliente(
     return await repo.update(cliente)
 
 
-async def get_metricas(
-    fatura_repo: FaturaRepository, cliente_id: str
-) -> ClienteMetricas:
+async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> ClienteMetricas:
     """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
     now = datetime.now(timezone.utc)
-    faturas_list, _ = await fatura_repo.list_by_filters(
-        cliente_id=cliente_id, limit=10000
-    )
+    faturas_list, _ = await fatura_repo.list_by_filters(cliente_id=cliente_id, limit=10000)
 
     em_aberto = [f for f in faturas_list if f.status in ("pendente", "vencido")]
     vencidas = [f for f in em_aberto if _aware(f.vencimento) < now]
@@ -77,9 +71,7 @@ async def get_metricas(
     dso_dias = 0.0
     pagas = [f for f in faturas_list if f.status == "pago" and f.pago_em]
     if pagas:
-        total_dias = sum(
-            (_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas
-        )
+        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
         dso_dias = total_dias / len(pagas)
 
     return ClienteMetricas(

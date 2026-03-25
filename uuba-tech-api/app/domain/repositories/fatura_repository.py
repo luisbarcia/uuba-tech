@@ -41,8 +41,6 @@ class FaturaRepository(Protocol):
         """Transiciona faturas pendentes vencidas para 'vencido'. Retorna contagem."""
         ...
 
-    async def exists_by_numero_nf_and_cliente(
-        self, numero_nf: str, cliente_id: str
-    ) -> bool:
+    async def exists_by_numero_nf_and_cliente(self, numero_nf: str, cliente_id: str) -> bool:
         """Verifica se já existe fatura com numero_nf + cliente_id."""
         ...

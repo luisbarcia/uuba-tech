@@ -18,9 +18,7 @@ class SqlAlchemyCobrancaRepository:
         self._session = session
 
     async def get_by_id(self, cobranca_id: str) -> Cobranca | None:
-        result = await self._session.execute(
-            select(Cobranca).where(Cobranca.id == cobranca_id)
-        )
+        result = await self._session.execute(select(Cobranca).where(Cobranca.id == cobranca_id))
         return result.scalar_one_or_none()
 
     async def create(self, cobranca: Cobranca) -> Cobranca:

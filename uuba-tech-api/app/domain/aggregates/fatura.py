@@ -161,8 +161,7 @@ class FaturaAggregate:
                 409,
                 "fatura-terminal",
                 "Fatura em status terminal",
-                f"Fatura {self.id} está '{self.status.value}' "
-                f"e não aceita novas cobranças.",
+                f"Fatura {self.id} está '{self.status.value}' e não aceita novas cobranças.",
             )
         self.cobrancas.append(cobranca)
 
@@ -192,8 +191,7 @@ class FaturaAggregate:
                 409,
                 "fatura-terminal",
                 "Fatura em status terminal",
-                f"Não é possível retomar cobranças de fatura "
-                f"'{self.status.value}'.",
+                f"Não é possível retomar cobranças de fatura '{self.status.value}'.",
             )
         cob = self._find_cobranca(cobranca_id)
         cob.pausado = False
