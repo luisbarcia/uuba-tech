@@ -50,3 +50,17 @@ class ClienteRepository(Protocol):
         Retorna quantidade de cobranças anonimizadas.
         """
         ...
+
+    async def search(
+        self,
+        *,
+        query: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Cliente], int]:
+        """Busca textual por nome, documento ou telefone. Retorna (items, total)."""
+        ...
+
+    async def get_by_id_including_deleted(self, cliente_id: str) -> Cliente | None:
+        """Busca cliente por ID incluindo anonimizados (deletado_em preenchido)."""
+        ...

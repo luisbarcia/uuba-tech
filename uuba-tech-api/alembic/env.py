@@ -8,6 +8,9 @@ from app.models.base import Base
 from app.models.cliente import Cliente  # noqa: F401
 from app.models.fatura import Fatura  # noqa: F401
 from app.models.cobranca import Cobranca  # noqa: F401
+from app.models.tenant import Tenant  # noqa: F401
+from app.models.audit_log import AuditLog  # noqa: F401
+from app.models.regua import Regua, ReguaPasso  # noqa: F401
 from app.config import settings
 
 config = context.config

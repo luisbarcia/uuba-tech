@@ -103,3 +103,38 @@ class SqlAlchemyClienteRepository:
         )
         await self._session.commit()
         return result.rowcount
+
+    async def search(
+        self,
+        *,
+        query: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[Cliente], int]:
+        """Busca textual por nome, documento ou telefone."""
+        base = self._base_filter()
+        pattern = f"%{query}%"
+        search_filter = (
+            Cliente.nome.ilike(pattern)
+            | Cliente.documento.ilike(pattern)
+            | Cliente.telefone.ilike(pattern)
+        )
+
+        q = select(Cliente).where(*base).where(search_filter)
+        count_q = select(func.count(Cliente.id)).where(*base).where(search_filter)
+
+        total = (await self._session.execute(count_q)).scalar() or 0
+        result = await self._session.execute(
+            q.order_by(Cliente.nome).limit(limit).offset(offset)
+        )
+        return result.scalars().all(), total
+
+    async def get_by_id_including_deleted(self, cliente_id: str) -> Cliente | None:
+        """Busca cliente por ID incluindo anonimizados (deletado_em preenchido)."""
+        result = await self._session.execute(
+            select(Cliente).where(
+                Cliente.id == cliente_id,
+                Cliente.tenant_id == self._tenant_id,
+            )
+        )
+        return result.scalar_one_or_none()

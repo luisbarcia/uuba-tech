@@ -209,8 +209,16 @@ app = FastAPI(
             "description": "Endpoints administrativos para seed de dados mock, reset do banco e operações de manutenção. Requerem autenticação.",
         },
         {
+            "name": "tenants",
+            "description": "Gerenciamento de tenants (multi-tenancy). Cada tenant eh uma empresa cliente da UUBA com seus proprios clientes, faturas e reguas de cobranca.",
+        },
+        {
+            "name": "metricas",
+            "description": "Metricas agregadas da plataforma: DSO, revenue, overdue, clientes ativos/inativos. Filtro opcional por tenant.",
+        },
+        {
             "name": "infraestrutura",
-            "description": "Endpoints de monitoramento e operação. Não requerem autenticação.",
+            "description": "Endpoints de monitoramento e operacao. Nao requerem autenticacao.",
         },
     ],
     docs_url=None,
@@ -311,7 +319,17 @@ app.add_middleware(RateLimitMiddleware)
 
 
 # --- Routers ---
-from app.routers import clientes, faturas, cobrancas, admin, jobs, import_csv, privacidade
+from app.routers import (  # noqa: E402
+    clientes,
+    faturas,
+    cobrancas,
+    admin,
+    jobs,
+    import_csv,
+    privacidade,
+    tenants,
+    metricas,
+)
 
 app.include_router(clientes.router)
 app.include_router(faturas.router)
@@ -320,6 +338,8 @@ app.include_router(admin.router)
 app.include_router(jobs.router)
 app.include_router(import_csv.router)
 app.include_router(privacidade.router)
+app.include_router(tenants.router)
+app.include_router(metricas.router)
 
 
 # --- Health ---
@@ -331,4 +351,4 @@ app.include_router(privacidade.router)
 )
 async def health(db: AsyncSession = Depends(get_db)):
     await db.execute(text("SELECT 1"))
-    return {"status": "ok"}
+    return {"status": "ok", "version": app.version}

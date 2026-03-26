@@ -55,16 +55,18 @@ async def list_cobrancas(
     periodo: str | None = Query(None, description="Período em dias (ex: 7d, 30d)"),
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
     fatura_id: str | None = Query(None, description="Filtrar por fatura"),
+    tenant_id: str | None = Query(None, description="Filtrar por tenant"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
     repo=Depends(get_cobranca_repository),
 ):
-    """Lista cobranças com filtros por período, cliente e fatura.
+    """Lista cobranças com filtros por período, cliente, fatura e tenant.
 
     Args:
         periodo: Período em dias para filtrar (ex: 7d, 30d).
         cliente_id: ID do cliente para filtrar (opcional).
         fatura_id: ID da fatura para filtrar (opcional).
+        tenant_id: ID do tenant para filtrar (opcional, admin).
         limit: Quantidade máxima de itens por página.
         offset: Deslocamento para paginação.
         repo: Repositório de cobranças (injetado).

@@ -71,6 +71,27 @@ async def anonimizar_cliente(repo: ClienteRepository, cliente_id: str) -> bool:
     return anonimizado
 
 
+async def search_clientes(
+    repo: ClienteRepository,
+    query: str,
+    limit: int = 50,
+    offset: int = 0,
+) -> tuple[list[Cliente], int]:
+    """Busca clientes por nome, documento ou telefone.
+
+    Returns:
+        Tupla (lista de clientes, total de registros).
+    """
+    return await repo.search(query=query, limit=limit, offset=offset)
+
+
+async def get_cliente_including_deleted(
+    repo: ClienteRepository, cliente_id: str
+) -> Cliente | None:
+    """Busca cliente por ID incluindo anonimizados (deletado_em preenchido)."""
+    return await repo.get_by_id_including_deleted(cliente_id)
+
+
 async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> ClienteMetricas:
     """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
     now = datetime.now(timezone.utc)
@@ -95,6 +116,97 @@ async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> Client
         faturas_em_aberto=len(em_aberto),
         faturas_vencidas=len(vencidas),
     )
+
+
+async def exportar_completo(
+    cliente: Cliente,
+    fatura_repo: FaturaRepository,
+    cobranca_repo: CobrancaRepository,
+) -> dict:
+    """Exporta dados completos do cliente: cadastro, faturas, cobrancas, metricas.
+
+    Formato compativel com a spec da CLI (portabilidade LGPD Art. 18).
+
+    Args:
+        cliente: Modelo do cliente cujos dados serao exportados.
+        fatura_repo: Repository de faturas.
+        cobranca_repo: Repository de cobrancas.
+
+    Returns:
+        Dict com cliente, faturas, cobrancas, metricas, exported_at.
+    """
+    faturas, _ = await fatura_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
+    cobrancas, _ = await cobranca_repo.list_by_filters(cliente_id=cliente.id, limit=10000)
+
+    now = datetime.now(timezone.utc)
+    em_aberto = [f for f in faturas if f.status in ("pendente", "vencido")]
+    vencidas = [f for f in em_aberto if _aware(f.vencimento) < now]
+
+    dso_dias = 0.0
+    pagas = [f for f in faturas if f.status == "pago" and f.pago_em]
+    if pagas:
+        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
+        dso_dias = total_dias / len(pagas)
+
+    return {
+        "cliente": {
+            "id": cliente.id,
+            "object": "cliente",
+            "nome": cliente.nome,
+            "documento": cliente.documento,
+            "email": cliente.email,
+            "telefone": cliente.telefone,
+            "created_at": cliente.created_at.isoformat() if cliente.created_at else None,
+            "updated_at": cliente.updated_at.isoformat() if cliente.updated_at else None,
+        },
+        "faturas": [
+            {
+                "id": f.id,
+                "object": "fatura",
+                "cliente_id": f.cliente_id,
+                "valor": f.valor,
+                "moeda": f.moeda,
+                "status": f.status,
+                "vencimento": f.vencimento.isoformat() if f.vencimento else None,
+                "descricao": f.descricao,
+                "numero_nf": f.numero_nf,
+                "pagamento_link": f.pagamento_link,
+                "pago_em": f.pago_em.isoformat() if f.pago_em else None,
+                "promessa_pagamento": (
+                    f.promessa_pagamento.isoformat() if f.promessa_pagamento else None
+                ),
+                "created_at": f.created_at.isoformat() if f.created_at else None,
+                "updated_at": f.updated_at.isoformat() if f.updated_at else None,
+            }
+            for f in faturas
+        ],
+        "cobrancas": [
+            {
+                "id": c.id,
+                "object": "cobranca",
+                "fatura_id": c.fatura_id,
+                "cliente_id": c.cliente_id,
+                "tipo": c.tipo,
+                "canal": c.canal,
+                "mensagem": c.mensagem,
+                "tom": c.tom,
+                "status": c.status,
+                "pausado": c.pausado,
+                "enviado_em": c.enviado_em.isoformat() if c.enviado_em else None,
+                "created_at": c.created_at.isoformat() if c.created_at else None,
+                "updated_at": c.updated_at.isoformat() if c.updated_at else None,
+            }
+            for c in cobrancas
+        ],
+        "metricas": {
+            "dso_dias": dso_dias,
+            "total_em_aberto": sum(f.valor for f in em_aberto),
+            "total_vencido": sum(f.valor for f in vencidas),
+            "faturas_em_aberto": len(em_aberto),
+            "faturas_vencidas": len(vencidas),
+        },
+        "exported_at": now.isoformat(),
+    }
 
 
 async def exportar_dados_pessoais(

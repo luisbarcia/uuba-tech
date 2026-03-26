@@ -48,15 +48,17 @@ async def list_faturas(
         description="Filtrar por status (aceita múltiplos separados por vírgula: pendente,vencido)",
     ),
     cliente_id: str | None = Query(None, description="Filtrar por cliente"),
+    tenant_id: str | None = Query(None, description="Filtrar por tenant"),
     limit: int = Query(50, ge=1, le=100, description="Itens por página (max 100)"),
     offset: int = Query(0, ge=0, description="Pular N itens"),
     repo=Depends(get_fatura_repository),
 ):
-    """Lista faturas com paginação e filtros por status e cliente.
+    """Lista faturas com paginação e filtros por status, cliente e tenant.
 
     Args:
         status: Status para filtrar, separados por vírgula (opcional).
         cliente_id: ID do cliente para filtrar (opcional).
+        tenant_id: ID do tenant para filtrar (opcional, admin).
         limit: Quantidade máxima de itens por página.
         offset: Deslocamento para paginação.
         repo: Repositório de faturas (injetado).

@@ -80,24 +80,8 @@ async def seed_database(db: AsyncSession = Depends(get_db)):
     }
 
 
-@router.delete(
-    "/reset",
-    summary="Limpar todos os dados",
-    description="Remove todos os registros de cobrancas, faturas e clientes. **Irreversível.**",
-)
-async def reset_database(
-    db: AsyncSession = Depends(get_db),
-    confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
-):
-    """Remove todos os registros do banco. Requer confirmação explícita.
-
-    Args:
-        db: Sessão assíncrona do banco (injetada).
-        confirm: String de confirmação (deve ser 'delete-all-data').
-
-    Returns:
-        Dict com contagem de registros removidos por entidade.
-    """
+async def _do_reset(db: AsyncSession, confirm: str) -> dict:
+    """Lógica compartilhada de reset entre DELETE e POST."""
     _check_not_production()
     if confirm != "delete-all-data":
         raise APIError(
@@ -118,6 +102,48 @@ async def reset_database(
             "clientes": r_cli.rowcount,
         },
     }
+
+
+@router.delete(
+    "/reset",
+    summary="Limpar todos os dados",
+    description="Remove todos os registros de cobrancas, faturas e clientes. **Irreversível.**",
+)
+async def reset_database(
+    db: AsyncSession = Depends(get_db),
+    confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
+):
+    """Remove todos os registros do banco (DELETE). Requer confirmação explícita.
+
+    Args:
+        db: Sessão assíncrona do banco (injetada).
+        confirm: String de confirmação (deve ser 'delete-all-data').
+
+    Returns:
+        Dict com contagem de registros removidos por entidade.
+    """
+    return await _do_reset(db, confirm)
+
+
+@router.post(
+    "/reset",
+    summary="Limpar todos os dados (POST)",
+    description="Alias POST para reset — aceita POST ou DELETE. **Irreversível.**",
+)
+async def reset_database_post(
+    db: AsyncSession = Depends(get_db),
+    confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
+):
+    """Remove todos os registros do banco (POST). Requer confirmação explícita.
+
+    Args:
+        db: Sessão assíncrona do banco (injetada).
+        confirm: String de confirmação (deve ser 'delete-all-data').
+
+    Returns:
+        Dict com contagem de registros removidos por entidade.
+    """
+    return await _do_reset(db, confirm)
 
 
 @router.post(
