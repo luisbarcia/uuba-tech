@@ -44,6 +44,7 @@ async def two_tenant_client(engine):
             Tenant(
                 id="ten_a",
                 nome="Empresa A",
+                slug="empresa-a",
                 documento="11111111000100",
                 api_key=TENANT_A_KEY,
                 ativo=True,
@@ -53,6 +54,7 @@ async def two_tenant_client(engine):
             Tenant(
                 id="ten_b",
                 nome="Empresa B",
+                slug="empresa-b",
                 documento="22222222000100",
                 api_key=TENANT_B_KEY,
                 ativo=True,

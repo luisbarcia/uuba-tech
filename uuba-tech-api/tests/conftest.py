@@ -55,9 +55,11 @@ async def engine():
             Tenant(
                 id=TEST_TENANT_ID,
                 nome="Tenant Teste",
+                slug="tenant-teste",
                 documento="00000000000100",
                 api_key=API_KEY,
                 ativo=True,
+                plan="starter",
             )
         )
         await session.commit()
