@@ -93,28 +93,17 @@ async def get_cliente_including_deleted(
 
 
 async def get_metricas(fatura_repo: FaturaRepository, cliente_id: str) -> ClienteMetricas:
-    """Calcula métricas financeiras do cliente: DSO, total em aberto, faturas vencidas."""
-    now = datetime.now(timezone.utc)
-    faturas_list, _ = await fatura_repo.list_by_filters(cliente_id=cliente_id, limit=10000)
+    """Calcula métricas financeiras do cliente via SQL aggregation.
 
-    em_aberto = [f for f in faturas_list if f.status in ("pendente", "vencido")]
-    vencidas = [f for f in em_aberto if _aware(f.vencimento) < now]
-
-    total_em_aberto = sum(f.valor for f in em_aberto)
-    total_vencido = sum(f.valor for f in vencidas)
-
-    dso_dias = 0.0
-    pagas = [f for f in faturas_list if f.status == "pago" and f.pago_em]
-    if pagas:
-        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
-        dso_dias = total_dias / len(pagas)
-
+    Usa get_metricas_agregadas para evitar carregar todas as faturas em memória.
+    """
+    data = await fatura_repo.get_metricas_agregadas(cliente_id)
     return ClienteMetricas(
-        dso_dias=dso_dias,
-        total_em_aberto=total_em_aberto,
-        total_vencido=total_vencido,
-        faturas_em_aberto=len(em_aberto),
-        faturas_vencidas=len(vencidas),
+        dso_dias=data["dso_dias"],
+        total_em_aberto=data["total_em_aberto"],
+        total_vencido=data["total_vencido"],
+        faturas_em_aberto=data["faturas_em_aberto"],
+        faturas_vencidas=data["faturas_vencidas"],
     )
 
 
@@ -145,7 +134,9 @@ async def exportar_completo(
     dso_dias = 0.0
     pagas = [f for f in faturas if f.status == "pago" and f.pago_em]
     if pagas:
-        total_dias = sum((_aware(f.pago_em) - _aware(f.vencimento)).days for f in pagas)
+        total_dias = sum(
+            max(0, (_aware(f.pago_em) - _aware(f.vencimento)).days) for f in pagas
+        )
         dso_dias = total_dias / len(pagas)
 
     return {

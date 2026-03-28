@@ -44,3 +44,7 @@ class FaturaRepository(Protocol):
     async def exists_by_numero_nf_and_cliente(self, numero_nf: str, cliente_id: str) -> bool:
         """Verifica se já existe fatura com numero_nf + cliente_id."""
         ...
+
+    async def get_metricas_agregadas(self, cliente_id: str) -> dict:
+        """Calcula metricas via SQL aggregation (sem carregar todas as linhas)."""
+        ...

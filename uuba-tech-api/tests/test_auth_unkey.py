@@ -105,11 +105,12 @@ class TestVerifyViaUnkey:
     @pytest.mark.asyncio
     async def test_cache_hit_avoids_http_call(self):
         """Segunda chamada com mesma key usa cache."""
-        _unkey_cache["cached_key"] = {
+        import time
+        _unkey_cache["cached_key"] = ({
             "tenant_id": "ten_cached",
             "permissions": [],
             "key_id": "key_cached",
-        }
+        }, time.monotonic())
 
         result = await _verify_via_unkey("cached_key")
         assert result["tenant_id"] == "ten_cached"

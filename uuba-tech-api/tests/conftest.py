@@ -23,8 +23,9 @@ from app.database import (
 from app.infrastructure.repositories.sqlalchemy_fatura_repo import SqlAlchemyFaturaRepository
 from app.infrastructure.repositories.sqlalchemy_cobranca_repo import SqlAlchemyCobrancaRepository
 from app.infrastructure.repositories.sqlalchemy_cliente_repo import SqlAlchemyClienteRepository
-from app.auth.api_key import clear_tenant_cache
+from app.auth.api_key import clear_tenant_cache, verify_api_key
 from app.config import settings
+from fastapi import Request
 
 TEST_TENANT_ID = "ten_test"
 API_KEY = settings.api_key
@@ -91,10 +92,22 @@ async def client(engine):
         async with factory() as session:
             yield SqlAlchemyClienteRepository(session, TEST_TENANT_ID)
 
+    async def override_verify_api_key(request: Request):
+        """Override padrao: valida key contra API_KEY e da permissoes admin."""
+        from app.exceptions import APIError
+        api_key = request.headers.get("X-API-Key", "")
+        if not api_key or api_key != API_KEY:
+            raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida")
+        request.state.tenant_id = TEST_TENANT_ID
+        request.state.permissions = ["tenants:write", "tenants:read"]
+        request.state.key_id = "key_test"
+        return api_key
+
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_fatura_repository] = override_fatura_repo
     app.dependency_overrides[get_cobranca_repository] = override_cobranca_repo
     app.dependency_overrides[get_cliente_repository] = override_cliente_repo
+    app.dependency_overrides[verify_api_key] = override_verify_api_key
 
     clear_tenant_cache()
 

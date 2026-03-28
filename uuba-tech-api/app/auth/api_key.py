@@ -9,6 +9,7 @@ O Unkey retorna ``ownerId`` (tenant_id) e ``permissions`` na response.
 import hmac as _hmac
 import logging
 import os
+import time
 
 import httpx
 from fastapi import Depends, Request, Security
@@ -26,11 +27,28 @@ api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 UNKEY_VERIFY_URL = "https://api.unkey.com/v2/keys.verifyKey"
 
-# Cache simples em memoria (tenant por api_key) — usado no fallback DB
-_tenant_cache: dict[str, Tenant] = {}
+CACHE_TTL_SECONDS = 300  # 5 minutos
 
-# Cache para respostas do Unkey (evita chamadas repetidas)
-_unkey_cache: dict[str, dict] = {}
+# Cache com TTL: dict[key, (value, timestamp)]
+_tenant_cache: dict[str, tuple[Tenant, float]] = {}
+_unkey_cache: dict[str, tuple[dict, float]] = {}
+
+
+def _get_cached(cache: dict, key: str):
+    """Retorna valor cacheado se dentro do TTL, senao None."""
+    entry = cache.get(key)
+    if entry is None:
+        return None
+    value, ts = entry
+    if time.monotonic() - ts > CACHE_TTL_SECONDS:
+        del cache[key]
+        return None
+    return value
+
+
+def _set_cached(cache: dict, key: str, value):
+    """Armazena valor no cache com timestamp atual."""
+    cache[key] = (value, time.monotonic())
 
 
 def _is_unkey_enabled() -> bool:
@@ -46,7 +64,7 @@ def _is_unkey_enabled() -> bool:
 
 async def _verify_via_unkey(api_key: str) -> dict:
     """Valida API key via Unkey API. Retorna dict com tenant_id, permissions, key_id."""
-    cached = _unkey_cache.get(api_key)
+    cached = _get_cached(_unkey_cache, api_key)
     if cached:
         return cached
 
@@ -88,13 +106,13 @@ async def _verify_via_unkey(api_key: str) -> dict:
             "API key nao esta associada a um tenant.",
         )
 
-    _unkey_cache[api_key] = result
+    _set_cached(_unkey_cache, api_key, result)
     return result
 
 
 async def _verify_via_db(api_key: str, db: AsyncSession) -> str:
     """Fallback: valida API key via DB local. Retorna tenant_id."""
-    tenant = _tenant_cache.get(api_key)
+    tenant = _get_cached(_tenant_cache, api_key)
 
     if not tenant:
         result = await db.execute(select(Tenant).where(Tenant.ativo.is_(True)))
@@ -102,7 +120,7 @@ async def _verify_via_db(api_key: str, db: AsyncSession) -> str:
         for t in tenants:
             if t.api_key and _hmac.compare_digest(api_key, t.api_key):
                 tenant = t
-                _tenant_cache[api_key] = t
+                _set_cached(_tenant_cache, api_key, t)
                 break
 
     if not tenant:
@@ -148,6 +166,31 @@ async def verify_api_key(
         request.state.key_id = ""
 
     return api_key
+
+
+def require_permission(permission: str):
+    """FastAPI dependency — verifica se o request tem uma permissao especifica.
+
+    Deve ser usado APOS verify_api_key (que seta request.state.permissions).
+
+    Args:
+        permission: String de permissao (ex: "tenants:write").
+
+    Raises:
+        APIError 403 se a permissao nao estiver presente.
+    """
+
+    async def _check(request: Request):
+        permissions = getattr(request.state, "permissions", [])
+        if permission not in permissions:
+            raise APIError(
+                403,
+                "permissao-negada",
+                "Permissao negada",
+                f"Esta operacao requer a permissao '{permission}'.",
+            )
+
+    return _check
 
 
 def clear_tenant_cache() -> None:

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_db
 from app.exceptions import APIError
 from app.schemas.common import ListResponse, PaginationMeta
@@ -13,7 +13,6 @@ from app.services import tenant_service
 router = APIRouter(
     prefix="/api/v1/tenants",
     tags=["tenants"],
-    dependencies=[Depends(verify_api_key)],
 )
 
 
@@ -25,6 +24,7 @@ router = APIRouter(
     description="Registra um novo tenant na plataforma. "
     "O slug eh gerado automaticamente a partir do nome. "
     "NAO gera API key — isso eh responsabilidade do Unkey (via CLI).",
+    dependencies=[Depends(verify_api_key), Depends(require_permission("tenants:write"))],
 )
 async def create_tenant(data: TenantCreate, db: AsyncSession = Depends(get_db)):
     """Cria novo tenant. Retorna 201."""
@@ -37,6 +37,7 @@ async def create_tenant(data: TenantCreate, db: AsyncSession = Depends(get_db)):
     response_model=ListResponse,
     summary="Listar tenants",
     description="Retorna todos os tenants com paginacao.",
+    dependencies=[Depends(verify_api_key)],
 )
 async def list_tenants(
     limit: int = Query(50, ge=1, le=100, description="Itens por pagina (max 100)"),
@@ -58,6 +59,7 @@ async def list_tenants(
     response_model=TenantResponse,
     summary="Buscar tenant",
     description="Retorna os dados de um tenant especifico pelo ID.",
+    dependencies=[Depends(verify_api_key)],
 )
 async def get_tenant(tenant_id: str, db: AsyncSession = Depends(get_db)):
     """Busca tenant por ID. Retorna 404 se nao existir."""
@@ -78,6 +80,7 @@ async def get_tenant(tenant_id: str, db: AsyncSession = Depends(get_db)):
     summary="Atualizar tenant",
     description="Atualiza parcialmente os dados de um tenant. "
     "Envie apenas os campos que deseja alterar.",
+    dependencies=[Depends(verify_api_key), Depends(require_permission("tenants:write"))],
 )
 async def update_tenant(
     tenant_id: str, data: TenantUpdate, db: AsyncSession = Depends(get_db)

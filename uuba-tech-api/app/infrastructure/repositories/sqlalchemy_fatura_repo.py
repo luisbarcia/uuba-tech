@@ -104,3 +104,66 @@ class SqlAlchemyFaturaRepository:
         )
         result = await self._session.execute(stmt)
         return result.scalar() or False
+
+    async def get_metricas_agregadas(self, cliente_id: str) -> dict:
+        """Calcula metricas via SQL aggregation — sem carregar todas as linhas.
+
+        Usa COUNT/SUM condicionais + AVG para DSO. Compativel com SQLite e PostgreSQL.
+        Nota: 'vencidas' = faturas em aberto com vencimento no passado (qualquer status aberto).
+        """
+        from sqlalchemy import case, and_
+
+        now = datetime.now(timezone.utc)
+
+        base = and_(
+            Fatura.cliente_id == cliente_id,
+            Fatura.tenant_id == self._tenant_id,
+        )
+
+        is_aberto = Fatura.status.in_(("pendente", "vencido"))
+        is_vencida = and_(is_aberto, Fatura.vencimento < now)
+
+        # Contagens e somas condicionais
+        q = select(
+            func.count(
+                case((is_aberto, Fatura.id))
+            ).label("faturas_em_aberto"),
+            func.coalesce(
+                func.sum(
+                    case((is_aberto, Fatura.valor))
+                ),
+                0,
+            ).label("total_em_aberto"),
+            func.count(
+                case((is_vencida, Fatura.id))
+            ).label("faturas_vencidas"),
+            func.coalesce(
+                func.sum(case((is_vencida, Fatura.valor))),
+                0,
+            ).label("total_vencido"),
+        ).where(base)
+
+        row = (await self._session.execute(q)).one()
+
+        # DSO: media de dias entre vencimento e pagamento (faturas pagas)
+        # julianday funciona em SQLite; em PostgreSQL usar EXTRACT(EPOCH FROM ...)
+        dso_q = select(
+            func.avg(
+                func.julianday(Fatura.pago_em) - func.julianday(Fatura.vencimento)
+            )
+        ).where(
+            and_(
+                base,
+                Fatura.status == "pago",
+                Fatura.pago_em.isnot(None),
+            )
+        )
+        dso_raw = (await self._session.execute(dso_q)).scalar()
+
+        return {
+            "faturas_em_aberto": row.faturas_em_aberto,
+            "total_em_aberto": row.total_em_aberto,
+            "faturas_vencidas": row.faturas_vencidas,
+            "total_vencido": row.total_vencido,
+            "dso_dias": max(0.0, float(dso_raw or 0)),
+        }
