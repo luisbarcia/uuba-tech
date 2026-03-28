@@ -96,7 +96,7 @@ async def client(engine):
             request.state.key_id = "key_admin"
         else:
             request.state.tenant_id = TEST_TENANT_ID
-            request.state.permissions = []
+            request.state.permissions = ["tenants:read"]
             request.state.key_id = "key_regular"
         return key
 

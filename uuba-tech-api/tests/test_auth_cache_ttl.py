@@ -137,19 +137,19 @@ class TestCacheTTLIntegration:
     """Cache works correctly with real requests."""
 
     async def test_first_request_populates_cache(self, client):
-        resp = await client.get("/api/v1/tenants", headers=AUTH)
+        resp = await client.get("/api/v1/metricas", headers=AUTH)
         assert resp.status_code == 200
         cached = _get_cached(auth_module._tenant_cache, API_KEY)
         assert cached is not None
         assert cached.id == TEST_TENANT_ID
 
     async def test_expired_cache_re_verifies(self, client):
-        resp1 = await client.get("/api/v1/tenants", headers=AUTH)
+        resp1 = await client.get("/api/v1/metricas", headers=AUTH)
         assert resp1.status_code == 200
         # Expire the entry
         entry = auth_module._tenant_cache.get(API_KEY)
         assert entry is not None
         auth_module._tenant_cache[API_KEY] = (entry[0], time.monotonic() - CACHE_TTL_SECONDS - 1)
         # Next request should still work (re-fetches from DB)
-        resp2 = await client.get("/api/v1/tenants", headers=AUTH)
+        resp2 = await client.get("/api/v1/metricas", headers=AUTH)
         assert resp2.status_code == 200
