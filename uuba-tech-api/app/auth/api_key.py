@@ -28,6 +28,7 @@ api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 UNKEY_VERIFY_URL = "https://api.unkey.com/v2/keys.verifyKey"
 
 CACHE_TTL_SECONDS = 300  # 5 minutos
+CACHE_MAX_SIZE = 500  # Previne memory exhaustion por API keys distintas
 
 # Cache com TTL: dict[key, (value, timestamp)]
 _tenant_cache: dict[str, tuple[Tenant, float]] = {}
@@ -47,7 +48,11 @@ def _get_cached(cache: dict, key: str):
 
 
 def _set_cached(cache: dict, key: str, value):
-    """Armazena valor no cache com timestamp atual."""
+    """Armazena valor no cache com timestamp atual. Evicta entradas antigas se cheio."""
+    if len(cache) >= CACHE_MAX_SIZE:
+        # Evicta a entrada mais antiga (FIFO simples)
+        oldest_key = min(cache, key=lambda k: cache[k][1])
+        del cache[oldest_key]
     cache[key] = (value, time.monotonic())
 
 

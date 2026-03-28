@@ -113,7 +113,8 @@ class SqlAlchemyClienteRepository:
     ) -> tuple[list[Cliente], int]:
         """Busca textual por nome, documento ou telefone."""
         base = self._base_filter()
-        pattern = f"%{query}%"
+        escaped = query.replace("%", r"\%").replace("_", r"\_")
+        pattern = f"%{escaped}%"
         search_filter = (
             Cliente.nome.ilike(pattern)
             | Cliente.documento.ilike(pattern)

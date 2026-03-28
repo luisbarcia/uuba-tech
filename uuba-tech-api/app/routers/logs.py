@@ -62,7 +62,8 @@ async def search_logs(
     tenant_id = request.state.tenant_id
     filters = [AuditLog.tenant_id == tenant_id]
 
-    search_pattern = f"%{q}%"
+    escaped_q = q.replace("%", r"\%").replace("_", r"\_")
+    search_pattern = f"%{escaped_q}%"
     filters.append(
         AuditLog.acao.ilike(search_pattern)
         | AuditLog.recurso.ilike(search_pattern)
