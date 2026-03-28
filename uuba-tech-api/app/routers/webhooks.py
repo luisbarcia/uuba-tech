@@ -20,9 +20,23 @@ router = APIRouter(
 )
 
 
+_BLOCKED_HOSTS = {"localhost", "127.0.0.1", "0.0.0.0", "169.254.169.254", "[::1]"}
+
+
 class WebhookCreate(BaseModel):
-    url: str = Field(..., max_length=500)
+    url: str = Field(..., max_length=500, pattern=r"^https?://")
     events: list[str] = Field(..., min_length=1)
+
+    @classmethod
+    def _validate_url(cls, url: str) -> str:
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        if parsed.hostname and parsed.hostname in _BLOCKED_HOSTS:
+            raise ValueError("URL aponta para host interno bloqueado")
+        if parsed.scheme not in ("http", "https"):
+            raise ValueError("URL deve usar http ou https")
+        return url
 
 
 def _to_response(w: Webhook) -> dict:

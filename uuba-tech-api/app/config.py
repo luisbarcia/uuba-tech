@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """Configurações da aplicação, carregadas de variáveis de ambiente ou ``.env``."""
 
     database_url: str = "postgresql+asyncpg://uuba:uuba@localhost:5432/uuba"
-    api_key: str = "uuba-dev-key-change-me"
+    api_key: str = "uuba-dev-key-change-me"  # DEVE ser alterado em producao via env var
     asaas_webhook_secret: str = ""
     whatsapp_verify_token: str = ""
     environment: str = "development"
@@ -20,3 +20,13 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+# Bloqueia producao com credenciais default
+if settings.environment == "production":
+    if settings.api_key == "uuba-dev-key-change-me":
+        raise RuntimeError("FATAL: API_KEY default em producao. Defina API_KEY via env var.")
+    if "uuba:uuba@" in settings.database_url:
+        raise RuntimeError(
+            "FATAL: DATABASE_URL com credenciais default em producao. "
+            "Defina DATABASE_URL via env var."
+        )
