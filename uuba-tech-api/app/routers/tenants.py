@@ -37,7 +37,7 @@ async def create_tenant(data: TenantCreate, db: AsyncSession = Depends(get_db)):
     response_model=ListResponse,
     summary="Listar tenants",
     description="Retorna todos os tenants com paginacao.",
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("tenants:read"))],
 )
 async def list_tenants(
     limit: int = Query(50, ge=1, le=100, description="Itens por pagina (max 100)"),
@@ -59,7 +59,7 @@ async def list_tenants(
     response_model=TenantResponse,
     summary="Buscar tenant",
     description="Retorna os dados de um tenant especifico pelo ID.",
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("tenants:read"))],
 )
 async def get_tenant(tenant_id: str, db: AsyncSession = Depends(get_db)):
     """Busca tenant por ID. Retorna 404 se nao existir."""
