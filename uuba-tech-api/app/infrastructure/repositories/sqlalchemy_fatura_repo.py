@@ -140,22 +140,24 @@ class SqlAlchemyFaturaRepository:
         row = (await self._session.execute(q)).one()
 
         # DSO: media de dias entre vencimento e pagamento (faturas pagas)
-        # julianday funciona em SQLite; em PostgreSQL usar EXTRACT(EPOCH FROM ...)
-        dso_q = select(
-            func.avg(func.julianday(Fatura.pago_em) - func.julianday(Fatura.vencimento))
-        ).where(
+        # Calculado em Python para compatibilidade SQLite (testes) e PostgreSQL (prod)
+        dso_q = select(Fatura.pago_em, Fatura.vencimento).where(
             and_(
                 base,
                 Fatura.status == "pago",
                 Fatura.pago_em.isnot(None),
             )
         )
-        dso_raw = (await self._session.execute(dso_q)).scalar()
+        pagas = (await self._session.execute(dso_q)).all()
+        dso_dias = 0.0
+        if pagas:
+            total_dias = sum(max(0, (row.pago_em - row.vencimento).days) for row in pagas)
+            dso_dias = total_dias / len(pagas)
 
         return {
             "faturas_em_aberto": row.faturas_em_aberto,
             "total_em_aberto": row.total_em_aberto,
             "faturas_vencidas": row.faturas_vencidas,
             "total_vencido": row.total_vencido,
-            "dso_dias": max(0.0, float(dso_raw or 0)),
+            "dso_dias": max(0.0, dso_dias),
         }
