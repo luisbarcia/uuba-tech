@@ -85,9 +85,7 @@ async def search_clientes(
     return await repo.search(query=query, limit=limit, offset=offset)
 
 
-async def get_cliente_including_deleted(
-    repo: ClienteRepository, cliente_id: str
-) -> Cliente | None:
+async def get_cliente_including_deleted(repo: ClienteRepository, cliente_id: str) -> Cliente | None:
     """Busca cliente por ID incluindo anonimizados (deletado_em preenchido)."""
     return await repo.get_by_id_including_deleted(cliente_id)
 
@@ -134,9 +132,7 @@ async def exportar_completo(
     dso_dias = 0.0
     pagas = [f for f in faturas if f.status == "pago" and f.pago_em]
     if pagas:
-        total_dias = sum(
-            max(0, (_aware(f.pago_em) - _aware(f.vencimento)).days) for f in pagas
-        )
+        total_dias = sum(max(0, (_aware(f.pago_em) - _aware(f.vencimento)).days) for f in pagas)
         dso_dias = total_dias / len(pagas)
 
     return {

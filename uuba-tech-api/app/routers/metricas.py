@@ -1,6 +1,6 @@
 """Router de metricas agregadas — dashboard da plataforma."""
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.api_key import verify_api_key
@@ -19,11 +19,12 @@ router = APIRouter(
     "",
     response_model=MetricasResponse,
     summary="Metricas agregadas",
-    description="Retorna metricas agregadas da plataforma: DSO, revenue, overdue, clientes.",
+    description="Retorna metricas agregadas do tenant autenticado: DSO, revenue, overdue, clientes.",
 )
 async def get_metricas(
-    tenant_id: str | None = Query(None, description="Filtrar por tenant"),
+    request: Request,
     db: AsyncSession = Depends(get_db),
 ):
-    """Retorna metricas agregadas da plataforma."""
+    """Retorna metricas agregadas do tenant autenticado."""
+    tenant_id = request.state.tenant_id
     return await metricas_service.get_metricas(db, tenant_id=tenant_id)

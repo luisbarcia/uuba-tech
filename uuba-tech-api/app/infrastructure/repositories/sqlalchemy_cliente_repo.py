@@ -124,9 +124,7 @@ class SqlAlchemyClienteRepository:
         count_q = select(func.count(Cliente.id)).where(*base).where(search_filter)
 
         total = (await self._session.execute(count_q)).scalar() or 0
-        result = await self._session.execute(
-            q.order_by(Cliente.nome).limit(limit).offset(offset)
-        )
+        result = await self._session.execute(q.order_by(Cliente.nome).limit(limit).offset(offset))
         return result.scalars().all(), total
 
     async def get_by_id_including_deleted(self, cliente_id: str) -> Cliente | None:

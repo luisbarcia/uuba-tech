@@ -95,9 +95,12 @@ async def client(engine):
     async def override_verify_api_key(request: Request):
         """Override padrao: valida key contra API_KEY e da permissoes admin."""
         from app.exceptions import APIError
+
         api_key = request.headers.get("X-API-Key", "")
         if not api_key or api_key != API_KEY:
-            raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida")
+            raise APIError(
+                401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida"
+            )
         request.state.tenant_id = TEST_TENANT_ID
         request.state.permissions = ["tenants:write", "tenants:read", "admin:write"]
         request.state.key_id = "key_test"

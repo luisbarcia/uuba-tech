@@ -34,9 +34,7 @@ async def get_metricas(
         cliente_filters.append(Cliente.tenant_id == tenant_id)
 
     # --- Clientes ativos/inativos ---
-    active_q = select(func.count(Cliente.id)).where(
-        Cliente.deletado_em.is_(None), *cliente_filters
-    )
+    active_q = select(func.count(Cliente.id)).where(Cliente.deletado_em.is_(None), *cliente_filters)
     inactive_q = select(func.count(Cliente.id)).where(
         Cliente.deletado_em.isnot(None), *cliente_filters
     )

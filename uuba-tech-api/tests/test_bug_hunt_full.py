@@ -371,10 +371,7 @@ class TestBugCSVAttacks:
         """CSV com formulas Excel (=CMD()) nao deve causar problemas server-side."""
         import io
 
-        csv_content = (
-            "nome;documento;valor;vencimento\n"
-            '=CMD("calc");52998224725;10000;2026-12-01\n'
-        )
+        csv_content = 'nome;documento;valor;vencimento\n=CMD("calc");52998224725;10000;2026-12-01\n'
         files = {"file": ("test.csv", io.BytesIO(csv_content.encode()), "text/csv")}
         resp = await client.post("/api/v1/import/csv", files=files, headers=AUTH)
         # Pode importar (nome ficaria "=CMD...") ou rejeitar — mas NAO deve crashar

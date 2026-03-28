@@ -246,9 +246,7 @@ class TestResetTenantIsolation:
     @pytest.fixture
     async def isolated_client(self, seeded_engine):
         """Client with seeded data for isolation test."""
-        factory = async_sessionmaker(
-            seeded_engine, class_=AsyncSession, expire_on_commit=False
-        )
+        factory = async_sessionmaker(seeded_engine, class_=AsyncSession, expire_on_commit=False)
 
         async def override_get_db():
             async with factory() as session:
@@ -257,9 +255,7 @@ class TestResetTenantIsolation:
         async def override_verify(request: Request):
             key = request.headers.get("X-API-Key", "")
             if not key:
-                raise APIError(
-                    401, "auth-invalida", "Autenticacao invalida", "API key ausente"
-                )
+                raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente")
             if key == ADMIN_KEY:
                 request.state.tenant_id = TENANT_B
                 request.state.permissions = [
@@ -282,9 +278,7 @@ class TestResetTenantIsolation:
         app.dependency_overrides[verify_api_key] = override_verify
         clear_tenant_cache()
 
-        async with AsyncClient(
-            transport=ASGITransport(app=app), base_url="http://test"
-        ) as ac:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
             yield ac, factory
 
         app.dependency_overrides.clear()
@@ -309,14 +303,10 @@ class TestResetTenantIsolation:
         # Verify tenant B data is intact
         async with factory() as session:
             count_b_cli = await session.scalar(
-                select(func.count()).select_from(Cliente).where(
-                    Cliente.tenant_id == TENANT_B
-                )
+                select(func.count()).select_from(Cliente).where(Cliente.tenant_id == TENANT_B)
             )
             count_b_fat = await session.scalar(
-                select(func.count()).select_from(Fatura).where(
-                    Fatura.tenant_id == TENANT_B
-                )
+                select(func.count()).select_from(Fatura).where(Fatura.tenant_id == TENANT_B)
             )
             assert count_b_cli == 1, f"Tenant B clientes should be intact, got {count_b_cli}"
             assert count_b_fat == 1, f"Tenant B faturas should be intact, got {count_b_fat}"
@@ -324,8 +314,6 @@ class TestResetTenantIsolation:
         # Verify tenant A data is gone
         async with factory() as session:
             count_a_cli = await session.scalar(
-                select(func.count()).select_from(Cliente).where(
-                    Cliente.tenant_id == TENANT_A
-                )
+                select(func.count()).select_from(Cliente).where(Cliente.tenant_id == TENANT_A)
             )
             assert count_a_cli == 0, f"Tenant A clientes should be 0, got {count_a_cli}"

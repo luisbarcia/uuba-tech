@@ -62,9 +62,7 @@ async def get_tenant(db: AsyncSession, tenant_id: str) -> Tenant | None:
     return result.scalar_one_or_none()
 
 
-async def update_tenant(
-    db: AsyncSession, tenant_id: str, data: TenantUpdate
-) -> Tenant | None:
+async def update_tenant(db: AsyncSession, tenant_id: str, data: TenantUpdate) -> Tenant | None:
     """Atualiza campos do tenant (patch parcial)."""
     result = await db.execute(select(Tenant).where(Tenant.id == tenant_id))
     tenant = result.scalar_one_or_none()

@@ -1,5 +1,7 @@
 # Deploy — Uúba Tech API na VPS
 
+> Guia completo de deploy, migrations e troubleshooting: [docs/INTERNALS.md#10-deploy](../../docs/INTERNALS.md#10-deploy)
+
 ## Arquitetura na VPS
 
 ```

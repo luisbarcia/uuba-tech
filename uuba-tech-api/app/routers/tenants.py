@@ -82,9 +82,7 @@ async def get_tenant(tenant_id: str, db: AsyncSession = Depends(get_db)):
     "Envie apenas os campos que deseja alterar.",
     dependencies=[Depends(verify_api_key), Depends(require_permission("tenants:write"))],
 )
-async def update_tenant(
-    tenant_id: str, data: TenantUpdate, db: AsyncSession = Depends(get_db)
-):
+async def update_tenant(tenant_id: str, data: TenantUpdate, db: AsyncSession = Depends(get_db)):
     """Atualiza parcialmente um tenant. Retorna 404 se nao existir."""
     tenant = await tenant_service.update_tenant(db, tenant_id, data)
     if not tenant:

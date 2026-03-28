@@ -45,6 +45,4 @@ class Tenant(Base, TimestampMixin):
     conta_azul_access_token: Mapped[str | None] = mapped_column(Text, nullable=True)
     conta_azul_refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    __table_args__ = (
-        Index("ix_tenants_slug", "slug", unique=True),
-    )
+    __table_args__ = (Index("ix_tenants_slug", "slug", unique=True),)

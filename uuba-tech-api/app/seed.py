@@ -60,8 +60,12 @@ def _date(days_offset: int) -> datetime:
     return datetime.now(timezone.utc) + timedelta(days=days_offset)
 
 
-def build_seed_data() -> dict:
-    """Gera IDs e monta os dados completos para seed."""
+def build_seed_data(tenant_id: str) -> dict:
+    """Gera IDs e monta os dados completos para seed.
+
+    Args:
+        tenant_id: ID do tenant que sera dono dos registros.
+    """
     now = datetime.now(timezone.utc)
     clientes = []
     faturas = []
@@ -69,7 +73,9 @@ def build_seed_data() -> dict:
 
     for c in CLIENTES:
         cli_id = generate_id("cli")
-        clientes.append({"id": cli_id, **c, "created_at": now, "updated_at": now})
+        clientes.append(
+            {"id": cli_id, **c, "tenant_id": tenant_id, "created_at": now, "updated_at": now}
+        )
 
     # --- Faturas variadas por cliente ---
     cenarios_faturas = [
@@ -99,6 +105,7 @@ def build_seed_data() -> dict:
             {
                 "id": fat_id,
                 "cliente_id": clientes[cli_idx]["id"],
+                "tenant_id": tenant_id,
                 "valor": valor,
                 "moeda": "BRL",
                 "status": status,
@@ -148,6 +155,7 @@ def build_seed_data() -> dict:
                 "id": cob_id,
                 "fatura_id": fat["id"],
                 "cliente_id": cli_id,
+                "tenant_id": tenant_id,
                 "tipo": "lembrete",
                 "canal": "whatsapp",
                 "tom": "amigavel",
@@ -168,6 +176,7 @@ def build_seed_data() -> dict:
                     "id": cob_id,
                     "fatura_id": fat["id"],
                     "cliente_id": cli_id,
+                    "tenant_id": tenant_id,
                     "tipo": "cobranca",
                     "canal": "whatsapp",
                     "tom": "firme",
@@ -190,6 +199,7 @@ def build_seed_data() -> dict:
                     "id": cob_id,
                     "fatura_id": fat["id"],
                     "cliente_id": cli_id,
+                    "tenant_id": tenant_id,
                     "tipo": "follow_up",
                     "canal": "whatsapp",
                     "tom": "firme",

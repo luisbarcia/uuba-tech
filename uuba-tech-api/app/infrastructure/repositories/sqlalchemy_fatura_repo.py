@@ -125,18 +125,12 @@ class SqlAlchemyFaturaRepository:
 
         # Contagens e somas condicionais
         q = select(
-            func.count(
-                case((is_aberto, Fatura.id))
-            ).label("faturas_em_aberto"),
+            func.count(case((is_aberto, Fatura.id))).label("faturas_em_aberto"),
             func.coalesce(
-                func.sum(
-                    case((is_aberto, Fatura.valor))
-                ),
+                func.sum(case((is_aberto, Fatura.valor))),
                 0,
             ).label("total_em_aberto"),
-            func.count(
-                case((is_vencida, Fatura.id))
-            ).label("faturas_vencidas"),
+            func.count(case((is_vencida, Fatura.id))).label("faturas_vencidas"),
             func.coalesce(
                 func.sum(case((is_vencida, Fatura.valor))),
                 0,
@@ -148,9 +142,7 @@ class SqlAlchemyFaturaRepository:
         # DSO: media de dias entre vencimento e pagamento (faturas pagas)
         # julianday funciona em SQLite; em PostgreSQL usar EXTRACT(EPOCH FROM ...)
         dso_q = select(
-            func.avg(
-                func.julianday(Fatura.pago_em) - func.julianday(Fatura.vencimento)
-            )
+            func.avg(func.julianday(Fatura.pago_em) - func.julianday(Fatura.vencimento))
         ).where(
             and_(
                 base,

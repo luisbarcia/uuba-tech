@@ -65,9 +65,7 @@ class TestBuscaClientes:
     @pytest.mark.asyncio
     async def test_busca_paginacao(self, client):
         for i in range(5):
-            await create_test_cliente(
-                client, nome=f"Busca Pag {i}", documento=f"9999999{i:07d}"
-            )
+            await create_test_cliente(client, nome=f"Busca Pag {i}", documento=f"9999999{i:07d}")
 
         resp = await client.get("/api/v1/clientes/busca?q=Busca+Pag&limit=2&offset=0", headers=AUTH)
         body = resp.json()
