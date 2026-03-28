@@ -329,6 +329,10 @@ from app.routers import (  # noqa: E402
     privacidade,
     tenants,
     metricas,
+    watch,
+    logs,
+    usage,
+    webhooks,
 )
 
 app.include_router(clientes.router)
@@ -340,6 +344,10 @@ app.include_router(import_csv.router)
 app.include_router(privacidade.router)
 app.include_router(tenants.router)
 app.include_router(metricas.router)
+app.include_router(watch.router)
+app.include_router(logs.router)
+app.include_router(usage.router)
+app.include_router(webhooks.router)
 
 
 # --- Health ---
