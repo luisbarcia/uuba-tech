@@ -187,6 +187,7 @@ async def cleanup(db: AsyncSession = Depends(get_db)):
     dependencies=_auth,
 )
 async def get_audit(
+    request: Request,
     recurso: str | None = Query(None, description="Filtrar por tipo de recurso"),
     recurso_id: str | None = Query(None, description="Filtrar por ID do recurso"),
     limit: int = Query(50, ge=1, le=100),
@@ -196,6 +197,7 @@ async def get_audit(
     """Lista registros de auditoria de acesso a dados pessoais (LGPD Art. 37).
 
     Args:
+        request: Request com tenant_id no state (injetado por verify_api_key).
         recurso: Tipo de recurso para filtrar (opcional).
         recurso_id: ID do recurso para filtrar (opcional).
         limit: Quantidade máxima de itens por página.
@@ -205,8 +207,9 @@ async def get_audit(
     Returns:
         ListResponse com registros de auditoria paginados.
     """
+    tenant_id = request.state.tenant_id
     items, total = await audit_service.listar(
-        db, recurso=recurso, recurso_id=recurso_id, limit=limit, offset=offset
+        db, tenant_id=tenant_id, recurso=recurso, recurso_id=recurso_id, limit=limit, offset=offset
     )
     return ListResponse(
         data=[

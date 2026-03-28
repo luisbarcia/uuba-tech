@@ -13,6 +13,7 @@ from app.utils.ids import generate_id
 async def registrar(
     session: AsyncSession,
     *,
+    tenant_id: str,
     acao: str,
     recurso: str,
     recurso_id: str | None = None,
@@ -22,6 +23,7 @@ async def registrar(
     """Registra uma operação no audit log."""
     log = AuditLog(
         id=generate_id("aud"),
+        tenant_id=tenant_id,
         acao=acao,
         recurso=recurso,
         recurso_id=recurso_id,
@@ -35,14 +37,15 @@ async def registrar(
 async def listar(
     session: AsyncSession,
     *,
+    tenant_id: str,
     recurso: str | None = None,
     recurso_id: str | None = None,
     limit: int = 50,
     offset: int = 0,
 ) -> tuple[list[AuditLog], int]:
-    """Lista registros de auditoria com filtros."""
-    query = select(AuditLog)
-    count_q = select(func.count(AuditLog.id))
+    """Lista registros de auditoria filtrados por tenant."""
+    query = select(AuditLog).where(AuditLog.tenant_id == tenant_id)
+    count_q = select(func.count(AuditLog.id)).where(AuditLog.tenant_id == tenant_id)
 
     if recurso:
         query = query.where(AuditLog.recurso == recurso)
