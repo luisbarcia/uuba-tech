@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.config import settings
 from app.database import get_db
 from app.exceptions import APIError
@@ -20,8 +20,10 @@ from app.services import audit_service, cleanup_service
 router = APIRouter(
     prefix="/api/v1/admin",
     tags=["admin"],
-    dependencies=[Depends(verify_api_key)],
 )
+
+_auth = [Depends(verify_api_key)]
+_admin_write = [Depends(verify_api_key), Depends(require_permission("admin:write"))]
 
 
 def _check_not_production():
@@ -39,24 +41,28 @@ def _check_not_production():
     "/seed",
     summary="Popular com dados mock",
     description="Limpa todos os dados e popula com dados mock realistas para demo. **Cuidado: apaga tudo antes de inserir.** Bloqueado em produção.",
+    dependencies=_admin_write,
 )
-async def seed_database(db: AsyncSession = Depends(get_db)):
-    """Limpa todos os dados e popula com dados mock. Bloqueado em produção.
+async def seed_database(request: Request, db: AsyncSession = Depends(get_db)):
+    """Limpa todos os dados do tenant e popula com dados mock. Bloqueado em produção.
 
     Args:
+        request: Request HTTP (usado para extrair tenant_id).
         db: Sessão assíncrona do banco (injetada).
 
     Returns:
         Dict com contagem de registros inseridos por entidade.
     """
     _check_not_production()
-    # Limpar na ordem correta (FK constraints)
-    await db.execute(delete(Cobranca))
-    await db.execute(delete(Fatura))
-    await db.execute(delete(Cliente))
+    tenant_id = request.state.tenant_id
+
+    # Limpar na ordem correta (FK constraints) — apenas do tenant autenticado
+    await db.execute(delete(Cobranca).where(Cobranca.tenant_id == tenant_id))
+    await db.execute(delete(Fatura).where(Fatura.tenant_id == tenant_id))
+    await db.execute(delete(Cliente).where(Cliente.tenant_id == tenant_id))
     await db.commit()
 
-    data = build_seed_data()
+    data = build_seed_data(tenant_id)
 
     for c in data["clientes"]:
         db.add(Cliente(**c))
@@ -80,7 +86,7 @@ async def seed_database(db: AsyncSession = Depends(get_db)):
     }
 
 
-async def _do_reset(db: AsyncSession, confirm: str) -> dict:
+async def _do_reset(request: Request, db: AsyncSession, confirm: str) -> dict:
     """Lógica compartilhada de reset entre DELETE e POST."""
     _check_not_production()
     if confirm != "delete-all-data":
@@ -90,9 +96,10 @@ async def _do_reset(db: AsyncSession, confirm: str) -> dict:
             title="Confirmação necessária",
             detail="Envie ?confirm=delete-all-data para confirmar a operação.",
         )
-    r_cob = await db.execute(delete(Cobranca))
-    r_fat = await db.execute(delete(Fatura))
-    r_cli = await db.execute(delete(Cliente))
+    tenant_id = request.state.tenant_id
+    r_cob = await db.execute(delete(Cobranca).where(Cobranca.tenant_id == tenant_id))
+    r_fat = await db.execute(delete(Fatura).where(Fatura.tenant_id == tenant_id))
+    r_cli = await db.execute(delete(Cliente).where(Cliente.tenant_id == tenant_id))
     await db.commit()
     return {
         "status": "ok",
@@ -108,42 +115,48 @@ async def _do_reset(db: AsyncSession, confirm: str) -> dict:
     "/reset",
     summary="Limpar todos os dados",
     description="Remove todos os registros de cobrancas, faturas e clientes. **Irreversível.**",
+    dependencies=_admin_write,
 )
 async def reset_database(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
 ):
     """Remove todos os registros do banco (DELETE). Requer confirmação explícita.
 
     Args:
+        request: Request HTTP (usado para extrair tenant_id).
         db: Sessão assíncrona do banco (injetada).
         confirm: String de confirmação (deve ser 'delete-all-data').
 
     Returns:
         Dict com contagem de registros removidos por entidade.
     """
-    return await _do_reset(db, confirm)
+    return await _do_reset(request, db, confirm)
 
 
 @router.post(
     "/reset",
     summary="Limpar todos os dados (POST)",
     description="Alias POST para reset — aceita POST ou DELETE. **Irreversível.**",
+    dependencies=_admin_write,
 )
 async def reset_database_post(
+    request: Request,
     db: AsyncSession = Depends(get_db),
     confirm: str = Query(..., description="Deve ser 'delete-all-data' para confirmar"),
 ):
     """Remove todos os registros do banco (POST). Requer confirmação explícita.
 
     Args:
+        request: Request HTTP (usado para extrair tenant_id).
         db: Sessão assíncrona do banco (injetada).
         confirm: String de confirmação (deve ser 'delete-all-data').
 
     Returns:
         Dict com contagem de registros removidos por entidade.
     """
-    return await _do_reset(db, confirm)
+    return await _do_reset(request, db, confirm)
 
 
 @router.post(
@@ -153,6 +166,7 @@ async def reset_database_post(
     "e remove mensagens de cobranças de faturas resolvidas além do período de retenção. "
     "Configurável via env vars RETENCAO_FATURAS_ANOS, RETENCAO_MENSAGENS_ANOS, "
     "RETENCAO_CLIENTES_INATIVOS_ANOS.",
+    dependencies=_admin_write,
 )
 async def cleanup(db: AsyncSession = Depends(get_db)):
     """Executa política de retenção LGPD (anonimização e limpeza de mensagens).
@@ -170,6 +184,7 @@ async def cleanup(db: AsyncSession = Depends(get_db)):
     "/audit",
     summary="Consultar audit trail (LGPD Art. 37)",
     description="Lista registros de auditoria de acesso a dados pessoais.",
+    dependencies=_auth,
 )
 async def get_audit(
     recurso: str | None = Query(None, description="Filtrar por tipo de recurso"),
@@ -219,6 +234,7 @@ async def get_audit(
     "/seed-regua",
     summary="Criar régua padrão UÚBA",
     description="Cria (ou recria) a régua de cobrança padrão com 5 passos progressivos.",
+    dependencies=_admin_write,
 )
 async def seed_regua(request: Request, db: AsyncSession = Depends(get_db)):
     """Cria ou recria a régua de cobrança padrão com 5 passos. Idempotente.

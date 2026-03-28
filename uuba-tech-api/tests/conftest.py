@@ -99,7 +99,7 @@ async def client(engine):
         if not api_key or api_key != API_KEY:
             raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida")
         request.state.tenant_id = TEST_TENANT_ID
-        request.state.permissions = ["tenants:write", "tenants:read"]
+        request.state.permissions = ["tenants:write", "tenants:read", "admin:write"]
         request.state.key_id = "key_test"
         return api_key
 
