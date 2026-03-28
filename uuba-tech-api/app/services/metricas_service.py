@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import func, select, and_, extract
+from sqlalchemy import func, select, extract
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.cliente import Cliente
@@ -84,7 +84,7 @@ async def get_metricas(
     dso = 0.0
     if pagas:
         total_dias = sum(
-            (_aware(row.pago_em) - _aware(row.vencimento)).days for row in pagas
+            max(0, (_aware(row.pago_em) - _aware(row.vencimento)).days) for row in pagas
         )
         dso = total_dias / len(pagas)
 

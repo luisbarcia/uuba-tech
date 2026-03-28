@@ -26,7 +26,6 @@ from app.main import app
 from app.models.audit_log import AuditLog  # noqa: F401
 from app.models.base import Base
 from app.models.cliente import Cliente
-from app.models.cobranca import Cobranca
 from app.models.fatura import Fatura
 from app.models.regua import Regua, ReguaPasso  # noqa: F401
 from app.models.tenant import Tenant

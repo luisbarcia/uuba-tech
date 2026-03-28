@@ -13,7 +13,13 @@ from app.utils.ids import generate_id
 
 
 async def create_tenant(db: AsyncSession, data: TenantCreate) -> Tenant:
-    """Cria um novo tenant com ID prefixado e slug automatico."""
+    """Cria um novo tenant com ID prefixado e slug automatico.
+
+    Raises:
+        APIError(409): Se slug gerado a partir do nome ja existir.
+    """
+    from sqlalchemy.exc import IntegrityError
+
     tenant = Tenant(
         id=generate_id("ten"),
         nome=data.name,
@@ -22,7 +28,16 @@ async def create_tenant(db: AsyncSession, data: TenantCreate) -> Tenant:
         plan="starter",
     )
     db.add(tenant)
-    await db.commit()
+    try:
+        await db.commit()
+    except IntegrityError:
+        await db.rollback()
+        raise APIError(
+            409,
+            "slug-duplicado",
+            "Tenant com este nome ja existe",
+            f"O slug '{_slugify(data.name)}' ja esta em uso. Escolha outro nome.",
+        )
     await db.refresh(tenant)
     return tenant
 

@@ -1,7 +1,6 @@
 """Testes do endpoint de metricas agregadas (GET /api/v1/metricas)."""
 
 import pytest
-from datetime import datetime, timezone, timedelta
 
 from tests.conftest import AUTH, create_test_cliente, create_test_fatura
 
@@ -54,11 +53,12 @@ class TestMetricasAgregadas:
         assert resp.status_code == 401
 
     @pytest.mark.asyncio
-    async def test_metricas_accepts_tenant_id_param(self, client):
+    async def test_metricas_ignora_query_param_tenant_id(self, client):
+        """Apos fix BUG-001: tenant_id query param foi removido.
+        O endpoint usa request.state.tenant_id do auth."""
         resp = await client.get(
             "/api/v1/metricas?tenant_id=ten_nonexistent",
             headers=AUTH,
         )
+        # Query param desconhecido e ignorado pelo FastAPI (nao causa erro)
         assert resp.status_code == 200
-        body = resp.json()
-        assert body["clients_active"] == 0

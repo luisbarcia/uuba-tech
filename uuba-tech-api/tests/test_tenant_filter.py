@@ -5,7 +5,7 @@ Verifica que os query params tenant_id sao aceitos nos endpoints existentes.
 
 import pytest
 
-from tests.conftest import AUTH, create_test_cliente, create_test_fatura, create_test_cobranca
+from tests.conftest import AUTH
 
 
 class TestClientesTenantFilter:
