@@ -23,12 +23,11 @@ router = APIRouter(
 )
 async def get_usage(
     request: Request,
-    tenant_id: str | None = Query(None, description="Filtrar por tenant"),
     days: int = Query(30, ge=1, le=365, description="Periodo em dias"),
     db: AsyncSession = Depends(get_db),
 ):
     """Retorna uso da API nos ultimos N dias."""
-    tid = tenant_id or request.state.tenant_id
+    tid = request.state.tenant_id
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
     query = (
