@@ -6,11 +6,9 @@ Permite migracao transparente: cliente muda URL + API key, payload identico.
 Fonte: openapi/components/schemas/canonical.yaml do repo cfo-automation-api.
 """
 
-from __future__ import annotations
-
 from datetime import date
 from enum import Enum
-from typing import Literal
+from typing import Literal, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -76,10 +74,10 @@ class Contact(BaseModel):
     """Contato associado a um cliente PJ."""
 
     name: str = Field(..., max_length=200)
-    email: str | None = None
-    phone: str | None = None
-    mobile: str | None = None
-    role: str | None = Field(None, max_length=100)
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    mobile: Optional[str] = None
+    role: Optional[str] = Field(None, max_length=100)
 
     model_config = {"extra": "forbid"}
 
@@ -87,13 +85,13 @@ class Contact(BaseModel):
 class Address(BaseModel):
     """Endereco do cliente."""
 
-    street: str | None = Field(None, max_length=200)
-    number: str | None = Field(None, max_length=20)
-    complement: str | None = Field(None, max_length=100)
-    neighborhood: str | None = Field(None, max_length=100)
-    zip_code: str | None = None
-    city: str | None = Field(None, max_length=100)
-    state: BrazilianState | None = None
+    street: Optional[str] = Field(None, max_length=200)
+    number: Optional[str] = Field(None, max_length=20)
+    complement: Optional[str] = Field(None, max_length=100)
+    neighborhood: Optional[str] = Field(None, max_length=100)
+    zip_code: Optional[str] = None
+    city: Optional[str] = Field(None, max_length=100)
+    state: Optional[BrazilianState] = None
 
     model_config = {"extra": "forbid"}
 
@@ -104,14 +102,16 @@ class Customer(BaseModel):
     type: PersonType
     document: str = Field(..., description="CPF (11 digits) ou CNPJ (14 digits)")
     name: str = Field(..., max_length=200)
-    email: str | None = None
-    phone: str | None = None
-    mobile: str | None = None
-    trade_name: str | None = Field(None, max_length=200, description="PJ only")
-    contacts: list[Contact] | None = Field(None, description="PJ only")
-    notes: str | None = Field(None, max_length=1000)
-    code: str | None = Field(None, max_length=50, description="Codigo externo do sistema de origem")
-    address: Address | None = None
+    email: Optional[str] = None
+    phone: Optional[str] = None
+    mobile: Optional[str] = None
+    trade_name: Optional[str] = Field(None, max_length=200, description="PJ only")
+    contacts: Optional[list[Contact]] = Field(None, description="PJ only")
+    notes: Optional[str] = Field(None, max_length=1000)
+    code: Optional[str] = Field(
+        None, max_length=50, description="Codigo externo do sistema de origem"
+    )
+    address: Optional[Address] = None
 
     model_config = {"extra": "forbid"}
 
@@ -121,8 +121,10 @@ class Service(BaseModel):
 
     description: str = Field(..., max_length=500)
     code: str = Field(..., max_length=50)
-    price: float | None = Field(None, ge=0)
-    cost: float | None = Field(None, ge=0, description="Custo do servico (para calculo de margem)")
+    price: Optional[float] = Field(None, ge=0)
+    cost: Optional[float] = Field(
+        None, ge=0, description="Custo do servico (para calculo de margem)"
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -132,7 +134,7 @@ class Sale(BaseModel):
 
     amount: float = Field(..., gt=0)
     due_date: date
-    description: str | None = Field(None, max_length=500)
+    description: Optional[str] = Field(None, max_length=500)
 
     model_config = {"extra": "forbid"}
 
@@ -141,10 +143,10 @@ class Contract(BaseModel):
     """Contrato recorrente."""
 
     start_date: date
-    cycles: int | None = Field(None, ge=1, description="null = open-ended (assinatura)")
+    cycles: Optional[int] = Field(None, ge=1, description="null = open-ended (assinatura)")
     frequency: Frequency
     due_day: int = Field(..., ge=1, le=28)
-    emission_day: int | None = Field(None, ge=1, le=28)
+    emission_day: Optional[int] = Field(None, ge=1, le=28)
 
     model_config = {"extra": "forbid"}
 
@@ -177,10 +179,12 @@ class CanonicalMessage(BaseModel):
     """
 
     customer: Customer
-    operations: list[SaleOperation | ContractOperation] = Field(..., min_length=1, max_length=50)
+    operations: list[Union[SaleOperation, ContractOperation]] = Field(
+        ..., min_length=1, max_length=50
+    )
     payment_method: Literal["BOLETO_BANCARIO"]
-    notes: str | None = Field(None, max_length=1000)
-    date: date | None = Field(None, description="Data de referencia (default: hoje)")
+    notes: Optional[str] = Field(None, max_length=1000)
+    date: Optional[date] = Field(None, description="Data de referencia (default: hoje)")
 
     model_config = {"extra": "forbid"}
 
@@ -202,8 +206,8 @@ class OperationResult(BaseModel):
     object: Literal["operation"] = "operation"
     type: Literal["sale", "contract"]
     status: OperationStatus
-    external_id: str | None = None
-    error: str | None = None
+    external_id: Optional[str] = None
+    error: Optional[str] = None
 
 
 class Receivable(BaseModel):
