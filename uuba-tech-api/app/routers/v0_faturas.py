@@ -19,7 +19,7 @@ import httpx
 from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.responses import JSONResponse
 
-from app.auth.api_key import require_permission, verify_api_key
+from app.auth.api_key import verify_api_key
 from app.exceptions import APIError
 from app.schemas.receivable import (
     CanonicalMessage,
