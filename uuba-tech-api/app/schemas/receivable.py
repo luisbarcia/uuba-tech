@@ -208,6 +208,27 @@ class OperationResult(BaseModel):
     error: str | None = None
 
 
+class ValidationWarning(BaseModel):
+    """Warning nao-bloqueante de validacao."""
+
+    pointer: str
+    code: str
+    detail: str
+
+
+class ValidationResult(BaseModel):
+    """Resultado de dry-run validation."""
+
+    object: Literal["validation_result"] = "validation_result"
+    valid: bool
+    customer_type: str
+    operations_count: int
+    total_sales: int
+    total_contracts: int
+    total_value: float
+    warnings: list[ValidationWarning] = []
+
+
 class Receivable(BaseModel):
     """Resultado do processamento de um receivable."""
 

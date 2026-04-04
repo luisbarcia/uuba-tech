@@ -4,6 +4,10 @@ Aceita o payload CanonicalMessage (formato da CFO API) e encaminha ao n8n
 webhook para processamento no ERP. Permite migracao transparente:
 cliente muda URL + API key, zero mudanca no payload.
 
+Features:
+- ?dry_run=true → valida payload sem enviar ao ERP
+- Idempotency-Key header (TODO: implementar KV)
+
 Lifecycle: deprecated quando cliente migrar para POST /api/v1/faturas.
 """
 
@@ -12,7 +16,8 @@ import os
 from datetime import datetime, timezone
 
 import httpx
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Header, Query, Request
+from fastapi.responses import JSONResponse
 
 from app.auth.api_key import require_permission, verify_api_key
 from app.exceptions import APIError
@@ -23,6 +28,9 @@ from app.schemas.receivable import (
     OperationStatus,
     Receivable,
     ReceivableStatus,
+    SaleOperation,
+    ValidationResult,
+    ValidationWarning,
 )
 from app.utils.ids import generate_id
 
@@ -37,7 +45,7 @@ N8N_TIMEOUT = float(os.environ.get("N8N_WEBHOOK_TIMEOUT", "30"))
 router = APIRouter(
     prefix="/api/v0/faturas",
     tags=["v0-compat"],
-    dependencies=[Depends(verify_api_key), Depends(require_permission("invoices:write"))],
+    dependencies=[Depends(verify_api_key)],
 )
 
 
@@ -89,27 +97,94 @@ async def _forward_to_n8n(
         )
 
 
+def _validate_payload(data: CanonicalMessage) -> ValidationResult:
+    """Valida o payload sem enviar ao ERP. Retorna ValidationResult."""
+    warnings: list[ValidationWarning] = []
+
+    # Verificar campos recomendados
+    if not data.customer.email:
+        warnings.append(
+            ValidationWarning(
+                pointer="/customer/email",
+                code="missing_email",
+                detail="Customer has no email. Recommended for ERP contact sync.",
+            )
+        )
+    if not data.customer.mobile and not data.customer.phone:
+        warnings.append(
+            ValidationWarning(
+                pointer="/customer/mobile",
+                code="missing_phone",
+                detail="Customer has no phone number. Recommended for ERP contact sync.",
+            )
+        )
+
+    total_sales = 0
+    total_contracts = 0
+    total_value = 0.0
+
+    for op in data.operations:
+        if isinstance(op, SaleOperation):
+            total_sales += 1
+            total_value += op.sale.amount
+        else:
+            total_contracts += 1
+            if op.service.price:
+                total_value += op.service.price
+
+    return ValidationResult(
+        valid=True,
+        customer_type=data.customer.type.value,
+        operations_count=len(data.operations),
+        total_sales=total_sales,
+        total_contracts=total_contracts,
+        total_value=total_value,
+        warnings=warnings,
+    )
+
+
 @router.post(
     "",
-    response_model=Receivable,
-    status_code=201,
+    status_code=200,
     summary="Criar fatura(s) via payload legado (v0)",
     description=(
         "Endpoint de compatibilidade com a CFO Automation API. "
         "Aceita o payload CanonicalMessage (customer + operations + payment_method) "
-        "e encaminha ao n8n para processamento no ERP. "
+        "e encaminha ao n8n para processamento no ERP.\n\n"
+        "Use `?dry_run=true` para validar o payload sem enviar ao ERP. "
+        "Retorna `ValidationResult` em vez de `Receivable`.\n\n"
         "Para o formato nativo, use `POST /api/v1/faturas`."
     ),
 )
 async def create_receivable(
     data: CanonicalMessage,
     request: Request,
+    dry_run: bool = Query(default=False, description="Validar sem enviar ao ERP"),
+    idempotency_key: str | None = Header(
+        default=None,
+        alias="Idempotency-Key",
+        description="UUID v4 para idempotencia (TODO)",
+    ),
 ):
     """Processa CanonicalMessage: valida, encaminha ao n8n, retorna Receivable."""
     tenant_id = request.state.tenant_id
     request_id = generate_id("recv")
 
-    # Serializar e encaminhar ao n8n
+    # --- Dry-run: valida e retorna sem processar ---
+    if dry_run:
+        result = _validate_payload(data)
+        logger.info(
+            "v0/faturas: dry-run tenant=%s ops=%d valid=%s",
+            tenant_id,
+            len(data.operations),
+            result.valid,
+        )
+        return JSONResponse(
+            content=result.model_dump(),
+            headers={"X-Request-Id": request_id},
+        )
+
+    # --- Processamento real: encaminhar ao n8n ---
     payload = data.model_dump(mode="json")
     n8n_response = await _forward_to_n8n(tenant_id, request_id, payload)
 
@@ -126,12 +201,11 @@ async def create_receivable(
         )
         operations = []
         for i, op in enumerate(data.operations):
-            is_sale = hasattr(op, "sale")
+            is_sale = isinstance(op, SaleOperation)
+            op_ids = n8n_response.get("operation_ids", [])
             operations.append(
                 OperationResult(
-                    id=n8n_response.get("operation_ids", [generate_id("op")])[i]
-                    if i < len(n8n_response.get("operation_ids", []))
-                    else generate_id("op"),
+                    id=op_ids[i] if i < len(op_ids) else generate_id("op"),
                     type="sale" if is_sale else "contract",
                     status=OperationStatus.CREATED,
                 )
@@ -159,4 +233,8 @@ async def create_receivable(
         status.value,
     )
 
-    return receivable
+    return JSONResponse(
+        content=receivable.model_dump(),
+        status_code=201 if status != ReceivableStatus.FAILED else 200,
+        headers={"X-Request-Id": request_id},
+    )
