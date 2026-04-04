@@ -77,7 +77,7 @@ class Contact(BaseModel):
     email: str | None = None
     phone: str | None = None
     mobile: str | None = None
-    role: str | None = Field(None, max_length=100)
+    role: str | None = Field(default=None, max_length=100)
 
     model_config = {"extra": "forbid"}
 
@@ -85,12 +85,12 @@ class Contact(BaseModel):
 class Address(BaseModel):
     """Endereco do cliente."""
 
-    street: str | None = Field(None, max_length=200)
-    number: str | None = Field(None, max_length=20)
-    complement: str | None = Field(None, max_length=100)
-    neighborhood: str | None = Field(None, max_length=100)
+    street: str | None = Field(default=None, max_length=200)
+    number: str | None = Field(default=None, max_length=20)
+    complement: str | None = Field(default=None, max_length=100)
+    neighborhood: str | None = Field(default=None, max_length=100)
     zip_code: str | None = None
-    city: str | None = Field(None, max_length=100)
+    city: str | None = Field(default=None, max_length=100)
     state: BrazilianState | None = None
 
     model_config = {"extra": "forbid"}
@@ -105,10 +105,12 @@ class Customer(BaseModel):
     email: str | None = None
     phone: str | None = None
     mobile: str | None = None
-    trade_name: str | None = Field(None, max_length=200, description="PJ only")
-    contacts: list[Contact] | None = Field(None, description="PJ only")
-    notes: str | None = Field(None, max_length=1000)
-    code: str | None = Field(None, max_length=50, description="Codigo externo do sistema de origem")
+    trade_name: str | None = Field(default=None, max_length=200, description="PJ only")
+    contacts: list[Contact] | None = Field(default=None, description="PJ only")
+    notes: str | None = Field(default=None, max_length=1000)
+    code: str | None = Field(
+        default=None, max_length=50, description="Codigo externo do sistema de origem"
+    )
     address: Address | None = None
 
     model_config = {"extra": "forbid"}
@@ -119,8 +121,10 @@ class Service(BaseModel):
 
     description: str = Field(..., max_length=500)
     code: str = Field(..., max_length=50)
-    price: float | None = Field(None, ge=0)
-    cost: float | None = Field(None, ge=0, description="Custo do servico (para calculo de margem)")
+    price: float | None = Field(default=None, ge=0)
+    cost: float | None = Field(
+        default=None, ge=0, description="Custo do servico (para calculo de margem)"
+    )
 
     model_config = {"extra": "forbid"}
 
@@ -130,7 +134,7 @@ class Sale(BaseModel):
 
     amount: float = Field(..., gt=0)
     due_date: date
-    description: str | None = Field(None, max_length=500)
+    description: str | None = Field(default=None, max_length=500)
 
     model_config = {"extra": "forbid"}
 
@@ -139,10 +143,10 @@ class Contract(BaseModel):
     """Contrato recorrente."""
 
     start_date: date
-    cycles: int | None = Field(None, ge=1, description="null = open-ended (assinatura)")
+    cycles: int | None = Field(default=None, ge=1, description="null = open-ended (assinatura)")
     frequency: Frequency
     due_day: int = Field(..., ge=1, le=28)
-    emission_day: int | None = Field(None, ge=1, le=28)
+    emission_day: int | None = Field(default=None, ge=1, le=28)
 
     model_config = {"extra": "forbid"}
 
@@ -177,8 +181,8 @@ class CanonicalMessage(BaseModel):
     customer: Customer
     operations: list[SaleOperation | ContractOperation] = Field(..., min_length=1, max_length=50)
     payment_method: Literal["BOLETO_BANCARIO"]
-    notes: str | None = Field(None, max_length=1000)
-    date: date | None = Field(None, description="Data de referencia (default: hoje)")
+    notes: str | None = Field(default=None, max_length=1000)
+    date: date | None = Field(default=None, description="Data de referencia (default: hoje)")
 
     model_config = {"extra": "forbid"}
 
