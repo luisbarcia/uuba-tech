@@ -48,7 +48,7 @@ async def _forward_to_n8n(
     logger.warning("v0/faturas: n8n integration not implemented — returning placeholder response")
     return {
         "status": "completed",
-        "customer": {"id": f"cst_{generate_id()}", "created": True},
+        "customer": {"id": generate_id("cst"), "created": True},
         "operations": [],
     }
 
