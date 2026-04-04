@@ -120,6 +120,105 @@ class TestVerifyViaUnkey:
         assert result["tenant_id"] == "ten_cached"
 
     @pytest.mark.asyncio
+    async def test_v2_envelope_meta_data(self):
+        """v2: response envelopada em {meta, data} (#78)."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "meta": {"requestId": "req_test"},
+            "data": {
+                "valid": True,
+                "keyId": "key_v2",
+                "identity": {"id": "id_001", "externalId": "ten_v2"},
+                "permissions": ["clients:read"],
+            },
+        }
+
+        mock_client = AsyncMock()
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        with patch("app.auth.api_key.httpx.AsyncClient", return_value=mock_client):
+            result = await _verify_via_unkey("uuba_live_v2_key")
+
+        assert result["tenant_id"] == "ten_v2"
+        assert result["permissions"] == ["clients:read"]
+        assert result["key_id"] == "key_v2"
+
+    @pytest.mark.asyncio
+    async def test_v2_identity_externalid_over_ownerid(self):
+        """v2: identity.externalId tem prioridade sobre ownerId (#79)."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "meta": {"requestId": "req_test"},
+            "data": {
+                "valid": True,
+                "keyId": "key_both",
+                "ownerId": "ten_old",
+                "identity": {"id": "id_002", "externalId": "ten_new"},
+                "permissions": [],
+            },
+        }
+
+        mock_client = AsyncMock()
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        with patch("app.auth.api_key.httpx.AsyncClient", return_value=mock_client):
+            result = await _verify_via_unkey("uuba_live_both")
+
+        assert result["tenant_id"] == "ten_new"  # identity tem prioridade
+
+    @pytest.mark.asyncio
+    async def test_v2_no_identity_falls_back_to_ownerid(self):
+        """v2: sem identity, faz fallback para ownerId (backward compat)."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "data": {
+                "valid": True,
+                "keyId": "key_legacy",
+                "ownerId": "ten_legacy",
+                "permissions": [],
+            },
+        }
+
+        mock_client = AsyncMock()
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        with patch("app.auth.api_key.httpx.AsyncClient", return_value=mock_client):
+            result = await _verify_via_unkey("uuba_live_legacy")
+
+        assert result["tenant_id"] == "ten_legacy"
+
+    @pytest.mark.asyncio
+    async def test_v2_sends_authorization_header(self):
+        """v2: envia Authorization: Bearer root_key (#77)."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "data": {
+                "valid": True,
+                "keyId": "key_auth",
+                "identity": {"id": "id_003", "externalId": "ten_auth"},
+                "permissions": [],
+            },
+        }
+
+        mock_client = AsyncMock()
+        mock_client.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.__aexit__ = AsyncMock(return_value=False)
+        mock_client.post = AsyncMock(return_value=mock_response)
+
+        with patch("app.auth.api_key.httpx.AsyncClient", return_value=mock_client):
+            with patch("app.auth.api_key.UNKEY_ROOT_KEY", "unkey_root_test"):
+                await _verify_via_unkey("uuba_live_auth_test")
+
+        call_kwargs = mock_client.post.call_args
+        assert call_kwargs[1]["headers"]["Authorization"] == "Bearer unkey_root_test"
+
+    @pytest.mark.asyncio
     async def test_http_error_raises_503(self):
         import httpx
 

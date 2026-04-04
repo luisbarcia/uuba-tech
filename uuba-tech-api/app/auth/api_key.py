@@ -3,7 +3,7 @@
 Em producao, valida via Unkey API (https://api.unkey.com/v2/keys.verifyKey).
 Em dev/teste, faz fallback para lookup na DB local.
 
-O Unkey retorna ``ownerId`` (tenant_id) e ``permissions`` na response.
+O Unkey v2 retorna ``identity.externalId`` (tenant_id) e ``permissions`` na response.
 """
 
 import hmac as _hmac
@@ -26,6 +26,7 @@ logger = logging.getLogger("uuba")
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
 UNKEY_VERIFY_URL = "https://api.unkey.com/v2/keys.verifyKey"
+UNKEY_ROOT_KEY = os.environ.get("UNKEY_ROOT_KEY", "")
 
 CACHE_TTL_SECONDS = 300  # 5 minutos
 CACHE_MAX_SIZE = 500  # Previne memory exhaustion por API keys distintas
@@ -68,18 +69,28 @@ def _is_unkey_enabled() -> bool:
 
 
 async def _verify_via_unkey(api_key: str) -> dict:
-    """Valida API key via Unkey API. Retorna dict com tenant_id, permissions, key_id."""
+    """Valida API key via Unkey API v2. Retorna dict com tenant_id, permissions, key_id.
+
+    Mudancas v2:
+    - Authorization header obrigatorio com root key (#77)
+    - Response envelopada em meta/data (#78)
+    - ownerId substituido por identity.externalId (#79)
+    """
     cached = _get_cached(_unkey_cache, api_key)
     if cached:
         return cached
 
     try:
+        headers = {}
+        if UNKEY_ROOT_KEY:
+            headers["Authorization"] = f"Bearer {UNKEY_ROOT_KEY}"
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.post(
                 UNKEY_VERIFY_URL,
+                headers=headers,
                 json={"key": api_key},
             )
-        data = response.json()
+        body = response.json()
     except (httpx.HTTPError, Exception) as exc:
         logger.error(f"Unkey verify falhou: {exc}")
         raise APIError(
@@ -89,6 +100,9 @@ async def _verify_via_unkey(api_key: str) -> dict:
             "Nao foi possivel validar a API key. Tente novamente.",
         )
 
+    # v2 envelopa em {meta, data} — fallback para flat (v1 compat)
+    data = body.get("data", body)
+
     if not data.get("valid"):
         raise APIError(
             401,
@@ -97,8 +111,12 @@ async def _verify_via_unkey(api_key: str) -> dict:
             "API key ausente ou invalida",
         )
 
+    # v2: identity.externalId substitui ownerId
+    identity = data.get("identity") or {}
+    tenant_id = identity.get("externalId", "") or data.get("ownerId", "")
+
     result = {
-        "tenant_id": data.get("ownerId", ""),
+        "tenant_id": tenant_id,
         "permissions": data.get("permissions", []),
         "key_id": data.get("keyId", ""),
     }
