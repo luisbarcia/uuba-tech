@@ -108,9 +108,7 @@ class Customer(BaseModel):
     trade_name: str | None = Field(None, max_length=200, description="PJ only")
     contacts: list[Contact] | None = Field(None, description="PJ only")
     notes: str | None = Field(None, max_length=1000)
-    code: str | None = Field(
-        None, max_length=50, description="Codigo externo do sistema de origem"
-    )
+    code: str | None = Field(None, max_length=50, description="Codigo externo do sistema de origem")
     address: Address | None = None
 
     model_config = {"extra": "forbid"}
@@ -122,9 +120,7 @@ class Service(BaseModel):
     description: str = Field(..., max_length=500)
     code: str = Field(..., max_length=50)
     price: float | None = Field(None, ge=0)
-    cost: float | None = Field(
-        None, ge=0, description="Custo do servico (para calculo de margem)"
-    )
+    cost: float | None = Field(None, ge=0, description="Custo do servico (para calculo de margem)")
 
     model_config = {"extra": "forbid"}
 
@@ -179,9 +175,7 @@ class CanonicalMessage(BaseModel):
     """
 
     customer: Customer
-    operations: list[SaleOperation | ContractOperation] = Field(
-        ..., min_length=1, max_length=50
-    )
+    operations: list[SaleOperation | ContractOperation] = Field(..., min_length=1, max_length=50)
     payment_method: Literal["BOLETO_BANCARIO"]
     notes: str | None = Field(None, max_length=1000)
     date: date | None = Field(None, description="Data de referencia (default: hoje)")
