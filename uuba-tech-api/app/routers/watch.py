@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_db
 from app.models.fatura import Fatura
 from app.models.cliente import Cliente
@@ -11,7 +11,7 @@ from app.models.cliente import Cliente
 router = APIRouter(
     prefix="/api/v1/watch",
     tags=["watch"],
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("admin:read"))],
 )
 
 

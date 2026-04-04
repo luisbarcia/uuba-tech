@@ -23,6 +23,7 @@ router = APIRouter(
 )
 
 _auth = [Depends(verify_api_key)]
+_admin_read = [Depends(verify_api_key), Depends(require_permission("admin:read"))]
 _admin_write = [Depends(verify_api_key), Depends(require_permission("admin:write"))]
 
 
@@ -184,7 +185,7 @@ async def cleanup(db: AsyncSession = Depends(get_db)):
     "/audit",
     summary="Consultar audit trail (LGPD Art. 37)",
     description="Lista registros de auditoria de acesso a dados pessoais.",
-    dependencies=_auth,
+    dependencies=_admin_read,
 )
 async def get_audit(
     request: Request,
