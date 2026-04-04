@@ -333,8 +333,10 @@ from app.routers import (  # noqa: E402
     logs,
     usage,
     webhooks,
+    v0_faturas,
 )
 
+app.include_router(v0_faturas.router)
 app.include_router(clientes.router)
 app.include_router(faturas.router)
 app.include_router(cobrancas.router)
