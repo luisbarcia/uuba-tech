@@ -8,11 +8,14 @@ Lifecycle: deprecated quando cliente migrar para POST /api/v1/faturas.
 """
 
 import logging
+import os
 from datetime import datetime, timezone
 
+import httpx
 from fastapi import APIRouter, Depends, Request
 
 from app.auth.api_key import require_permission, verify_api_key
+from app.exceptions import APIError
 from app.schemas.receivable import (
     CanonicalMessage,
     CustomerResult,
@@ -25,6 +28,12 @@ from app.utils.ids import generate_id
 
 logger = logging.getLogger("uuba")
 
+N8N_WEBHOOK_URL = os.environ.get(
+    "N8N_RECEIVABLE_WEBHOOK_URL",
+    "https://n8n.srv921702.hstgr.cloud/webhook/cfo/v1/receivables",
+)
+N8N_TIMEOUT = float(os.environ.get("N8N_WEBHOOK_TIMEOUT", "30"))
+
 router = APIRouter(
     prefix="/api/v0/faturas",
     tags=["v0-compat"],
@@ -34,23 +43,50 @@ router = APIRouter(
 
 async def _forward_to_n8n(
     tenant_id: str,
+    request_id: str,
     payload: dict,
 ) -> dict:
-    """Encaminha payload ao n8n webhook e retorna a resposta.
-
-    TODO: Implementar chamada HTTP ao n8n webhook.
-    - URL: configuravel via env N8N_RECEIVABLE_WEBHOOK_URL
-    - Headers: X-Tenant-Id, X-Request-Id
-    - Timeout: 30s
-    - Retry: 1x com backoff
-    """
-    # PLACEHOLDER — retorna resposta simulada ate integrar com n8n
-    logger.warning("v0/faturas: n8n integration not implemented — returning placeholder response")
-    return {
-        "status": "completed",
-        "customer": {"id": generate_id("cst"), "created": True},
-        "operations": [],
-    }
+    """Encaminha payload ao n8n webhook e retorna a resposta."""
+    try:
+        async with httpx.AsyncClient(timeout=N8N_TIMEOUT) as client:
+            response = await client.post(
+                N8N_WEBHOOK_URL,
+                json=payload,
+                headers={
+                    "X-Tenant-Id": tenant_id,
+                    "X-Request-Id": request_id,
+                    "Content-Type": "application/json",
+                },
+            )
+        if response.status_code >= 400:
+            logger.error(
+                "n8n webhook error: %d %s",
+                response.status_code,
+                response.text[:500],
+            )
+            raise APIError(
+                502,
+                "n8n-error",
+                "Erro no processamento",
+                f"n8n retornou {response.status_code}. Tente novamente.",
+            )
+        return response.json()
+    except httpx.TimeoutException:
+        logger.error("n8n webhook timeout after %ss", N8N_TIMEOUT)
+        raise APIError(
+            504,
+            "n8n-timeout",
+            "Timeout no processamento",
+            "O processamento demorou mais que o esperado. Tente novamente.",
+        )
+    except httpx.HTTPError as exc:
+        logger.error("n8n webhook connection error: %s", exc)
+        raise APIError(
+            502,
+            "n8n-unavailable",
+            "Servico de processamento indisponivel",
+            "Nao foi possivel conectar ao processador. Tente novamente.",
+        )
 
 
 @router.post(
@@ -73,24 +109,34 @@ async def create_receivable(
     tenant_id = request.state.tenant_id
     request_id = generate_id("recv")
 
-    # Serializar payload pra enviar ao n8n
+    # Serializar e encaminhar ao n8n
     payload = data.model_dump(mode="json")
+    n8n_response = await _forward_to_n8n(tenant_id, request_id, payload)
 
-    # Encaminhar ao n8n
-    n8n_response = await _forward_to_n8n(tenant_id, payload)
-
-    # Montar response no formato Receivable
-    operations_results = []
-    for i, op in enumerate(data.operations):
-        is_sale = hasattr(op, "sale")
-        op_id = generate_id("op")
-        operations_results.append(
-            OperationResult(
-                id=op_id,
-                type="sale" if is_sale else "contract",
-                status=OperationStatus.CREATED,
-            )
+    # Se n8n retornou response no formato Receivable, usar diretamente
+    if "customer" in n8n_response and "operations" in n8n_response:
+        customer = CustomerResult(**n8n_response["customer"])
+        operations = [OperationResult(**op) for op in n8n_response.get("operations", [])]
+        status = ReceivableStatus(n8n_response.get("status", "completed"))
+    else:
+        # Fallback: montar response a partir do payload original
+        customer = CustomerResult(
+            id=n8n_response.get("customer_id", generate_id("cst")),
+            created=n8n_response.get("customer_created", True),
         )
+        operations = []
+        for i, op in enumerate(data.operations):
+            is_sale = hasattr(op, "sale")
+            operations.append(
+                OperationResult(
+                    id=n8n_response.get("operation_ids", [generate_id("op")])[i]
+                    if i < len(n8n_response.get("operation_ids", []))
+                    else generate_id("op"),
+                    type="sale" if is_sale else "contract",
+                    status=OperationStatus.CREATED,
+                )
+            )
+        status = ReceivableStatus(n8n_response.get("status", "completed"))
 
     # Determinar ambiente a partir do prefixo da key
     key_id = getattr(request.state, "key_id", "")
@@ -98,16 +144,19 @@ async def create_receivable(
 
     receivable = Receivable(
         id=request_id,
-        status=ReceivableStatus(n8n_response.get("status", "completed")),
-        customer=CustomerResult(**n8n_response["customer"]),
-        operations=operations_results,
+        status=status,
+        customer=customer,
+        operations=operations,
         environment=environment,
         created_at=datetime.now(timezone.utc).isoformat(),
     )
 
     logger.info(
-        "v0/faturas: receivable created",
-        extra={"request_id": request_id, "tenant_id": tenant_id, "ops": len(data.operations)},
+        "v0/faturas: receivable %s tenant=%s ops=%d status=%s",
+        request_id,
+        tenant_id,
+        len(data.operations),
+        status.value,
     )
 
     return receivable
