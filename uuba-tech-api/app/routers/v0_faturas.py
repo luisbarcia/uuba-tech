@@ -19,7 +19,7 @@ import httpx
 from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.responses import JSONResponse
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.exceptions import APIError
 from app.schemas.receivable import (
     CanonicalMessage,
@@ -45,7 +45,7 @@ N8N_TIMEOUT = float(os.environ.get("N8N_WEBHOOK_TIMEOUT", "30"))
 router = APIRouter(
     prefix="/api/v0/faturas",
     tags=["v0-compat"],
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("receivables:write"))],
 )
 
 
