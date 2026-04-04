@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.unkey.com)",
+      "WebFetch(domain:spec.speakeasy.com)",
+      "WebSearch",
+      "WebFetch(domain:engineering.unkey.com)",
+      "WebFetch(domain:unkey.com)",
+      "Bash(gh project:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh label:*)"
+    ]
+  }
+}

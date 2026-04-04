@@ -104,7 +104,12 @@ async def client(engine):
             raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente")
         if key == ADMIN_KEY:
             request.state.tenant_id = TENANT_B
-            request.state.permissions = ["admin:write", "admin:read", "tenants:write", "tenants:read"]
+            request.state.permissions = [
+                "admin:write",
+                "admin:read",
+                "tenants:write",
+                "tenants:read",
+            ]
             request.state.key_id = "key_admin"
         elif key == REGULAR_KEY:
             request.state.tenant_id = TENANT_A
