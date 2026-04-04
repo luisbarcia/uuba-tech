@@ -2,7 +2,7 @@
 
 - POST /admin/seed, DELETE /admin/reset, POST /admin/reset,
   POST /admin/cleanup, POST /admin/seed-regua require admin:write.
-- GET /admin/audit is accessible to any authenticated key.
+- GET /admin/audit requires admin:read (#81).
 - Reset only deletes the authenticated tenant's data.
 """
 
@@ -104,7 +104,7 @@ async def client(engine):
             raise APIError(401, "auth-invalida", "Autenticacao invalida", "API key ausente")
         if key == ADMIN_KEY:
             request.state.tenant_id = TENANT_B
-            request.state.permissions = ["admin:write", "tenants:write", "tenants:read"]
+            request.state.permissions = ["admin:write", "admin:read", "tenants:write", "tenants:read"]
             request.state.key_id = "key_admin"
         elif key == REGULAR_KEY:
             request.state.tenant_id = TENANT_A
@@ -167,11 +167,16 @@ class TestAdminRBACWrite:
 
 
 class TestAdminRBACRead:
-    """GET /audit is accessible to any authenticated key."""
+    """GET /audit requires admin:read permission (#81)."""
 
     @pytest.mark.asyncio
-    async def test_audit_without_admin_write_returns_200(self, client):
+    async def test_audit_without_admin_read_returns_403(self, client):
         resp = await client.get("/api/v1/admin/audit", headers=REGULAR_AUTH)
+        assert resp.status_code == 403
+
+    @pytest.mark.asyncio
+    async def test_audit_with_admin_read_returns_200(self, client):
+        resp = await client.get("/api/v1/admin/audit", headers=ADMIN_AUTH)
         assert resp.status_code == 200
 
 
@@ -260,6 +265,7 @@ class TestResetTenantIsolation:
                 request.state.tenant_id = TENANT_B
                 request.state.permissions = [
                     "admin:write",
+                    "admin:read",
                     "tenants:write",
                     "tenants:read",
                 ]
