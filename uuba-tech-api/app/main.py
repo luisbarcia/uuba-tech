@@ -236,6 +236,38 @@ async def scalar_docs():
 
 
 # --- Exception handlers ---
+from fastapi.exceptions import RequestValidationError
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request: Request, exc: RequestValidationError):
+    """Transforma erros de validação Pydantic em RFC 9457 Problem Details."""
+    errors = []
+    for err in exc.errors():
+        # Converter loc tuple ("body", "customer", "name") em JSON Pointer "/customer/name"
+        parts = [str(p) for p in err.get("loc", []) if p != "body"]
+        pointer = "/" + "/".join(parts) if parts else "/"
+        errors.append(
+            {
+                "pointer": pointer,
+                "code": err.get("type", "validation_error"),
+                "detail": err.get("msg", ""),
+            }
+        )
+    return JSONResponse(
+        status_code=422,
+        content={
+            "type": "https://api.uubatech.com/errors/validacao",
+            "title": "Erro de validacao",
+            "status": 422,
+            "detail": f"{len(errors)} campo(s) com erro de validacao.",
+            "instance": str(request.url.path),
+            "request_id": getattr(request.state, "request_id", ""),
+            "errors": errors,
+        },
+    )
+
+
 @app.exception_handler(APIError)
 async def api_error_handler(request: Request, exc: APIError):
     return JSONResponse(
