@@ -6,7 +6,7 @@ Permite migracao transparente: cliente muda URL + API key, payload identico.
 Fonte: openapi/components/schemas/canonical.yaml do repo cfo-automation-api.
 """
 
-from datetime import date
+import datetime as _dt
 from enum import Enum
 from typing import Literal
 
@@ -133,7 +133,7 @@ class Sale(BaseModel):
     """Venda avulsa (pagamento unico ou parcela individual)."""
 
     amount: float = Field(..., gt=0)
-    due_date: date
+    due_date: _dt.date
     description: str | None = Field(default=None, max_length=500)
 
     model_config = {"extra": "forbid"}
@@ -142,7 +142,7 @@ class Sale(BaseModel):
 class Contract(BaseModel):
     """Contrato recorrente."""
 
-    start_date: date
+    start_date: _dt.date
     cycles: int | None = Field(default=None, ge=1, description="null = open-ended (assinatura)")
     frequency: Frequency
     due_day: int = Field(..., ge=1, le=28)
@@ -182,7 +182,7 @@ class CanonicalMessage(BaseModel):
     operations: list[SaleOperation | ContractOperation] = Field(..., min_length=1, max_length=50)
     payment_method: Literal["BOLETO_BANCARIO"]
     notes: str | None = Field(default=None, max_length=1000)
-    date: date | None = Field(default=None, description="Data de referencia (default: hoje)")
+    date: _dt.date | None = Field(default=None, description="Data de referencia (default: hoje)")
 
     model_config = {"extra": "forbid"}
 
