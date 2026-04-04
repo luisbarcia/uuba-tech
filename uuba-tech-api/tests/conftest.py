@@ -103,7 +103,7 @@ async def client(engine):
                 401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida"
             )
         request.state.tenant_id = TEST_TENANT_ID
-        request.state.permissions = ["tenants:write", "tenants:read", "admin:write"]
+        request.state.permissions = ["tenants:write", "tenants:read", "admin:write", "admin:read"]
         request.state.key_id = "key_test"
         return api_key
 
