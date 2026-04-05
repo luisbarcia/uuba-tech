@@ -212,6 +212,8 @@ def require_permission(permission: str):
 
     async def _check(request: Request):
         permissions = getattr(request.state, "permissions", [])
+        if "*" in permissions:
+            return  # Wildcard: full access (DB fallback mode)
         if permission not in permissions:
             raise APIError(
                 403,
