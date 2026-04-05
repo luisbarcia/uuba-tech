@@ -85,9 +85,7 @@ def _mock_httpx_client(mock_response=None, side_effect=None) -> AsyncMock:
 
 
 async def test_dry_run_valid_payload(v0_client):
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH)
     assert resp.status_code == 200
     body = resp.json()
     assert body["object"] == "validation_result"
@@ -99,18 +97,14 @@ async def test_dry_run_valid_payload(v0_client):
 
 
 async def test_dry_run_warnings_missing_email(v0_client):
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH)
     assert resp.status_code == 200
     codes = [w["code"] for w in resp.json()["warnings"]]
     assert "missing_email" in codes
 
 
 async def test_dry_run_warnings_missing_phone(v0_client):
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH)
     assert resp.status_code == 200
     codes = [w["code"] for w in resp.json()["warnings"]]
     assert "missing_phone" in codes
@@ -121,9 +115,7 @@ async def test_dry_run_no_warning_when_email_present(v0_client):
         **MINIMAL_PAYLOAD,
         "customer": {**MINIMAL_PAYLOAD["customer"], "email": "padaria@email.com"},
     }
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=payload, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=payload, headers=AUTH)
     assert resp.status_code == 200
     codes = [w["code"] for w in resp.json()["warnings"]]
     assert "missing_email" not in codes
@@ -147,9 +139,7 @@ async def test_dry_run_counts_operations(v0_client):
             },
         ],
     }
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=payload, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=payload, headers=AUTH)
     assert resp.status_code == 200
     body = resp.json()
     assert body["operations_count"] == 3
@@ -314,9 +304,7 @@ async def test_n8n_fallback_response(v0_client):
 
 
 async def test_request_id_header_dry_run(v0_client):
-    resp = await v0_client.post(
-        "/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH
-    )
+    resp = await v0_client.post("/api/v0/faturas?dry_run=true", json=MINIMAL_PAYLOAD, headers=AUTH)
     assert resp.status_code == 200
     assert "x-request-id" in resp.headers
     assert resp.headers["x-request-id"].startswith("recv_")

@@ -170,6 +170,7 @@ async def create_test_cobranca(
 
 # --- v0/faturas fixture (receivables:write) ---
 
+
 @pytest.fixture
 async def v0_client(engine):
     """Client HTTP com receivables:write nas permissions (para v0/faturas)."""

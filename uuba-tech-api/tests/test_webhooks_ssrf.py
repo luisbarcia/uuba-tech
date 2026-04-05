@@ -80,9 +80,9 @@ class TestSSRFIPv6:
     @pytest.mark.parametrize(
         "host",
         [
-            "[::1]",        # loopback
-            "[fc00::1]",    # ULA
-            "[fe80::1]",    # link-local
+            "[::1]",  # loopback
+            "[fc00::1]",  # ULA
+            "[fe80::1]",  # link-local
         ],
     )
     async def test_ipv6_private_blocked(self, client, host):
@@ -224,7 +224,10 @@ class TestSSRFValidURLs:
             mock_dns.return_value = [(2, 1, 6, "", ("93.184.216.34", 0))]
             resp = await client.post(
                 "/api/v1/webhooks",
-                json={"url": "https://hooks.example.com:8443/v1/receive", "events": ["invoice.paid"]},
+                json={
+                    "url": "https://hooks.example.com:8443/v1/receive",
+                    "events": ["invoice.paid"],
+                },
                 headers=AUTH,
             )
         assert resp.status_code == 201
@@ -234,7 +237,9 @@ class TestSSRFValidURLs:
         """Se DNS nao resolve, deixa passar (vai falhar na entrega)."""
         import socket as _socket
 
-        with patch("app.routers.webhooks.socket.getaddrinfo", side_effect=_socket.gaierror("nxdomain")):
+        with patch(
+            "app.routers.webhooks.socket.getaddrinfo", side_effect=_socket.gaierror("nxdomain")
+        ):
             resp = await client.post(
                 "/api/v1/webhooks",
                 json={"url": "https://unknown-host.example.com/hook", "events": ["invoice.paid"]},
@@ -251,56 +256,70 @@ class TestIsBlockedIPUnit:
 
     def test_loopback_v4(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("127.0.0.1") is True
 
     def test_loopback_v6(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("::1") is True
 
     def test_rfc1918_10(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("10.0.0.1") is True
 
     def test_rfc1918_172(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("172.16.0.1") is True
 
     def test_rfc1918_192(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("192.168.1.1") is True
 
     def test_link_local(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("169.254.169.254") is True
 
     def test_ipv6_ula(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("fc00::1") is True
 
     def test_ipv6_link_local(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("fe80::1") is True
 
     def test_public_ip_allowed(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("8.8.8.8") is False
 
     def test_public_ip_allowed_2(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("93.184.216.34") is False
 
     def test_not_an_ip(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("example.com") is False
 
     def test_octal_loopback(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("0177.0.0.1") is True
 
     def test_decimal_loopback(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("2130706433") is True
 
     def test_hex_loopback(self):
         from app.routers.webhooks import _is_blocked_ip
+
         assert _is_blocked_ip("0x7f000001") is True
