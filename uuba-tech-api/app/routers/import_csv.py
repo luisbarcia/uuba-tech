@@ -39,15 +39,25 @@ async def import_csv(
             "Apenas arquivos .csv são aceitos.",
         )
 
-    content = await file.read()
+    # Ler em chunks com limite para prevenir DoS (#99)
+    max_size = 5 * 1024 * 1024
+    chunks: list[bytes] = []
+    total = 0
+    while True:
+        chunk = await file.read(64 * 1024)  # 64KB por vez
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_size:
+            raise APIError(
+                422,
+                "arquivo-grande-demais",
+                "Arquivo muito grande",
+                "O arquivo CSV deve ter no máximo 5MB.",
+            )
+        chunks.append(chunk)
 
-    if len(content) > 5 * 1024 * 1024:
-        raise APIError(
-            422,
-            "arquivo-grande-demais",
-            "Arquivo muito grande",
-            "O arquivo CSV deve ter no máximo 5MB.",
-        )
+    content = b"".join(chunks)
 
     if len(content) == 0:
         raise APIError(
