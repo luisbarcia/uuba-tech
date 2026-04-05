@@ -76,14 +76,21 @@ async def _verify_via_unkey(api_key: str) -> dict:
     - Response envelopada em meta/data (#78)
     - ownerId substituido por identity.externalId (#79)
     """
+    if not UNKEY_ROOT_KEY:
+        logger.error("UNKEY_ROOT_KEY vazio — Authorization header sera omitido")
+        raise APIError(
+            503,
+            "auth-config",
+            "Servico de autenticacao mal configurado",
+            "UNKEY_ROOT_KEY nao definido. Configure no ambiente do container.",
+        )
+
     cached = _get_cached(_unkey_cache, api_key)
     if cached:
         return cached
 
     try:
-        headers = {}
-        if UNKEY_ROOT_KEY:
-            headers["Authorization"] = f"Bearer {UNKEY_ROOT_KEY}"
+        headers = {"Authorization": f"Bearer {UNKEY_ROOT_KEY}"}
         async with httpx.AsyncClient(timeout=5.0) as client:
             response = await client.post(
                 UNKEY_VERIFY_URL,
@@ -185,7 +192,7 @@ async def verify_api_key(
     else:
         tenant_id = await _verify_via_db(api_key, db)
         request.state.tenant_id = tenant_id
-        request.state.permissions = []
+        request.state.permissions = ["*"]  # DB fallback: full access (Unkey disabled)
         request.state.key_id = ""
 
     return api_key
