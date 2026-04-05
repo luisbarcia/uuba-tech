@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, UploadFile, File
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_cliente_repository, get_fatura_repository
 from app.exceptions import APIError
 from app.schemas.import_csv import ImportResult
@@ -25,6 +25,7 @@ router = APIRouter(
         "Colunas opcionais: email, telefone, numero_nf, descricao. "
         "Separador auto-detectado (vírgula ou ponto-e-vírgula)."
     ),
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def import_csv(
     file: UploadFile = File(...),

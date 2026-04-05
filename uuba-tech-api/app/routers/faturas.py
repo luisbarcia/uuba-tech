@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.database import get_event_bus, get_fatura_repository
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.exceptions import APIError
 from app.schemas.fatura import FaturaCreate, FaturaUpdate, FaturaResponse
 from app.schemas.common import ListResponse, PaginationMeta
@@ -22,6 +22,7 @@ router = APIRouter(
     status_code=201,
     summary="Registrar fatura",
     description="Cria uma nova fatura a receber vinculada a um cliente. O valor deve ser em centavos (R$ 2.500,00 = `250000`).",
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def create_fatura(data: FaturaCreate, repo=Depends(get_fatura_repository)):
     """Cria nova fatura vinculada a um cliente. Retorna 201.
@@ -41,6 +42,7 @@ async def create_fatura(data: FaturaCreate, repo=Depends(get_fatura_repository))
     response_model=ListResponse,
     summary="Listar faturas",
     description="Retorna faturas com filtros opcionais por status e cliente. Use `status=pendente,vencido` para faturas em aberto.",
+    dependencies=[Depends(require_permission("invoices:read"))],
 )
 async def list_faturas(
     status: str | None = Query(
@@ -82,6 +84,7 @@ async def list_faturas(
     response_model=FaturaResponse,
     summary="Buscar fatura",
     description="Retorna os dados completos de uma fatura pelo ID.",
+    dependencies=[Depends(require_permission("invoices:read"))],
 )
 async def get_fatura(fatura_id: str, repo=Depends(get_fatura_repository)):
     """Busca fatura por ID. Retorna 404 se não existir.
@@ -109,6 +112,7 @@ async def get_fatura(fatura_id: str, repo=Depends(get_fatura_repository)):
     response_model=FaturaResponse,
     summary="Atualizar fatura",
     description="Atualiza status, promessa de pagamento, ou link de pagamento. Ao marcar como `pago`, o campo `pago_em` é preenchido automaticamente.",
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def update_fatura(
     fatura_id: str,

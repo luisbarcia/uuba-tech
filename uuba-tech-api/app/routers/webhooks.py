@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_db
 from app.exceptions import APIError
 from app.models.webhook import Webhook
@@ -158,6 +158,7 @@ def _to_response(w: Webhook) -> dict:
     "",
     summary="Listar webhooks",
     description="Lista webhooks registrados para o tenant.",
+    dependencies=[Depends(require_permission("webhooks:read"))],
 )
 async def list_webhooks(
     request: Request,
@@ -175,6 +176,7 @@ async def list_webhooks(
     summary="Criar webhook",
     description="Registra um novo webhook para receber eventos.",
     status_code=201,
+    dependencies=[Depends(require_permission("webhooks:write"))],
 )
 async def create_webhook(
     request: Request,
@@ -202,6 +204,7 @@ async def create_webhook(
     "/{webhook_id}/test",
     summary="Testar webhook",
     description="Envia evento de teste para o webhook.",
+    dependencies=[Depends(require_permission("webhooks:write"))],
 )
 async def test_webhook(
     request: Request,
@@ -223,6 +226,7 @@ async def test_webhook(
     summary="Remover webhook",
     description="Remove um webhook registrado.",
     status_code=204,
+    dependencies=[Depends(require_permission("webhooks:write"))],
 )
 async def delete_webhook(
     request: Request,

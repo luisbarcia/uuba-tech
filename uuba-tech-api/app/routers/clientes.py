@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, Query, Response
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_cliente_repository, get_cobranca_repository, get_fatura_repository
 from app.exceptions import APIError
 from app.schemas.cliente import (
@@ -28,6 +28,7 @@ router = APIRouter(
     status_code=201,
     summary="Cadastrar cliente",
     description="Registra um novo cliente na carteira. O campo `documento` (CPF ou CNPJ) deve ser único.",
+    dependencies=[Depends(require_permission("clients:write"))],
 )
 async def create_cliente(data: ClienteCreate, repo=Depends(get_cliente_repository)):
     """Cria novo cliente. Delega ao service e retorna 201.
@@ -47,6 +48,7 @@ async def create_cliente(data: ClienteCreate, repo=Depends(get_cliente_repositor
     response_model=ListResponse,
     summary="Listar clientes",
     description="Retorna a lista de clientes com suporte a filtro por telefone. Use `telefone` para buscar pelo número WhatsApp.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def list_clientes(
     telefone: str | None = Query(
@@ -85,6 +87,7 @@ async def list_clientes(
     response_model=ListResponse,
     summary="Buscar clientes",
     description="Busca textual por nome, documento ou telefone.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def busca_clientes(
     q: str = Query(..., min_length=1, description="Termo de busca"),
@@ -121,6 +124,7 @@ async def busca_clientes(
     response_model=ClienteResponse,
     summary="Buscar cliente",
     description="Retorna os dados de um cliente específico pelo ID.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def get_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
     """Busca cliente por ID. Retorna 404 se não existir.
@@ -148,6 +152,7 @@ async def get_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
     response_model=ClienteResponse,
     summary="Atualizar cliente",
     description="Atualiza parcialmente os dados de um cliente. Envie apenas os campos que deseja alterar.",
+    dependencies=[Depends(require_permission("clients:write"))],
 )
 async def update_cliente(
     cliente_id: str, data: ClienteUpdate, repo=Depends(get_cliente_repository)
@@ -180,6 +185,7 @@ async def update_cliente(
     description="Anonimiza dados pessoais do cliente conforme Art. 18 VI da LGPD. "
     "Nome, documento, email e telefone são removidos. Faturas e cobranças "
     "mantêm integridade referencial mas mensagens são apagadas.",
+    dependencies=[Depends(require_permission("clients:write"))],
 )
 async def delete_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
     """Anonimiza dados pessoais do cliente (LGPD Art. 18 VI). Retorna 204.
@@ -208,6 +214,7 @@ async def delete_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
     summary="Anonimizar cliente (LGPD Art. 18)",
     description="Substitui dados pessoais por valores anonimizados. Irreversivel. "
     "Mantem registro para integridade referencial com faturas/cobrancas.",
+    dependencies=[Depends(require_permission("clients:write"))],
 )
 async def anonimizar_cliente(cliente_id: str, repo=Depends(get_cliente_repository)):
     """Anonimiza dados pessoais do cliente e retorna o registro atualizado.
@@ -237,6 +244,7 @@ async def anonimizar_cliente(cliente_id: str, repo=Depends(get_cliente_repositor
     response_model=ClienteMetricas,
     summary="Métricas de pagamento",
     description="Retorna indicadores financeiros do cliente: DSO (dias médios para pagamento), total em aberto, total vencido, e contagem de faturas.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def get_metricas(
     cliente_id: str,
@@ -269,6 +277,7 @@ async def get_metricas(
     summary="Exportar dados do cliente (LGPD Art. 18 — Portabilidade)",
     description="Retorna todos os dados pessoais do cliente + faturas + cobrancas + metricas. "
     "Formato portavel (JSON) conforme Art. 18, II e V da LGPD.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def exportar_cliente(
     cliente_id: str,
@@ -303,6 +312,7 @@ async def exportar_cliente(
     summary="Dados pessoais do titular (LGPD Art. 18)",
     description="Retorna todos os dados pessoais do titular em formato portável (JSON). "
     "Inclui cadastro, faturas e cobranças associadas. Conforme Art. 18, II e V da LGPD.",
+    dependencies=[Depends(require_permission("clients:read"))],
 )
 async def get_dados_pessoais(
     cliente_id: str,

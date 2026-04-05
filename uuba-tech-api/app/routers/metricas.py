@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_db
 from app.schemas.metricas import MetricasResponse
 from app.services import metricas_service
@@ -11,7 +11,7 @@ from app.services import metricas_service
 router = APIRouter(
     prefix="/api/v1/metricas",
     tags=["metricas"],
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("metrics:read"))],
 )
 
 

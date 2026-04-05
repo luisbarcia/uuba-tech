@@ -5,14 +5,14 @@ from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime, timezone, timedelta
 
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.database import get_db
 from app.models.audit_log import AuditLog
 
 router = APIRouter(
     prefix="/api/v1/usage",
     tags=["usage"],
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(verify_api_key), Depends(require_permission("usage:read"))],
 )
 
 

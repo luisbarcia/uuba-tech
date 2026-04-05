@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, Query
 
 from app.database import get_cobranca_repository, get_event_bus, get_fatura_repository
-from app.auth.api_key import verify_api_key
+from app.auth.api_key import require_permission, verify_api_key
 from app.exceptions import APIError
 from app.schemas.cobranca import CobrancaCreate, CobrancaResponse
 from app.schemas.common import ListResponse, PaginationMeta
@@ -22,6 +22,7 @@ router = APIRouter(
     status_code=201,
     summary="Registrar cobrança",
     description="Registra uma ação de cobrança vinculada a uma fatura. Especifique o tipo (lembrete, cobrança, follow_up, escalação) e opcionalmente o tom e mensagem.",
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def create_cobranca(
     data: CobrancaCreate,
@@ -50,6 +51,7 @@ async def create_cobranca(
     response_model=ListResponse,
     summary="Listar cobranças",
     description="Retorna cobranças com filtros por período, cliente, ou fatura. Use `periodo=7d` para cobranças dos últimos 7 dias.",
+    dependencies=[Depends(require_permission("invoices:read"))],
 )
 async def list_cobrancas(
     periodo: str | None = Query(None, description="Período em dias (ex: 7d, 30d)"),
@@ -95,6 +97,7 @@ async def list_cobrancas(
     response_model=ListResponse,
     summary="Histórico de cobranças",
     description="Retorna toda a timeline de cobranças enviadas para uma fatura específica, ordenadas da mais recente para a mais antiga.",
+    dependencies=[Depends(require_permission("invoices:read"))],
 )
 async def get_historico(fatura_id: str, repo=Depends(get_cobranca_repository)):
     """Retorna timeline de cobranças de uma fatura, da mais recente à mais antiga.
@@ -118,6 +121,7 @@ async def get_historico(fatura_id: str, repo=Depends(get_cobranca_repository)):
     response_model=CobrancaResponse,
     summary="Pausar cobrança",
     description="Pausa a régua de cobrança para esta fatura. Nenhuma mensagem será enviada enquanto estiver pausada.",
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def pausar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
     """Pausa a régua de cobrança. Retorna 404 se não existir.
@@ -145,6 +149,7 @@ async def pausar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
     response_model=CobrancaResponse,
     summary="Retomar cobrança",
     description="Retoma uma cobrança que estava pausada. A régua volta a funcionar normalmente.",
+    dependencies=[Depends(require_permission("invoices:write"))],
 )
 async def retomar(cobranca_id: str, repo=Depends(get_cobranca_repository)):
     """Retoma cobrança pausada. Retorna 404 se não existir.
