@@ -52,13 +52,13 @@ class TestJobsRequireAdminWrite:
     """POST /api/v1/jobs/* requires admin:write."""
 
     @pytest.mark.asyncio
-    async def test_jobs_vencimento_without_permission_returns_403(self, client):
-        resp = await client.post("/api/v1/jobs/vencimento", headers=NO_PERMS_AUTH)
+    async def test_jobs_transicionar_vencidas_without_permission_returns_403(self, client):
+        resp = await client.post("/api/v1/jobs/transicionar-vencidas", headers=NO_PERMS_AUTH)
         assert resp.status_code == 403
 
     @pytest.mark.asyncio
-    async def test_jobs_cobranca_without_permission_returns_403(self, client):
-        resp = await client.post("/api/v1/jobs/cobranca", headers=NO_PERMS_AUTH)
+    async def test_jobs_processar_regua_without_permission_returns_403(self, client):
+        resp = await client.post("/api/v1/jobs/processar-regua", headers=NO_PERMS_AUTH)
         assert resp.status_code == 403
 
 
@@ -72,11 +72,11 @@ class TestLogsRequireAdminRead:
 
 
 class TestWatchRequireAdminRead:
-    """GET /api/v1/watch requires admin:read."""
+    """GET /api/v1/watch/snapshot requires admin:read."""
 
     @pytest.mark.asyncio
-    async def test_watch_without_permission_returns_403(self, client):
-        resp = await client.get("/api/v1/watch", headers=NO_PERMS_AUTH)
+    async def test_watch_snapshot_without_permission_returns_403(self, client):
+        resp = await client.get("/api/v1/watch/snapshot", headers=NO_PERMS_AUTH)
         assert resp.status_code == 403
 
 

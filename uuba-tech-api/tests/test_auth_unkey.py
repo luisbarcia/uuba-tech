@@ -45,6 +45,12 @@ class TestVerifyViaUnkey:
         yield
         clear_tenant_cache()
 
+    @pytest.fixture(autouse=True)
+    def mock_root_key(self):
+        """Todos os testes de _verify_via_unkey precisam de UNKEY_ROOT_KEY setado."""
+        with patch("app.auth.api_key.UNKEY_ROOT_KEY", "unkey_root_test"):
+            yield
+
     @pytest.mark.asyncio
     async def test_valid_key_returns_tenant_data(self):
         mock_response = MagicMock()
@@ -212,8 +218,7 @@ class TestVerifyViaUnkey:
         mock_client.post = AsyncMock(return_value=mock_response)
 
         with patch("app.auth.api_key.httpx.AsyncClient", return_value=mock_client):
-            with patch("app.auth.api_key.UNKEY_ROOT_KEY", "unkey_root_test"):
-                await _verify_via_unkey("uuba_live_auth_test")
+            await _verify_via_unkey("uuba_live_auth_test")
 
         call_kwargs = mock_client.post.call_args
         assert call_kwargs[1]["headers"]["Authorization"] == "Bearer unkey_root_test"
@@ -231,3 +236,4 @@ class TestVerifyViaUnkey:
             with pytest.raises(APIError) as exc_info:
                 await _verify_via_unkey("key_http_fail")
             assert exc_info.value.status == 503
+            assert exc_info.value.error_type == "auth-indisponivel"
