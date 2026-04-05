@@ -166,3 +166,56 @@ async def create_test_cobranca(
     resp = await c.post("/api/v1/cobrancas", json=data, headers=AUTH)
     assert resp.status_code == 201, resp.text
     return resp.json()
+
+
+# --- v0/faturas fixture (receivables:write) ---
+
+@pytest.fixture
+async def v0_client(engine):
+    """Client HTTP com receivables:write nas permissions (para v0/faturas)."""
+    factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+    async def override_get_db():
+        async with factory() as session:
+            yield session
+
+    async def override_fatura_repo():
+        async with factory() as session:
+            yield SqlAlchemyFaturaRepository(session, TEST_TENANT_ID)
+
+    async def override_cobranca_repo():
+        async with factory() as session:
+            yield SqlAlchemyCobrancaRepository(session, TEST_TENANT_ID)
+
+    async def override_cliente_repo():
+        async with factory() as session:
+            yield SqlAlchemyClienteRepository(session, TEST_TENANT_ID)
+
+    async def override_verify_api_key(request: Request):
+        from app.exceptions import APIError
+
+        api_key = request.headers.get("X-API-Key", "")
+        if not api_key or api_key != API_KEY:
+            raise APIError(
+                401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida"
+            )
+        request.state.tenant_id = TEST_TENANT_ID
+        request.state.permissions = ["receivables:write"]
+        request.state.key_id = "key_test"
+        return api_key
+
+    app.dependency_overrides[get_db] = override_get_db
+    app.dependency_overrides[get_fatura_repository] = override_fatura_repo
+    app.dependency_overrides[get_cobranca_repository] = override_cobranca_repo
+    app.dependency_overrides[get_cliente_repository] = override_cliente_repo
+    app.dependency_overrides[verify_api_key] = override_verify_api_key
+
+    clear_tenant_cache()
+
+    async with AsyncClient(
+        transport=ASGITransport(app=app),
+        base_url="http://test",
+    ) as ac:
+        yield ac
+    app.dependency_overrides.clear()
+    clear_tenant_cache()
