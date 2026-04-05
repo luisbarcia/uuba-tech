@@ -3,7 +3,7 @@
 import json
 
 from fastapi import APIRouter, Depends, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,6 +27,7 @@ class WebhookCreate(BaseModel):
     url: str = Field(..., max_length=500, pattern=r"^https?://")
     events: list[str] = Field(..., min_length=1)
 
+    @field_validator("url")
     @classmethod
     def _validate_url(cls, url: str) -> str:
         from urllib.parse import urlparse
