@@ -358,6 +358,7 @@ from app.routers import (  # noqa: E402
     admin,
     jobs,
     import_csv,
+    integrations,
     privacidade,
     tenants,
     metricas,
@@ -375,6 +376,7 @@ app.include_router(cobrancas.router)
 app.include_router(admin.router)
 app.include_router(jobs.router)
 app.include_router(import_csv.router)
+app.include_router(integrations.router)
 app.include_router(privacidade.router)
 app.include_router(tenants.router)
 app.include_router(metricas.router)

@@ -11,6 +11,12 @@ from sqlalchemy.pool import StaticPool
 
 from app.models.base import Base
 from app.models.audit_log import AuditLog  # noqa: F401 — registra tabela no metadata
+from app.models.integration import (  # noqa: F401 — registra tabelas no metadata
+    IntegrationProvider,
+    TenantIntegration,
+    IntegrationCredential,
+    IntegrationEvent,
+)
 from app.models.regua import Regua, ReguaPasso  # noqa: F401
 from app.models.tenant import Tenant  # noqa: F401
 from app.models.webhook import Webhook  # noqa: F401
@@ -116,6 +122,7 @@ async def client(engine):
             "usage:read",
             "webhooks:read",
             "webhooks:write",
+            "integrations:read",
         ]
         request.state.key_id = "key_test"
         return api_key
