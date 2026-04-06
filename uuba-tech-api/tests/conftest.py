@@ -17,6 +17,7 @@ from app.models.integration import (  # noqa: F401 — registra tabelas no metad
     IntegrationCredential,
     IntegrationEvent,
 )
+from app.models.oauth_state import OAuthStateToken  # noqa: F401
 from app.models.regua import Regua, ReguaPasso  # noqa: F401
 from app.models.tenant import Tenant  # noqa: F401
 from app.models.webhook import Webhook  # noqa: F401
