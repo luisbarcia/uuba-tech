@@ -215,6 +215,115 @@ async def _refresh_oauth_token(
         await db.execute(text(f"SELECT pg_advisory_unlock({lock_key})"))
 
 
+def encrypt_credentials(plaintext: dict, key: str) -> tuple[bytes, bytes]:
+    """Encripta credenciais com AES-256-GCM. Retorna (encrypted_data, iv)."""
+    derived = _derive_key(key)
+    aesgcm = AESGCM(derived)
+    iv = os.urandom(12)
+    encrypted = aesgcm.encrypt(iv, json.dumps(plaintext).encode(), None)
+    return encrypted, iv
+
+
+@router.post(
+    "/{integration_id}/credentials",
+    status_code=201,
+    summary="Salvar credenciais de integracao",
+    description="Recebe credenciais em plaintext, criptografa com AES-256-GCM e salva no cofre. "
+    "Protegido por scope `integrations:write`.",
+    dependencies=[Depends(require_permission("integrations:write"))],
+)
+async def set_integration_credentials(
+    request: Request,
+    integration_id: str,
+    body: dict,
+    db: AsyncSession = Depends(get_db),
+):
+    """POST /api/v1/integrations/{integration_id}/credentials
+
+    Recebe credenciais em plaintext, encripta e salva.
+    Se ja existem credenciais, atualiza (upsert).
+    """
+    # Buscar integracao
+    result = await db.execute(
+        select(TenantIntegration).where(TenantIntegration.id == integration_id)
+    )
+    integration = result.scalar_one_or_none()
+    if not integration:
+        raise APIError(
+            404,
+            "integracao-nao-encontrada",
+            "Integracao nao encontrada",
+            f"Integracao '{integration_id}' nao existe.",
+        )
+
+    # Verificar que pertence ao tenant da request
+    auth_tenant_id = request.state.tenant_id
+    if auth_tenant_id != integration.tenant_id:
+        raise APIError(
+            403,
+            "permissao-negada",
+            "Permissao negada",
+            f"API key pertence ao tenant {auth_tenant_id}, nao {integration.tenant_id}.",
+        )
+
+    encryption_key = _get_encryption_key()
+    encrypted_data, iv = encrypt_credentials(body, encryption_key)
+
+    now = datetime.now(timezone.utc)
+
+    # Buscar credential existente
+    result = await db.execute(
+        select(IntegrationCredential).where(
+            IntegrationCredential.integration_id == integration_id
+        )
+    )
+    credential = result.scalar_one_or_none()
+
+    if credential:
+        # Update existente
+        credential.encrypted_data = encrypted_data
+        credential.iv = iv
+        credential.updated_at = now
+        if body.get("expires_at"):
+            credential.token_expires_at = datetime.fromisoformat(body["expires_at"])
+    else:
+        # Criar nova
+        credential = IntegrationCredential(
+            id=generate_id("crd"),
+            integration_id=integration_id,
+            encrypted_data=encrypted_data,
+            iv=iv,
+            created_at=now,
+            updated_at=now,
+        )
+        if body.get("expires_at"):
+            credential.token_expires_at = datetime.fromisoformat(body["expires_at"])
+        db.add(credential)
+
+    # Registrar evento
+    db.add(
+        IntegrationEvent(
+            id=generate_id("iev"),
+            integration_id=integration_id,
+            event_type="credentials_set",
+            details={"keys": list(body.keys())},
+            created_at=now,
+        )
+    )
+
+    # Atualizar status se pending_setup
+    if integration.status == "pending_setup":
+        integration.status = "configuring"
+
+    await db.commit()
+
+    return {
+        "status": "ok",
+        "integration_id": integration_id,
+        "credential_id": credential.id,
+    }
+
+
 @router.get(
     "/{tenant_id}/{provider_slug}/credentials",
     summary="Buscar credenciais de integracao",

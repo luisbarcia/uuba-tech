@@ -123,6 +123,7 @@ async def client(engine):
             "webhooks:read",
             "webhooks:write",
             "integrations:read",
+            "integrations:write",
         ]
         request.state.key_id = "key_test"
         return api_key
