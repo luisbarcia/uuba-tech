@@ -9,6 +9,14 @@ Features:
 - Idempotency-Key header (TODO: implementar KV)
 
 Lifecycle: deprecated quando cliente migrar para POST /api/v1/faturas.
+
+n8n Webhook Headers (convencao obrigatoria):
+    Todo forward da API para webhooks n8n DEVE incluir:
+    - X-Tenant-Id: ID do tenant que originou o request
+    - X-Request-Id: ID unico do request para rastreamento
+    - X-API-Base-URL: Base URL da API (ex: https://api.uuba.tech)
+    - X-API-Endpoint: URL completa do endpoint que originou (ex: https://api.uuba.tech/api/v0/faturas)
+    Isso permite que workflows n8n facam callbacks para a API sem hardcode de URLs.
 """
 
 import logging
@@ -41,6 +49,7 @@ N8N_WEBHOOK_URL = os.environ.get(
     "https://n8n.srv921702.hstgr.cloud/webhook/cfo/v1/receivables",
 )
 N8N_TIMEOUT = float(os.environ.get("N8N_WEBHOOK_TIMEOUT", "30"))
+API_BASE_URL = os.environ.get("API_BASE_URL", "https://api.uuba.tech")
 
 router = APIRouter(
     prefix="/api/v0/faturas",
@@ -63,6 +72,8 @@ async def _forward_to_n8n(
                 headers={
                     "X-Tenant-Id": tenant_id,
                     "X-Request-Id": request_id,
+                    "X-API-Base-URL": API_BASE_URL,
+                    "X-API-Endpoint": f"{API_BASE_URL}/api/v0/faturas",
                     "Content-Type": "application/json",
                 },
             )
