@@ -54,7 +54,11 @@ def _get_encryption_key() -> str:
 
 
 def _derive_key(raw_key: str) -> bytes:
-    """Deriva chave AES-256 de 32 bytes via SHA-256. Compativel com o CLI (Node.js)."""
+    """Deriva chave AES-256 de 32 bytes via SHA-256.
+
+    Compativel com o CLI (Node.js): deriveKey(envKey).toString("hex") →
+    Buffer.from(hex, "hex") → 32 raw bytes.
+    """
     return hashlib.sha256(raw_key.encode()).digest()
 
 
