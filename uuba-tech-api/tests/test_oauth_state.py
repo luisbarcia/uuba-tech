@@ -25,9 +25,9 @@ INTEGRATION_ID = "int_oauth_test"
 
 @pytest.fixture(autouse=True)
 def set_encryption_key():
-    os.environ["INTEGRATION_ENCRYPTION_KEY"] = ENCRYPTION_KEY
+    os.environ["UUBA_ENCRYPTION_KEY"] = ENCRYPTION_KEY
     yield
-    os.environ.pop("INTEGRATION_ENCRYPTION_KEY", None)
+    os.environ.pop("UUBA_ENCRYPTION_KEY", None)
 
 
 @pytest.fixture
@@ -205,7 +205,104 @@ async def test_create_state_no_auth(client, engine):
 
 
 @pytest.mark.asyncio
-@pytest.mark.skip(reason="requires httpx mock for token exchange")
-async def test_callback_happy_path(client, seed_oauth_provider):
+async def test_callback_happy_path(client, seed_oauth_provider, monkeypatch):
     """Callback happy path — troca code por tokens e salva no cofre."""
-    pass
+    import httpx
+    from unittest.mock import AsyncMock
+    from app.models.oauth_app import OAuthApp
+    from app.models.integration import IntegrationCredential, IntegrationEvent
+    from app.routers.integrations import encrypt_credentials
+
+    # 1. Criar OAuth app com client_secret encriptado
+    encrypted_secret, secret_iv = encrypt_credentials(
+        {"raw": "test_client_secret"}, ENCRYPTION_KEY
+    )
+    async with seed_oauth_provider() as session:
+        session.add(
+            OAuthApp(
+                id="oapp_test_happy",
+                provider_id=PROVIDER_ID,
+                label="Test App",
+                client_id="test_client_id",
+                client_secret_encrypted=encrypted_secret,
+                client_secret_iv=secret_iv,
+                is_default=True,
+            )
+        )
+        await session.commit()
+
+    # 2. Criar state token pendente
+    resp = await client.post(
+        "/api/v1/integrations/oauth/state",
+        json={
+            "integration_id": INTEGRATION_ID,
+            "provider_slug": "conta-azul",
+            "scopes": "openid profile",
+            "code_verifier": "test_verifier_pkce",
+            "redirect_uri": "https://api.uuba.tech/oauth/callback",
+        },
+        headers=AUTH,
+    )
+    assert resp.status_code == 201
+    state_token = resp.json()["state_token"]
+
+    # 3. Mock httpx para simular token exchange do provider
+    fake_tokens = {
+        "access_token": "fake_access_token_123",
+        "refresh_token": "fake_refresh_token_456",
+        "expires_in": 3600,
+        "token_type": "Bearer",
+    }
+    from unittest.mock import Mock
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_response.json.return_value = fake_tokens
+
+    mock_http = AsyncMock()
+    mock_http.post = AsyncMock(return_value=mock_response)
+    mock_http.__aenter__ = AsyncMock(return_value=mock_http)
+    mock_http.__aexit__ = AsyncMock(return_value=False)
+
+    monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: mock_http)
+
+    # 4. Chamar callback (GET publico, sem auth)
+    resp = await client.get(
+        f"/oauth/callback?code=test_auth_code&state={state_token}"
+    )
+    assert resp.status_code == 200
+    assert "sucesso" in resp.text.lower()
+
+    # 5. Verificar no DB
+    async with seed_oauth_provider() as session:
+        # State token marcado como completed
+        result = await session.execute(
+            select(OAuthStateToken).where(OAuthStateToken.state_token == state_token)
+        )
+        token = result.scalar_one()
+        assert token.status == "completed"
+
+        # Credenciais encriptadas salvas
+        result = await session.execute(
+            select(IntegrationCredential).where(
+                IntegrationCredential.integration_id == INTEGRATION_ID
+            )
+        )
+        cred = result.scalar_one()
+        assert cred.encrypted_data is not None
+        assert cred.iv is not None
+
+        # Integration status = active
+        result = await session.execute(
+            select(TenantIntegration).where(TenantIntegration.id == INTEGRATION_ID)
+        )
+        integration = result.scalar_one()
+        assert integration.status == "active"
+
+        # Evento connected registrado
+        result = await session.execute(
+            select(IntegrationEvent).where(
+                IntegrationEvent.integration_id == INTEGRATION_ID
+            )
+        )
+        event = result.scalar_one()
+        assert event.event_type == "connected"

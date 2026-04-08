@@ -61,6 +61,9 @@ class TenantIntegration(Base, TimestampMixin):
     metadata_: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     error_count: Mapped[int] = mapped_column(Integer, default=0)
+    oauth_app_id: Mapped[str | None] = mapped_column(
+        String(25), ForeignKey("oauth_apps.id"), nullable=True
+    )
     last_sync_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     last_error_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

@@ -7,10 +7,10 @@ Endpoints:
 """
 
 import logging
-import os
 from datetime import datetime, timezone, timedelta
 
 import httpx
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import HTMLResponse
 from sqlalchemy import select, and_
@@ -25,8 +25,9 @@ from app.models.integration import (
     IntegrationProvider,
     TenantIntegration,
 )
+from app.models.oauth_app import OAuthApp
 from app.models.oauth_state import OAuthStateToken
-from app.routers.integrations import encrypt_credentials, _get_encryption_key
+from app.routers.integrations import encrypt_credentials, _get_encryption_key, _derive_key
 from app.utils.ids import generate_id
 
 logger = logging.getLogger("uuba")
@@ -226,19 +227,58 @@ async def oauth_callback(
             status_code=400,
         )
 
-    # 4. Buscar client_id/secret dos env vars
-    env_prefix = provider.slug.upper().replace("-", "_")
-    client_id = os.environ.get(f"{env_prefix}_CLIENT_ID", "")
-    client_secret = os.environ.get(f"{env_prefix}_CLIENT_SECRET", "")
+    # 4. Buscar integracao (movido para antes do OAuth app lookup)
+    result = await db.execute(
+        select(TenantIntegration).where(TenantIntegration.id == token.integration_id)
+    )
+    integration = result.scalar_one_or_none()
 
-    if not client_id or not client_secret:
-        logger.error(f"OAuth callback: {env_prefix}_CLIENT_ID ou _CLIENT_SECRET ausente")
+    if not integration:
         return HTMLResponse(
-            content=HTML_ERROR.format(message="Configuração do provider incompleta no servidor."),
+            content=HTML_ERROR.format(message="Integração não encontrada."),
             status_code=400,
         )
 
-    # 5. POST token_url
+    # 5. Resolver OAuth app do DB (oauth_apps table)
+    # Prioridade: integration.oauth_app_id → default do provider → erro
+    oauth_app = None
+    if integration.oauth_app_id:
+        result = await db.execute(
+            select(OAuthApp).where(OAuthApp.id == integration.oauth_app_id)
+        )
+        oauth_app = result.scalar_one_or_none()
+
+    if not oauth_app:
+        # Fallback: default for this provider
+        result = await db.execute(
+            select(OAuthApp).where(
+                and_(OAuthApp.provider_id == provider.id, OAuthApp.is_default.is_(True))
+            )
+        )
+        oauth_app = result.scalar_one_or_none()
+
+    if not oauth_app:
+        logger.error(f"OAuth callback: nenhum OAuth app para provider {provider.slug}")
+        return HTMLResponse(
+            content=HTML_ERROR.format(
+                message="OAuth app não configurado para este provider. "
+                "Configure via: uuba integrations oauth-apps add"
+            ),
+            status_code=400,
+        )
+
+    client_id = oauth_app.client_id
+    # Decrypt client_secret
+    encryption_key = _get_encryption_key()
+    derived = _derive_key(encryption_key)
+    aesgcm = AESGCM(derived)
+    client_secret = aesgcm.decrypt(
+        bytes(oauth_app.client_secret_iv),
+        bytes(oauth_app.client_secret_encrypted),
+        None,
+    ).decode()
+
+    # 6. POST token_url
     token_data_payload = {
         "grant_type": "authorization_code",
         "code": code,
@@ -271,21 +311,8 @@ async def oauth_callback(
 
     token_data = response.json()
 
-    # 6. Encriptar tokens e salvar no cofre
-    encryption_key = _get_encryption_key()
+    # 7. Encriptar tokens e salvar no cofre
     encrypted_data, iv = encrypt_credentials(token_data, encryption_key)
-
-    # Buscar integracao
-    result = await db.execute(
-        select(TenantIntegration).where(TenantIntegration.id == token.integration_id)
-    )
-    integration = result.scalar_one_or_none()
-
-    if not integration:
-        return HTMLResponse(
-            content=HTML_ERROR.format(message="Integração não encontrada."),
-            status_code=400,
-        )
 
     # Upsert credential
     result = await db.execute(

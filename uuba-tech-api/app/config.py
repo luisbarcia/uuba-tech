@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     whatsapp_verify_token: str = ""
     environment: str = "development"
     debug: bool = False
+    uuba_encryption_key: str = ""  # AES-256-GCM key para cofre de credenciais
 
     # LGPD: Períodos de retenção (Art. 15/16)
     retencao_faturas_anos: int = 5

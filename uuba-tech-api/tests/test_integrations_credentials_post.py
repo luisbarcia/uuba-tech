@@ -27,9 +27,9 @@ INTEGRATION_ID = "int_testcredpost"
 
 @pytest.fixture(autouse=True)
 def set_encryption_key():
-    os.environ["INTEGRATION_ENCRYPTION_KEY"] = ENCRYPTION_KEY
+    os.environ["UUBA_ENCRYPTION_KEY"] = ENCRYPTION_KEY
     yield
-    os.environ.pop("INTEGRATION_ENCRYPTION_KEY", None)
+    os.environ.pop("UUBA_ENCRYPTION_KEY", None)
 
 
 @pytest.fixture

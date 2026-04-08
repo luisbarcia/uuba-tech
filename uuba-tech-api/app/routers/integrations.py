@@ -39,14 +39,16 @@ router = APIRouter(
 
 
 def _get_encryption_key() -> str:
-    """Obtem chave de encriptacao do env var. Levanta APIError se ausente."""
-    key = os.environ.get("INTEGRATION_ENCRYPTION_KEY", "")
+    """Obtem chave de encriptacao (settings → env var fallback). Levanta APIError se ausente."""
+    from app.config import settings as _settings
+
+    key = _settings.uuba_encryption_key or os.environ.get("UUBA_ENCRYPTION_KEY", "")
     if not key:
         raise APIError(
             503,
             "integracao-config",
             "Chave de encriptacao nao configurada",
-            "Defina INTEGRATION_ENCRYPTION_KEY no ambiente.",
+            "Defina UUBA_ENCRYPTION_KEY no ambiente.",
         )
     return key
 
@@ -67,7 +69,7 @@ def decrypt_credentials(encrypted_data: bytes, iv: bytes, key: str) -> dict:
     Args:
         encrypted_data: Ciphertext + auth_tag (16 bytes) do DB (BYTEA).
         iv: Initialization vector (12 bytes) do DB (BYTEA).
-        key: Chave raw do env var INTEGRATION_ENCRYPTION_KEY.
+        key: Chave raw do env var UUBA_ENCRYPTION_KEY.
 
     Returns:
         dict com credenciais descriptografadas.
