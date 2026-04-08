@@ -139,23 +139,85 @@ async def poll_state_token(
 # --- Router publico (callback) ---
 callback_router = APIRouter(tags=["integrations"])
 
-HTML_SUCCESS = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><title>Autorizado</title></head>
-<body style="font-family:sans-serif;text-align:center;padding:60px">
-<h1>Autorizado com sucesso!</h1>
-<p>Pode fechar esta janela.</p>
-</body>
-</html>"""
+_UUBA_SVG = """<svg width="48" height="48" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="52" cy="50" r="38" stroke="{color}" stroke-width="2.5" fill="none"/>
+<path d="M14 50 C14 50 30 85 52 88 C52 88 14 82 14 50Z" fill="{color}"/>
+<g stroke="{color}" stroke-width="1.8" stroke-linecap="round">
+<line x1="28" y1="62" x2="72" y2="52"/><line x1="30" y1="67" x2="74" y2="57"/>
+<line x1="33" y1="72" x2="76" y2="62"/><line x1="37" y1="77" x2="77" y2="67"/>
+<line x1="42" y1="81" x2="76" y2="72"/><line x1="48" y1="84" x2="73" y2="76"/>
+</g></svg>"""
 
-HTML_ERROR = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head><meta charset="UTF-8"><title>Erro</title></head>
-<body style="font-family:sans-serif;text-align:center;padding:60px">
-<h1>Erro na autorização</h1>
-<p>{message}</p>
-</body>
-</html>"""
+_BASE_STYLE = """
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Libre Baskerville', Georgia, serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FAFAFA;
+    color: #1A1A1A;
+  }
+  .card {
+    text-align: center;
+    padding: 60px 48px;
+    max-width: 440px;
+  }
+  .logo { margin-bottom: 32px; }
+  h1 {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    font-weight: 300;
+    font-size: 22px;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+    color: {heading_color};
+  }
+  p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #555;
+  }
+  .hint {
+    margin-top: 24px;
+    font-size: 13px;
+    color: #999;
+  }
+</style>
+"""
+
+HTML_SUCCESS = (
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    "<title>Autorizado - UUBA</title>"
+    + _BASE_STYLE.replace("{heading_color}", "#1B2154")
+    + '</head><body><div class="card">'
+    + '<div class="logo">' + _UUBA_SVG.replace("{color}", "#1B2154") + "</div>"
+    + "<h1>Autorizado com sucesso</h1>"
+    + "<p>Sua integração foi conectada. Pode fechar esta janela.</p>"
+    + '<p class="hint">UUBA Tech</p>'
+    + "</div></body></html>"
+)
+
+HTML_ERROR = (
+    '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">'
+    '<meta name="viewport" content="width=device-width,initial-scale=1">'
+    "<title>Erro - UUBA</title>"
+    + _BASE_STYLE.replace("{heading_color}", "#C0392B")
+    + '</head><body><div class="card">'
+    + '<div class="logo">' + _UUBA_SVG.replace("{color}", "#C0392B") + "</div>"
+    + "<h1>Erro na autorização</h1>"
+    + "<p>__MESSAGE__</p>"
+    + '<p class="hint">UUBA Tech</p>'
+    + "</div></body></html>"
+)
+
+
+def _error_page(message: str) -> str:
+    """Gera pagina de erro com mensagem substituida."""
+    return HTML_ERROR.replace("__MESSAGE__", message)
 
 
 @callback_router.get(
@@ -190,7 +252,7 @@ async def oauth_callback(
 
     if not token:
         return HTMLResponse(
-            content=HTML_ERROR.format(message="State token inválido ou não encontrado."),
+            content=_error_page("State token inválido ou não encontrado."),
             status_code=400,
         )
 
@@ -198,7 +260,7 @@ async def oauth_callback(
     now = datetime.now(timezone.utc)
     if token.status != "pending":
         return HTMLResponse(
-            content=HTML_ERROR.format(message=f"State token já foi utilizado (status: {token.status})."),
+            content=_error_page(f"State token já foi utilizado (status: {token.status})."),
             status_code=400,
         )
 
@@ -206,7 +268,7 @@ async def oauth_callback(
         token.status = "expired"
         await db.commit()
         return HTMLResponse(
-            content=HTML_ERROR.format(message="State token expirado. Inicie o fluxo novamente."),
+            content=_error_page("State token expirado. Inicie o fluxo novamente."),
             status_code=400,
         )
 
@@ -223,7 +285,7 @@ async def oauth_callback(
 
     if not provider or not provider.token_url:
         return HTMLResponse(
-            content=HTML_ERROR.format(message="Provider não encontrado ou sem token_url configurado."),
+            content=_error_page("Provider não encontrado ou sem token_url configurado."),
             status_code=400,
         )
 
@@ -235,7 +297,7 @@ async def oauth_callback(
 
     if not integration:
         return HTMLResponse(
-            content=HTML_ERROR.format(message="Integração não encontrada."),
+            content=_error_page("Integração não encontrada."),
             status_code=400,
         )
 
@@ -260,8 +322,8 @@ async def oauth_callback(
     if not oauth_app:
         logger.error(f"OAuth callback: nenhum OAuth app para provider {provider.slug}")
         return HTMLResponse(
-            content=HTML_ERROR.format(
-                message="OAuth app não configurado para este provider. "
+            content=_error_page(
+                "OAuth app não configurado para este provider. "
                 "Configure via: uuba integrations oauth-apps add"
             ),
             status_code=400,
@@ -298,14 +360,14 @@ async def oauth_callback(
     except httpx.HTTPError as exc:
         logger.error(f"OAuth token exchange falhou: {exc}")
         return HTMLResponse(
-            content=HTML_ERROR.format(message="Falha na comunicação com o provider."),
+            content=_error_page("Falha na comunicação com o provider."),
             status_code=400,
         )
 
     if response.status_code != 200:
         logger.error(f"OAuth token exchange HTTP {response.status_code}: {response.text[:500]}")
         return HTMLResponse(
-            content=HTML_ERROR.format(message="Provider rejeitou a troca de código por tokens."),
+            content=_error_page("Provider rejeitou a troca de código por tokens."),
             status_code=400,
         )
 
