@@ -13,7 +13,7 @@ import time
 
 import httpx
 from fastapi import Depends, Request, Security
-from fastapi.security import APIKeyHeader
+from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +24,7 @@ from app.models.tenant import Tenant
 logger = logging.getLogger("uuba")
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+bearer_scheme = HTTPBearer(auto_error=False, description="Authorization: Bearer <api_key>")
 
 UNKEY_VERIFY_URL = "https://api.unkey.com/v2/keys.verifyKey"
 UNKEY_ROOT_KEY = os.environ.get("UNKEY_ROOT_KEY", "")
@@ -166,17 +167,26 @@ async def _verify_via_db(api_key: str, db: AsyncSession) -> str:
 
 async def verify_api_key(
     request: Request,
+    bearer: HTTPAuthorizationCredentials | None = Security(bearer_scheme),
     api_key: str | None = Security(api_key_header),
     db: AsyncSession = Depends(get_db),
 ) -> str:
     """Valida API key e identifica o tenant.
 
+    Aceita ``Authorization: Bearer <key>`` (prioritario) ou ``X-API-Key`` (fallback).
     Injeta ``request.state.tenant_id`` para uso nos endpoints.
 
     Em producao com UNKEY_ENABLED=1, valida via Unkey API.
     Caso contrario, faz fallback para lookup na DB local.
     """
-    if not api_key:
+    # Resolver key: Bearer prioritario, X-API-Key fallback
+    resolved_key: str | None = None
+    if bearer is not None and bearer.credentials:
+        resolved_key = bearer.credentials
+    elif api_key:
+        resolved_key = api_key
+
+    if not resolved_key:
         raise APIError(
             401,
             "auth-invalida",
@@ -185,17 +195,23 @@ async def verify_api_key(
         )
 
     if _is_unkey_enabled():
-        unkey_data = await _verify_via_unkey(api_key)
+        unkey_data = await _verify_via_unkey(resolved_key)
         request.state.tenant_id = unkey_data["tenant_id"]
         request.state.permissions = unkey_data["permissions"]
         request.state.key_id = unkey_data["key_id"]
     else:
-        tenant_id = await _verify_via_db(api_key, db)
+        tenant_id = await _verify_via_db(resolved_key, db)
         request.state.tenant_id = tenant_id
         request.state.permissions = ["*"]  # DB fallback: full access (Unkey disabled)
         request.state.key_id = ""
 
-    return api_key
+    # Environment detection via key prefix
+    if resolved_key.startswith("sk_test_") or resolved_key.startswith("uuba_test_"):
+        request.state.environment = "test"
+    else:
+        request.state.environment = "live"
+
+    return resolved_key
 
 
 def require_permission(permission: str):
