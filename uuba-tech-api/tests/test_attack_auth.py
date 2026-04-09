@@ -35,8 +35,8 @@ async def test_header_name_case_insensitive(client):
     assert resp.status_code == 200  # correct per HTTP spec
 
 
-async def test_auth_header_with_bearer_prefix(client):
-    """Bearer prefix should not work — API expects raw key."""
+async def test_bearer_prefix_in_x_api_key_header_rejected(client):
+    """Bearer prefix inside X-API-Key header should not work — use Authorization: Bearer."""
     resp = await client.get(
         "/api/v1/clientes",
         headers={"X-API-Key": f"Bearer {AUTH['X-API-Key']}"},
@@ -74,6 +74,47 @@ async def test_auth_with_sql_injection_in_key(client):
 
 async def test_auth_with_whitespace_key(client):
     resp = await client.get("/api/v1/clientes", headers={"X-API-Key": "   "})
+    assert resp.status_code == 401
+
+
+# --- Bearer attack vectors ---
+
+
+async def test_bearer_with_null_bytes(client):
+    resp = await client.get(
+        "/api/v1/clientes", headers={"Authorization": "Bearer valid\x00key"}
+    )
+    assert resp.status_code == 401
+
+
+async def test_bearer_with_very_long_token(client):
+    """100KB token should not crash server."""
+    resp = await client.get(
+        "/api/v1/clientes", headers={"Authorization": f"Bearer {'A' * 100_000}"}
+    )
+    assert resp.status_code == 401
+
+
+async def test_bearer_with_sql_injection(client):
+    resp = await client.get(
+        "/api/v1/clientes", headers={"Authorization": "Bearer ' OR 1=1--"}
+    )
+    assert resp.status_code == 401
+
+
+async def test_bearer_double_prefix(client):
+    from tests.conftest import API_KEY
+    resp = await client.get(
+        "/api/v1/clientes",
+        headers={"Authorization": f"Bearer Bearer {API_KEY}"},
+    )
+    assert resp.status_code == 401
+
+
+async def test_bearer_with_whitespace_token(client):
+    resp = await client.get(
+        "/api/v1/clientes", headers={"Authorization": "Bearer    "}
+    )
     assert resp.status_code == 401
 
 
