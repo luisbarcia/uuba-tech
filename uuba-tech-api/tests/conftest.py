@@ -39,6 +39,7 @@ from fastapi import Request
 TEST_TENANT_ID = "ten_test"
 API_KEY = settings.api_key
 AUTH = {"X-API-Key": API_KEY}
+BEARER_AUTH = {"Authorization": f"Bearer {API_KEY}"}
 
 
 @pytest.fixture
@@ -102,10 +103,16 @@ async def client(engine):
             yield SqlAlchemyClienteRepository(session, TEST_TENANT_ID)
 
     async def override_verify_api_key(request: Request):
-        """Override padrao: valida key contra API_KEY e da permissoes admin."""
+        """Override padrao: valida key via Bearer OU X-API-Key."""
         from app.exceptions import APIError
 
-        api_key = request.headers.get("X-API-Key", "")
+        # Tentar Bearer primeiro
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            api_key = auth_header[7:]
+        else:
+            api_key = request.headers.get("X-API-Key", "")
+
         if not api_key or api_key != API_KEY:
             raise APIError(
                 401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida"
@@ -126,8 +133,10 @@ async def client(engine):
             "webhooks:write",
             "integrations:read",
             "integrations:write",
+            "receivables:write",
         ]
         request.state.key_id = "key_test"
+        request.state.environment = "test"
         return api_key
 
     app.dependency_overrides[get_db] = override_get_db
@@ -216,9 +225,16 @@ async def v0_client(engine):
             yield SqlAlchemyClienteRepository(session, TEST_TENANT_ID)
 
     async def override_verify_api_key(request: Request):
+        """Override v0: valida key via Bearer OU X-API-Key (permissions restritas)."""
         from app.exceptions import APIError
 
-        api_key = request.headers.get("X-API-Key", "")
+        # Bearer tem prioridade sobre X-API-Key
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            api_key = auth_header[7:]
+        else:
+            api_key = request.headers.get("X-API-Key", "")
+
         if not api_key or api_key != API_KEY:
             raise APIError(
                 401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida"
@@ -226,6 +242,7 @@ async def v0_client(engine):
         request.state.tenant_id = TEST_TENANT_ID
         request.state.permissions = ["receivables:write"]
         request.state.key_id = "key_test"
+        request.state.environment = "test"
         return api_key
 
     app.dependency_overrides[get_db] = override_get_db
