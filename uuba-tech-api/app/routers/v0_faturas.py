@@ -6,7 +6,7 @@ cliente muda URL + API key, zero mudanca no payload.
 
 Features:
 - ?dry_run=true → valida payload sem enviar ao ERP
-- Idempotency-Key header (TODO: implementar KV)
+- Idempotency-Key header → dedup via DB cache (24h TTL)
 
 Lifecycle: deprecated quando cliente migrar para POST /api/v1/faturas.
 
@@ -19,6 +19,7 @@ n8n Webhook Headers (convencao obrigatoria):
     Isso permite que workflows n8n facam callbacks para a API sem hardcode de URLs.
 """
 
+import json
 import logging
 import os
 from datetime import datetime, timezone
@@ -26,8 +27,11 @@ from datetime import datetime, timezone
 import httpx
 from fastapi import APIRouter, Depends, Header, Query, Request
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.api_key import require_permission, verify_api_key
+from app.auth.idempotency import check_idempotency, save_idempotency
+from app.database import get_db
 from app.exceptions import APIError
 from app.schemas.receivable import (
     CanonicalMessage,
@@ -170,11 +174,12 @@ def _validate_payload(data: CanonicalMessage) -> ValidationResult:
 async def create_receivable(
     data: CanonicalMessage,
     request: Request,
+    db: AsyncSession = Depends(get_db),
     dry_run: bool = Query(default=False, description="Validar sem enviar ao ERP"),
     idempotency_key: str | None = Header(
         default=None,
         alias="Idempotency-Key",
-        description="UUID v4 para idempotencia (TODO)",
+        description="UUID v4 para idempotencia (24h TTL)",
     ),
 ):
     """Processa CanonicalMessage: valida, encaminha ao n8n, retorna Receivable."""
@@ -194,6 +199,26 @@ async def create_receivable(
             content=result.model_dump(),
             headers={"X-Request-Id": request_id},
         )
+
+    # --- Idempotency check (antes de encaminhar ao n8n) ---
+    body_bytes = data.model_dump_json().encode()
+
+    if idempotency_key:
+        cached = await check_idempotency(db, tenant_id, idempotency_key, body_bytes)
+        if cached:
+            logger.info(
+                "v0/faturas: idempotency hit key=%s tenant=%s",
+                idempotency_key,
+                tenant_id,
+            )
+            return JSONResponse(
+                content=json.loads(cached.response_body),
+                status_code=cached.response_status,
+                headers={
+                    "X-Request-Id": request_id,
+                    "X-Idempotent-Replayed": "true",
+                },
+            )
 
     # --- Processamento real: encaminhar ao n8n ---
     payload = data.model_dump(mode="json")
@@ -235,6 +260,20 @@ async def create_receivable(
         created_at=datetime.now(timezone.utc).isoformat(),
     )
 
+    response_status = 201 if status != ReceivableStatus.FAILED else 200
+    response_body = receivable.model_dump()
+
+    # --- Idempotency save (apos resposta construida) ---
+    if idempotency_key:
+        await save_idempotency(
+            db,
+            tenant_id,
+            idempotency_key,
+            body_bytes,
+            response_status,
+            json.dumps(response_body),
+        )
+
     logger.info(
         "v0/faturas: receivable %s tenant=%s ops=%d status=%s",
         request_id,
@@ -244,7 +283,7 @@ async def create_receivable(
     )
 
     return JSONResponse(
-        content=receivable.model_dump(),
-        status_code=201 if status != ReceivableStatus.FAILED else 200,
+        content=response_body,
+        status_code=response_status,
         headers={"X-Request-Id": request_id},
     )
