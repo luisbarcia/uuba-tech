@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     debug: bool = False
     uuba_encryption_key: str = ""  # AES-256-GCM key para cofre de credenciais
 
+    # OAuth
+    oauth_state_ttl_minutes: int = 60  # TTL do state token (link de autorizacao)
+
     # LGPD: Períodos de retenção (Art. 15/16)
     retencao_faturas_anos: int = 5
     retencao_mensagens_anos: int = 2
@@ -24,8 +27,13 @@ settings = Settings()
 
 # Bloqueia producao com credenciais default
 if settings.environment == "production":
-    if settings.api_key == "uuba-dev-key-change-me":
-        raise RuntimeError("FATAL: API_KEY default em producao. Defina API_KEY via env var.")
+    import os as _os
+
+    if not _os.environ.get("UNKEY_ROOT_KEY"):
+        raise RuntimeError(
+            "FATAL: UNKEY_ROOT_KEY nao definido em producao. "
+            "Autenticacao via Unkey requer root key."
+        )
     if "uuba:uuba@" in settings.database_url:
         raise RuntimeError(
             "FATAL: DATABASE_URL com credenciais default em producao. "
