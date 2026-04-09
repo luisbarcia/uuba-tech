@@ -2,6 +2,7 @@ import logging
 import json as json_lib
 
 from fastapi import FastAPI, Request, Depends
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import JSONResponse
 from scalar_fastapi import get_scalar_api_reference
 from sqlalchemy import text
@@ -187,6 +188,9 @@ app = FastAPI(
     version="0.1.0",
     description=API_DESCRIPTION,
     contact={"name": "Uúba Tech", "url": "https://uuba.tech"},
+    servers=[
+        {"url": "https://api.uuba.tech", "description": "Production"},
+    ],
     openapi_tags=[
         {
             "name": "clientes",
@@ -224,6 +228,41 @@ app = FastAPI(
     docs_url=None,
     redoc_url=None,
 )
+
+
+# --- Custom OpenAPI schema with security schemes ---
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+        tags=app.openapi_tags,
+        servers=app.servers,
+        contact=app.contact,
+    )
+    schema.setdefault("components", {})["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "Unkey",
+            "description": "API key: Authorization: Bearer <key>",
+        },
+        "ApiKeyHeader": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "X-API-Key",
+            "description": "(Deprecated) Use Authorization: Bearer em vez disso.",
+        },
+    }
+    schema["security"] = [{"BearerAuth": []}, {"ApiKeyHeader": []}]
+    app.openapi_schema = schema
+    return schema
+
+
+app.openapi = custom_openapi
 
 
 # --- Scalar API Docs ---
