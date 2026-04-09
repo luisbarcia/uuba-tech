@@ -18,6 +18,7 @@ from app.models.integration import (  # noqa: F401 — registra tabelas no metad
     IntegrationEvent,
 )
 from app.models.oauth_app import OAuthApp  # noqa: F401
+from app.models.idempotency import IdempotencyCache  # noqa: F401 — registra tabela no metadata
 from app.models.oauth_state import OAuthStateToken  # noqa: F401
 from app.models.regua import Regua, ReguaPasso  # noqa: F401
 from app.models.tenant import Tenant  # noqa: F401
