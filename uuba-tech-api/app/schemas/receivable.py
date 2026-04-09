@@ -239,3 +239,26 @@ class Receivable(BaseModel):
     operations: list[OperationResult]
     environment: Literal["live", "test"]
     created_at: str
+
+
+# --- Error schemas (RFC 9457 Problem Details) ---
+
+
+class ProblemDetailError(BaseModel):
+    """Detalhe de erro individual (JSON Pointer)."""
+
+    pointer: str = Field(..., description="JSON Pointer ao campo com erro (RFC 6901)")
+    code: str = Field(..., description="Codigo de erro machine-readable")
+    detail: str = Field(..., description="Descricao human-readable")
+
+
+class ProblemDetails(BaseModel):
+    """Erro RFC 9457 — Problem Details for HTTP APIs."""
+
+    type: str = Field(..., description="URI identificador do tipo de erro")
+    title: str = Field(..., description="Titulo human-readable do erro")
+    status: int = Field(..., description="HTTP status code")
+    detail: str = Field(..., description="Descricao especifica desta ocorrencia")
+    instance: str = Field("", description="URI da operacao que gerou o erro")
+    request_id: str = Field("", description="ID unico do request para suporte")
+    errors: list[ProblemDetailError] = Field(default_factory=list)

@@ -25,7 +25,7 @@ import os
 from datetime import datetime, timezone
 
 import httpx
-from fastapi import APIRouter, Depends, Header, Query, Request
+from fastapi import APIRouter, Body, Depends, Header, Query, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -38,6 +38,7 @@ from app.schemas.receivable import (
     CustomerResult,
     OperationResult,
     OperationStatus,
+    ProblemDetails,
     Receivable,
     ReceivableStatus,
     SaleOperation,
@@ -161,19 +162,293 @@ def _validate_payload(data: CanonicalMessage) -> ValidationResult:
 @router.post(
     "",
     status_code=200,
-    summary="Criar fatura(s) via payload legado (v0)",
+    summary="Criar fatura(s) via Canonical Data Model",
     description=(
         "Endpoint de compatibilidade com a CFO Automation API. "
         "Aceita o payload CanonicalMessage (customer + operations + payment_method) "
         "e encaminha ao n8n para processamento no ERP.\n\n"
-        "Use `?dry_run=true` para validar o payload sem enviar ao ERP. "
-        "Retorna `ValidationResult` em vez de `Receivable`.\n\n"
+        "**Responses:**\n"
+        "- `201` — Receivable criado (dry_run=false)\n"
+        "- `200` — ValidationResult (dry_run=true)\n\n"
+        "**Idempotency:** Envie `Idempotency-Key: <UUID>` para dedup. "
+        "Mesmo key + mesmo body em 24h retorna a resposta original. "
+        "Mesmo key + body diferente retorna 422.\n\n"
         "Para o formato nativo, use `POST /api/v1/faturas`."
     ),
+    responses={
+        201: {
+            "model": Receivable,
+            "description": "Receivable criado com sucesso no ERP",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "id": "recv_abc123def456",
+                        "object": "receivable",
+                        "status": "completed",
+                        "customer": {"id": "cst_abc123", "created": True},
+                        "operations": [
+                            {
+                                "id": "op_abc123",
+                                "object": "operation",
+                                "type": "sale",
+                                "status": "created",
+                                "external_id": "12345",
+                            }
+                        ],
+                        "environment": "live",
+                        "created_at": "2026-04-09T14:30:00-03:00",
+                    }
+                }
+            },
+        },
+        200: {
+            "model": ValidationResult,
+            "description": "Resultado da validacao (dry_run=true)",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "object": "validation_result",
+                        "valid": True,
+                        "customer_type": "PJ",
+                        "operations_count": 2,
+                        "total_sales": 2,
+                        "total_contracts": 0,
+                        "total_value": 3500.0,
+                        "warnings": [
+                            {
+                                "pointer": "/customer/email",
+                                "code": "missing_email",
+                                "detail": "Customer has no email. Recommended for ERP contact sync.",
+                            }
+                        ],
+                    }
+                }
+            },
+        },
+        401: {
+            "model": ProblemDetails,
+            "description": "API key ausente ou invalida",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "https://api.uuba.tech/errors/auth-invalida",
+                        "title": "Autenticacao invalida",
+                        "status": 401,
+                        "detail": "API key ausente ou invalida",
+                        "instance": "/api/v0/faturas",
+                        "request_id": "req_abc123",
+                        "errors": [],
+                    }
+                }
+            },
+        },
+        422: {
+            "model": ProblemDetails,
+            "description": "Erro de validacao ou Idempotency mismatch",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "validation_error": {
+                            "summary": "Erro de validacao do payload",
+                            "value": {
+                                "type": "https://api.uuba.tech/errors/validacao",
+                                "title": "Erro de validacao",
+                                "status": 422,
+                                "detail": "2 campo(s) com erro de validacao.",
+                                "instance": "/api/v0/faturas",
+                                "request_id": "req_abc123",
+                                "errors": [
+                                    {
+                                        "pointer": "/customer/document",
+                                        "code": "string_too_short",
+                                        "detail": "String should have at least 11 characters",
+                                    },
+                                    {
+                                        "pointer": "/operations/0/sale/amount",
+                                        "code": "greater_than",
+                                        "detail": "Input should be greater than 0",
+                                    },
+                                ],
+                            },
+                        },
+                        "idempotency_mismatch": {
+                            "summary": "Idempotency-Key reutilizada com body diferente",
+                            "value": {
+                                "type": "https://api.uuba.tech/errors/idempotency-mismatch",
+                                "title": "Idempotency key reutilizada com body diferente",
+                                "status": 422,
+                                "detail": "A key 'uuid' ja foi usada com um payload diferente.",
+                                "instance": "/api/v0/faturas",
+                                "request_id": "req_abc123",
+                                "errors": [],
+                            },
+                        },
+                    }
+                }
+            },
+        },
+        502: {
+            "model": ProblemDetails,
+            "description": "Erro no processamento (n8n indisponivel)",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "https://api.uuba.tech/errors/n8n-error",
+                        "title": "Erro no processamento",
+                        "status": 502,
+                        "detail": "n8n retornou 500. Tente novamente.",
+                        "instance": "/api/v0/faturas",
+                        "request_id": "req_abc123",
+                        "errors": [],
+                    }
+                }
+            },
+        },
+        504: {
+            "model": ProblemDetails,
+            "description": "Timeout no processamento",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "type": "https://api.uuba.tech/errors/n8n-timeout",
+                        "title": "Timeout no processamento",
+                        "status": 504,
+                        "detail": "O processamento demorou mais que o esperado. Tente novamente.",
+                        "instance": "/api/v0/faturas",
+                        "request_id": "req_abc123",
+                        "errors": [],
+                    }
+                }
+            },
+        },
+    },
 )
 async def create_receivable(
-    data: CanonicalMessage,
     request: Request,
+    data: CanonicalMessage = Body(
+        ...,
+        openapi_examples={
+            "sale_pj": {
+                "summary": "Venda avulsa (PJ)",
+                "description": "Registro de venda para empresa com CNPJ",
+                "value": {
+                    "customer": {
+                        "type": "PJ",
+                        "document": "12345678000190",
+                        "name": "Startup ABC Ltda",
+                        "trade_name": "Startup ABC",
+                        "email": "financeiro@startup.com",
+                        "mobile": "(11) 99999-8888",
+                    },
+                    "operations": [
+                        {
+                            "service": {
+                                "code": "CONSULT-01",
+                                "description": "Consultoria em gestao financeira",
+                                "price": 2500.00,
+                            },
+                            "sale": {
+                                "amount": 2500.00,
+                                "due_date": "2026-05-15",
+                                "description": "Parcela unica",
+                            },
+                        }
+                    ],
+                    "payment_method": "BOLETO_BANCARIO",
+                },
+            },
+            "sale_pf": {
+                "summary": "Venda avulsa (PF)",
+                "description": "Registro de venda para pessoa fisica com CPF",
+                "value": {
+                    "customer": {
+                        "type": "PF",
+                        "document": "12345678900",
+                        "name": "Joao Silva",
+                        "email": "joao@email.com",
+                        "mobile": "(11) 98765-4321",
+                    },
+                    "operations": [
+                        {
+                            "service": {
+                                "code": "TRAIN-01",
+                                "description": "Treinamento individual",
+                                "price": 500.00,
+                            },
+                            "sale": {
+                                "amount": 500.00,
+                                "due_date": "2026-05-01",
+                            },
+                        }
+                    ],
+                    "payment_method": "BOLETO_BANCARIO",
+                },
+            },
+            "contract_mensal": {
+                "summary": "Contrato mensal (assinatura)",
+                "description": "Contrato recorrente open-ended (cycles=null)",
+                "value": {
+                    "customer": {
+                        "type": "PJ",
+                        "document": "98765432000199",
+                        "name": "Empresa XYZ Ltda",
+                        "email": "admin@xyz.com",
+                        "contacts": [
+                            {
+                                "name": "Ana Costa",
+                                "email": "ana@xyz.com",
+                                "role": "CFO",
+                            }
+                        ],
+                    },
+                    "operations": [
+                        {
+                            "service": {
+                                "code": "SAAS-PRO",
+                                "description": "Plano Pro - SaaS mensal",
+                                "price": 499.00,
+                            },
+                            "contract": {
+                                "start_date": "2026-05-01",
+                                "cycles": None,
+                                "frequency": "MENSAL",
+                                "due_day": 5,
+                                "emission_day": 1,
+                            },
+                        }
+                    ],
+                    "payment_method": "BOLETO_BANCARIO",
+                },
+            },
+            "parcelamento_3x": {
+                "summary": "Parcelamento em 3x",
+                "description": "3 operacoes de venda com datas de vencimento sequenciais",
+                "value": {
+                    "customer": {
+                        "type": "PJ",
+                        "document": "11222333000181",
+                        "name": "Industria Beta SA",
+                        "email": "financeiro@beta.com",
+                    },
+                    "operations": [
+                        {
+                            "service": {"code": "IMPL-01", "description": "Implantacao do sistema"},
+                            "sale": {"amount": 5000.00, "due_date": "2026-05-15", "description": "Parcela 1/3"},
+                        },
+                        {
+                            "service": {"code": "IMPL-01", "description": "Implantacao do sistema"},
+                            "sale": {"amount": 5000.00, "due_date": "2026-06-15", "description": "Parcela 2/3"},
+                        },
+                        {
+                            "service": {"code": "IMPL-01", "description": "Implantacao do sistema"},
+                            "sale": {"amount": 5000.00, "due_date": "2026-07-15", "description": "Parcela 3/3"},
+                        },
+                    ],
+                    "payment_method": "BOLETO_BANCARIO",
+                },
+            },
+        },
+    ),
     db: AsyncSession = Depends(get_db),
     dry_run: bool = Query(default=False, description="Validar sem enviar ao ERP"),
     idempotency_key: str | None = Header(
