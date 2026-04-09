@@ -223,9 +223,8 @@ async def create_receivable(
             )
         status = ReceivableStatus(n8n_response.get("status", "completed"))
 
-    # Determinar ambiente a partir do prefixo da key
-    key_id = getattr(request.state, "key_id", "")
-    environment = "test" if "test" in key_id.lower() else "live"
+    # Environment definido por verify_api_key com base no prefixo da key
+    environment = getattr(request.state, "environment", "live")
 
     receivable = Receivable(
         id=request_id,
