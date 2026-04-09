@@ -1,0 +1,286 @@
+### ============================================================
+### UUBA Tech API — Requests (REST Client / VS Code)
+### Extensao: humao.rest-client
+###
+### Variavel @token: substituir pela key real (uuba keys create)
+### ============================================================
+
+@baseUrl = https://api.uuba.tech
+@token = uuba_test_65VDKdxCfruPS7NFXsN44p
+
+### ────────────────────────────────────────────
+### Health
+### ────────────────────────────────────────────
+
+### Health check
+GET {{baseUrl}}/health
+
+### ────────────────────────────────────────────
+### Auth — testes de autenticacao
+### ────────────────────────────────────────────
+
+### Sem auth → 401
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+
+{
+  "customer": { "type": "PJ", "document": "12345678000190", "name": "Teste Auth" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 100, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Bearer valido → 200
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": { "type": "PJ", "document": "12345678000190", "name": "Teste Bearer" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 100, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### X-API-Key valido → 200
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+X-API-Key: {{token}}
+
+{
+  "customer": { "type": "PJ", "document": "12345678000190", "name": "Teste X-API-Key" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 100, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Bearer invalido → 401
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer fake_key_invalida
+
+{
+  "customer": { "type": "PJ", "document": "12345678000190", "name": "Teste" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 100, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### ────────────────────────────────────────────
+### POST /api/v0/faturas — Dry Run (validacao)
+### ────────────────────────────────────────────
+
+### Venda avulsa PJ — dry run
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": {
+    "type": "PJ",
+    "document": "12345678000190",
+    "name": "Startup ABC Ltda",
+    "trade_name": "Startup ABC",
+    "email": "financeiro@startup.com",
+    "mobile": "(11) 99999-8888"
+  },
+  "operations": [
+    {
+      "service": {
+        "code": "CONSULT-01",
+        "description": "Consultoria em gestao financeira",
+        "price": 2500.00
+      },
+      "sale": {
+        "amount": 2500.00,
+        "due_date": "2026-05-15",
+        "description": "Parcela unica"
+      }
+    }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Venda avulsa PF — dry run
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": {
+    "type": "PF",
+    "document": "12345678900",
+    "name": "Joao Silva",
+    "email": "joao@email.com",
+    "mobile": "(11) 98765-4321"
+  },
+  "operations": [
+    {
+      "service": {
+        "code": "TRAIN-01",
+        "description": "Treinamento individual",
+        "price": 500.00
+      },
+      "sale": {
+        "amount": 500.00,
+        "due_date": "2026-05-01"
+      }
+    }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Contrato mensal (assinatura open-ended) — dry run
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": {
+    "type": "PJ",
+    "document": "98765432000199",
+    "name": "Empresa XYZ Ltda",
+    "email": "admin@xyz.com",
+    "contacts": [
+      { "name": "Ana Costa", "email": "ana@xyz.com", "role": "CFO" }
+    ]
+  },
+  "operations": [
+    {
+      "service": {
+        "code": "SAAS-PRO",
+        "description": "Plano Pro - SaaS mensal",
+        "price": 499.00
+      },
+      "contract": {
+        "start_date": "2026-05-01",
+        "cycles": null,
+        "frequency": "MENSAL",
+        "due_day": 5,
+        "emission_day": 1
+      }
+    }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Parcelamento 3x — dry run
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": {
+    "type": "PJ",
+    "document": "11222333000181",
+    "name": "Industria Beta SA",
+    "email": "financeiro@beta.com"
+  },
+  "operations": [
+    {
+      "service": { "code": "IMPL-01", "description": "Implantacao do sistema" },
+      "sale": { "amount": 5000.00, "due_date": "2026-05-15", "description": "Parcela 1/3" }
+    },
+    {
+      "service": { "code": "IMPL-01", "description": "Implantacao do sistema" },
+      "sale": { "amount": 5000.00, "due_date": "2026-06-15", "description": "Parcela 2/3" }
+    },
+    {
+      "service": { "code": "IMPL-01", "description": "Implantacao do sistema" },
+      "sale": { "amount": 5000.00, "due_date": "2026-07-15", "description": "Parcela 3/3" }
+    }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### ────────────────────────────────────────────
+### POST /api/v0/faturas — Processamento real
+### ────────────────────────────────────────────
+
+### Venda real (encaminha ao n8n) — com idempotency
+POST {{baseUrl}}/api/v0/faturas
+Content-Type: application/json
+Authorization: Bearer {{token}}
+Idempotency-Key: {{$guid}}
+
+{
+  "customer": {
+    "type": "PJ",
+    "document": "12345678000190",
+    "name": "Startup ABC Ltda",
+    "trade_name": "Startup ABC",
+    "email": "financeiro@startup.com",
+    "mobile": "(11) 99999-8888"
+  },
+  "operations": [
+    {
+      "service": {
+        "code": "CONSULT-01",
+        "description": "Consultoria em gestao financeira",
+        "price": 2500.00
+      },
+      "sale": {
+        "amount": 2500.00,
+        "due_date": "2026-05-15",
+        "description": "Parcela unica"
+      }
+    }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### ────────────────────────────────────────────
+### Erros esperados
+### ────────────────────────────────────────────
+
+### Payload invalido → 422 (campo obrigatorio faltando)
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": { "type": "PJ", "name": "Sem documento" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 100, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### Amount zero → 422
+POST {{baseUrl}}/api/v0/faturas?dry_run=true
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customer": { "type": "PJ", "document": "12345678000190", "name": "Teste" },
+  "operations": [
+    { "service": { "code": "T1", "description": "Teste" }, "sale": { "amount": 0, "due_date": "2026-12-01" } }
+  ],
+  "payment_method": "BOLETO_BANCARIO"
+}
+
+### ────────────────────────────────────────────
+### Outros endpoints (v1)
+### ────────────────────────────────────────────
+
+### Listar clientes
+GET {{baseUrl}}/api/v1/clientes
+Authorization: Bearer {{token}}
+
+### Listar faturas
+GET {{baseUrl}}/api/v1/faturas
+Authorization: Bearer {{token}}
+
+### Listar cobrancas
+GET {{baseUrl}}/api/v1/cobrancas
+Authorization: Bearer {{token}}
+
+### OpenAPI spec (JSON)
+GET {{baseUrl}}/openapi.json
+
+### Docs (Scalar)
+GET {{baseUrl}}/docs
