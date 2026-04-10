@@ -7,7 +7,7 @@ Com a migracao para Unkey, o campo ``api_key`` eh opcional (legacy).
 API keys sao gerenciadas pelo Unkey, nao pela DB local.
 """
 
-from sqlalchemy import Boolean, Index, String, Text
+from sqlalchemy import Boolean, Index, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.models.base import Base, TimestampMixin
@@ -38,11 +38,5 @@ class Tenant(Base, TimestampMixin):
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     plan: Mapped[str] = mapped_column(String(20), default="starter")
     # starter | pro | enterprise
-
-    # Conta Azul OAuth (para #17 — link de pagamento)
-    conta_azul_client_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    conta_azul_client_secret: Mapped[str | None] = mapped_column(Text, nullable=True)
-    conta_azul_access_token: Mapped[str | None] = mapped_column(Text, nullable=True)
-    conta_azul_refresh_token: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     __table_args__ = (Index("ix_tenants_slug", "slug", unique=True),)
