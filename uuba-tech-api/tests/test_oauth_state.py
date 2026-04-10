@@ -41,7 +41,6 @@ async def seed_oauth_provider(engine):
                 slug="conta-azul",
                 name="Conta Azul",
                 category="erp",
-                auth_type="OAUTH2",
                 base_url="https://api.contaazul.com/v1",
                 token_url="https://api.contaazul.com/oauth2/token",
                 authorization_url="https://api.contaazul.com/oauth2/authorize",

@@ -43,7 +43,6 @@ async def seed_integration(engine):
                 slug="pipedrive",
                 name="Pipedrive",
                 category="crm",
-                auth_type="API_KEY",
                 base_url="https://api.pipedrive.com/v1",
                 is_active=True,
                 created_at=datetime.now(timezone.utc),
@@ -152,7 +151,6 @@ async def test_set_credentials_wrong_tenant(client, engine):
                 slug="other-provider",
                 name="Other",
                 category="test",
-                auth_type="API_KEY",
                 is_active=True,
                 created_at=datetime.now(timezone.utc),
             )

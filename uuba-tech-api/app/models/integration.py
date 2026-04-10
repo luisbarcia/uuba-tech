@@ -34,7 +34,6 @@ class IntegrationProvider(Base):
     slug: Mapped[str] = mapped_column(String(100), unique=True)
     name: Mapped[str] = mapped_column(String(200))
     category: Mapped[str] = mapped_column(String(50))  # erp, crm, payment, fiscal, banking
-    auth_type: Mapped[str] = mapped_column(String(30))  # OAUTH2, OAUTH2_CC, API_KEY, BASIC, CUSTOM
     base_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     token_url: Mapped[str | None] = mapped_column(Text, nullable=True)
     authorization_url: Mapped[str | None] = mapped_column(Text, nullable=True)
