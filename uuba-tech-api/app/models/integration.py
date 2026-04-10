@@ -35,10 +35,6 @@ class IntegrationProvider(Base):
     name: Mapped[str] = mapped_column(String(200))
     category: Mapped[str] = mapped_column(String(50))  # erp, crm, payment, fiscal, banking
     base_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    token_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    authorization_url: Mapped[str | None] = mapped_column(Text, nullable=True)
-    default_scopes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    scope_separator: Mapped[str] = mapped_column(String(5), default=" ")
     connection_config_schema: Mapped[dict] = mapped_column(JSON, default=dict)
     credential_schema: Mapped[dict] = mapped_column(JSON, default=dict)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)

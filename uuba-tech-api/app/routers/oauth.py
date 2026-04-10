@@ -299,8 +299,8 @@ async def oauth_callback(
             status_code=400,
         )
 
-    # token_url do oauth_app (migration 012) com fallback para provider
-    token_url = oauth_app.token_url or provider.token_url
+    # token_url do oauth_app (colunas legadas removidas do provider — migration CLI 017)
+    token_url = oauth_app.token_url
     if not token_url:
         logger.error(f"OAuth callback: sem token_url para provider {provider.slug}")
         return HTMLResponse(

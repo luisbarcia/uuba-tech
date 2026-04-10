@@ -113,7 +113,7 @@ async def _refresh_oauth_token(
         )
         oauth_app = result.scalar_one_or_none()
 
-    token_url = (oauth_app.token_url if oauth_app else None) or provider.token_url
+    token_url = oauth_app.token_url if oauth_app else None
     if not token_url:
         raise APIError(
             502,
