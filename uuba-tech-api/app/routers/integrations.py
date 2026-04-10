@@ -10,7 +10,7 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -27,6 +27,7 @@ from app.models.integration import (
     IntegrationProvider,
     TenantIntegration,
 )
+from app.models.oauth_app import OAuthApp
 from app.utils.ids import generate_id
 
 logger = logging.getLogger("uuba")
@@ -91,7 +92,7 @@ async def _refresh_oauth_token(
     provider: IntegrationProvider,
     encryption_key: str,
 ) -> dict:
-    """Faz refresh do OAuth token usando token_url do provider.
+    """Faz refresh do OAuth token usando token_url do oauth_app (migration 012).
 
     Usa pg_advisory_lock para evitar refreshes concorrentes.
     Registra evento "refreshed" ou "error" no historico.
@@ -99,7 +100,21 @@ async def _refresh_oauth_token(
     Returns:
         dict com credenciais atualizadas (plaintext).
     """
-    if not provider.token_url:
+    # Resolver token_url do oauth_app (migration 012) com fallback para provider
+    oauth_app = None
+    if integration.oauth_app_id:
+        result = await db.execute(select(OAuthApp).where(OAuthApp.id == integration.oauth_app_id))
+        oauth_app = result.scalar_one_or_none()
+    if not oauth_app:
+        result = await db.execute(
+            select(OAuthApp).where(
+                and_(OAuthApp.provider_id == integration.provider_id, OAuthApp.is_default.is_(True))
+            )
+        )
+        oauth_app = result.scalar_one_or_none()
+
+    token_url = (oauth_app.token_url if oauth_app else None) or provider.token_url
+    if not token_url:
         raise APIError(
             502,
             "integracao-refresh-falhou",
@@ -136,7 +151,7 @@ async def _refresh_oauth_token(
         # Fazer request de refresh
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.post(
-                provider.token_url,
+                token_url,
                 data={
                     "grant_type": "refresh_token",
                     "refresh_token": refresh_token,
@@ -429,12 +444,12 @@ async def get_integration_credentials(
 
     encryption_key = _get_encryption_key()
 
-    # Verificar se token expirou (auto-refresh)
+    # Verificar se token expirou ou expira em 5min (auto-refresh, AC-009 HubSpot pattern)
+    # Se token_expires_at existe, é OAuth — suficiente para decidir refresh
     now = datetime.now(timezone.utc)
     needs_refresh = (
-        provider.auth_type in ("OAUTH2", "OAUTH2_CC")
-        and credential.token_expires_at is not None
-        and credential.token_expires_at < now
+        credential.token_expires_at is not None
+        and credential.token_expires_at < now + timedelta(minutes=5)
     )
 
     if needs_refresh:
@@ -455,7 +470,7 @@ async def get_integration_credentials(
         "provider": {
             "slug": provider.slug,
             "name": provider.name,
-            "auth_type": provider.auth_type,
+            "auth_types": provider.auth_types,
             "base_url": provider.base_url,
         },
     }
