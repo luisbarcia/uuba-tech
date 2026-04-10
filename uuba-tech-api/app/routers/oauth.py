@@ -28,6 +28,7 @@ from app.models.integration import (
 from app.models.oauth_app import OAuthApp
 from app.models.oauth_state import OAuthStateToken
 from app.routers.integrations import encrypt_credentials, _get_encryption_key, _derive_key
+from app.config import settings
 from app.utils.ids import generate_id
 
 logger = logging.getLogger("uuba")
@@ -52,7 +53,7 @@ state_router = APIRouter(
     status_code=201,
     summary="Criar state token para fluxo OAuth",
     description="Cria um state token com PKCE para iniciar o fluxo OAuth2 Authorization Code. "
-    "Token expira em 60 minutos. Protegido por scope `integrations:write`.",
+    "TTL configuravel via OAUTH_STATE_TTL_MINUTES (default 60 min). Protegido por scope `integrations:write`.",
     dependencies=[Depends(require_permission("integrations:write"))],
 )
 async def create_state_token(
@@ -87,7 +88,7 @@ async def create_state_token(
         code_verifier=body.get("code_verifier"),
         redirect_uri=redirect_uri,
         status="pending",
-        expires_at=now + timedelta(minutes=60),
+        expires_at=now + timedelta(minutes=settings.oauth_state_ttl_minutes),
         created_at=now,
     )
     db.add(token)
@@ -252,9 +253,9 @@ async def oauth_callback(
     )
     provider = result.scalar_one_or_none()
 
-    if not provider or not provider.token_url:
+    if not provider:
         return HTMLResponse(
-            content=_error_page("Provider não encontrado ou sem token_url configurado."),
+            content=_error_page("Provider não encontrado."),
             status_code=400,
         )
 
@@ -298,6 +299,15 @@ async def oauth_callback(
             status_code=400,
         )
 
+    # token_url do oauth_app (migration 012) com fallback para provider
+    token_url = oauth_app.token_url or provider.token_url
+    if not token_url:
+        logger.error(f"OAuth callback: sem token_url para provider {provider.slug}")
+        return HTMLResponse(
+            content=_error_page("Provider sem token_url configurado."),
+            status_code=400,
+        )
+
     client_id = oauth_app.client_id
     # Decrypt client_secret
     encryption_key = _get_encryption_key()
@@ -321,7 +331,7 @@ async def oauth_callback(
     try:
         async with httpx.AsyncClient(timeout=15.0) as http_client:
             response = await http_client.post(
-                provider.token_url,
+                token_url,
                 data=token_data_payload,
                 auth=(client_id, client_secret),
                 headers={"Content-Type": "application/x-www-form-urlencoded"},
