@@ -1,6 +1,5 @@
 """Testes para idempotency middleware — dedup via Idempotency-Key header."""
 
-import pytest
 from unittest.mock import patch, AsyncMock
 
 from tests.conftest import BEARER_AUTH

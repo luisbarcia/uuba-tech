@@ -1,7 +1,7 @@
 """Model para OAuth state tokens — rastreamento de fluxos OAuth em andamento."""
 
 import secrets
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 
 from sqlalchemy import DateTime, Index, String, Text
 from sqlalchemy.orm import Mapped, mapped_column

@@ -1,7 +1,6 @@
 """Idempotency helpers — dedup POST requests via Idempotency-Key header."""
 
 import hashlib
-import json
 import logging
 from datetime import datetime, timedelta, timezone
 

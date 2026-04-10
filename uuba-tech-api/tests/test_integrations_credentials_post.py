@@ -15,7 +15,6 @@ from app.models.integration import (
     TenantIntegration,
 )
 from app.models.tenant import Tenant
-from app.utils.ids import generate_id
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 

@@ -11,7 +11,7 @@ from datetime import datetime, timezone, timedelta
 
 import httpx
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import HTMLResponse
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
