@@ -2,9 +2,7 @@
 
 Cada tenant tem suas proprias credenciais, clientes, faturas e reguas.
 Multi-tenancy via row-level filtering (tenant_id em todas as tabelas).
-
-Com a migracao para Unkey, o campo ``api_key`` eh opcional (legacy).
-API keys sao gerenciadas pelo Unkey, nao pela DB local.
+API keys sao gerenciadas pelo Unkey (nao pela DB local).
 """
 
 from sqlalchemy import Boolean, Index, String
@@ -34,7 +32,6 @@ class Tenant(Base, TimestampMixin):
     nome: Mapped[str] = mapped_column(String(255))
     slug: Mapped[str] = mapped_column(String(255), default="")
     documento: Mapped[str | None] = mapped_column(String(14), nullable=True)  # CNPJ do credor
-    api_key: Mapped[str | None] = mapped_column(String(100), nullable=True)  # legacy (Unkey)
     ativo: Mapped[bool] = mapped_column(Boolean, default=True)
     plan: Mapped[str] = mapped_column(String(20), default="starter")
     # starter | pro | enterprise

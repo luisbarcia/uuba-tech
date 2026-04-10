@@ -64,7 +64,6 @@ async def engine():
                 nome="Tenant A",
                 slug="tenant-a",
                 documento="00000000000100",
-                api_key=REGULAR_KEY,
                 ativo=True,
                 plan="starter",
             )
@@ -75,7 +74,6 @@ async def engine():
                 nome="Tenant B",
                 slug="tenant-b",
                 documento="11111111000111",
-                api_key=ADMIN_KEY,
                 ativo=True,
                 plan="enterprise",
             )

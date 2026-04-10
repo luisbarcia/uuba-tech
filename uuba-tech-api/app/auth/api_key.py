@@ -1,12 +1,9 @@
-"""Autenticacao por API key com suporte a Unkey verify e fallback DB.
+"""Autenticacao por API key via Unkey.
 
-Em producao, valida via Unkey API (https://api.unkey.com/v2/keys.verifyKey).
-Em dev/teste, faz fallback para lookup na DB local.
-
+Valida via Unkey API (https://api.unkey.com/v2/keys.verifyKey).
 O Unkey v2 retorna ``identity.externalId`` (tenant_id) e ``permissions`` na response.
 """
 
-import hmac as _hmac
 import logging
 import os
 import time
@@ -14,12 +11,10 @@ import time
 import httpx
 from fastapi import Depends, Request, Security
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.exceptions import APIError
-from app.models.tenant import Tenant
 
 logger = logging.getLogger("uuba")
 
@@ -33,7 +28,6 @@ CACHE_TTL_SECONDS = 300  # 5 minutos
 CACHE_MAX_SIZE = 500  # Previne memory exhaustion por API keys distintas
 
 # Cache com TTL: dict[key, (value, timestamp)]
-_tenant_cache: dict[str, tuple[Tenant, float]] = {}
 _unkey_cache: dict[str, tuple[dict, float]] = {}
 
 
@@ -142,27 +136,13 @@ async def _verify_via_unkey(api_key: str) -> dict:
 
 
 async def _verify_via_db(api_key: str, db: AsyncSession) -> str:
-    """Fallback: valida API key via DB local. Retorna tenant_id."""
-    tenant = _get_cached(_tenant_cache, api_key)
-
-    if not tenant:
-        result = await db.execute(select(Tenant).where(Tenant.ativo.is_(True)))
-        tenants = result.scalars().all()
-        for t in tenants:
-            if t.api_key and _hmac.compare_digest(api_key, t.api_key):
-                tenant = t
-                _set_cached(_tenant_cache, api_key, t)
-                break
-
-    if not tenant:
-        raise APIError(
-            401,
-            "auth-invalida",
-            "Autenticacao invalida",
-            "API key ausente ou invalida",
-        )
-
-    return tenant.id
+    """Fallback quando Unkey desabilitado. Requer UNKEY_ENABLED=1 em producao."""
+    raise APIError(
+        503,
+        "auth-config",
+        "Servico de autenticacao nao configurado",
+        "UNKEY_ENABLED nao esta ativo. Autenticacao via DB local foi removida.",
+    )
 
 
 async def verify_api_key(
@@ -242,6 +222,5 @@ def require_permission(permission: str):
 
 
 def clear_tenant_cache() -> None:
-    """Limpa cache de tenants (util em testes)."""
-    _tenant_cache.clear()
+    """Limpa cache de verificacao (util em testes)."""
     _unkey_cache.clear()

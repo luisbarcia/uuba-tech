@@ -8,7 +8,7 @@ import pytest
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 
-from app.auth.api_key import clear_tenant_cache
+from app.auth.api_key import clear_tenant_cache, verify_api_key
 from app.database import (
     get_cliente_repository,
     get_cobranca_repository,
@@ -46,7 +46,6 @@ async def two_tenant_client(engine):
                 nome="Empresa A",
                 slug="empresa-a",
                 documento="11111111000100",
-                api_key=TENANT_A_KEY,
                 ativo=True,
             )
         )
@@ -56,7 +55,6 @@ async def two_tenant_client(engine):
                 nome="Empresa B",
                 slug="empresa-b",
                 documento="22222222000100",
-                api_key=TENANT_B_KEY,
                 ativo=True,
             )
         )
@@ -71,6 +69,29 @@ async def two_tenant_client(engine):
     # Para isso, NÃO sobrescrevemos os repos; deixamos o DI padrão funcionar
     # Mas precisamos que get_db use nossa engine de teste
     app.dependency_overrides[get_db] = override_get_db
+
+    # Auth override: mapeia key → tenant_id (sem depender de Tenant.api_key no DB)
+    from fastapi import Request as _Req
+    from app.exceptions import APIError as _Err
+
+    KEY_TO_TENANT = {TENANT_A_KEY: "ten_a", TENANT_B_KEY: "ten_b"}
+
+    async def override_verify_api_key(request: _Req):
+        auth_header = request.headers.get("Authorization", "")
+        if auth_header.startswith("Bearer "):
+            key = auth_header[7:]
+        else:
+            key = request.headers.get("X-API-Key", "")
+        tenant_id = KEY_TO_TENANT.get(key)
+        if not tenant_id:
+            raise _Err(401, "auth-invalida", "Autenticacao invalida", "API key ausente ou invalida")
+        request.state.tenant_id = tenant_id
+        request.state.permissions = ["*"]
+        request.state.key_id = "key_test"
+        request.state.environment = "test"
+        return key
+
+    app.dependency_overrides[verify_api_key] = override_verify_api_key
 
     # Precisamos sobrescrever os repos para usar a engine de teste
     # mas com o tenant correto do request
