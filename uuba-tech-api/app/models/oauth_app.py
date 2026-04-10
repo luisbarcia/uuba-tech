@@ -21,6 +21,9 @@ class OAuthApp(Base, TimestampMixin):
     client_id: Mapped[str] = mapped_column(Text)
     client_secret_encrypted: Mapped[bytes] = mapped_column(LargeBinary)
     client_secret_iv: Mapped[bytes] = mapped_column(LargeBinary)
+    authorization_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    token_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    scopes: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)
     metadata_: Mapped[dict] = mapped_column("metadata", JSON, default=dict)
 
